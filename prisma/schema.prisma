@@ -19,36 +19,35 @@ model User {
     owner             Owner?
     lessee            Lessee?
     VerificationTable VerificationTable[]
+    OwnerMessages     Chat?               @relation("user1")
+    RequestMessages   Chat?               @relation("user2")
+    Message           Message[]
 }
 
 model Owner {
-    id                 Int                  @id @default(autoincrement())
+    ownerId            Int                  @id @default(autoincrement())
     rating             Float
     totalRatingCount   Int
-    userId             Int
-    user               User                 @relation(fields: [userId], references: [id])
+    user               User                 @relation(fields: [ownerId], references: [id])
     Items              Item[]
     ProductOwnerReview ProductOwnerReview[]
     LesseeReview       LesseeReview[]
     PaypalOwner        PaypalOwner[]
     StripeOwner        StripeOwner[]
     Transactions       Transaction[]
-    Message            Message[]
 }
 
 model Lessee {
-    id                 Int                  @id @default(autoincrement())
+    lesseeId           Int                  @id @default(autoincrement())
     rating             Float
     totalRatingCount   Int
-    user               User                 @relation(fields: [userId], references: [id])
-    userId             Int
+    user               User                 @relation(fields: [lesseeId], references: [id])
     ItemReview         ItemReview[]
     ProductOwnerReview ProductOwnerReview[]
     LesseeReview       LesseeReview[]
     PaypalLessee       PaypalLessee[]
     StripeLessee       StripeLessee[]
     Transactions       Transaction[]
-    Message            Message[]
 }
 
 model Item {
@@ -60,7 +59,7 @@ model Item {
     description      String
     updatedAt        DateTime       @updatedAt
     createdAt        DateTime       @default(now())
-    owner            Owner          @relation(fields: [ownerId], references: [id])
+    owner            Owner          @relation(fields: [ownerId], references: [ownerId])
     ownerId          Int
     ItemCategory     ItemCategory[]
     ItemReview       ItemReview[]
@@ -68,12 +67,19 @@ model Item {
 }
 
 model Category {
-    id            Int            @id @default(autoincrement())
-    category      String
-    subcategoryId Int
-    subcategory   Category       @relation(fields: [subcategoryId], references: [id])
-    ItemCategory  ItemCategory[]
-    SubCategories Category[]     @relation("CategoryToCategory")
+    id             Int            @id @default(autoincrement())
+    category       String
+    parentCategory SubCategory[]  @relation("parent")
+    subCategory    SubCategory[]  @relation("sub")
+    ItemCategory   ItemCategory[]
+}
+
+model SubCategory {
+    id               Int      @id @default(autoincrement())
+    parentCategoryId Int
+    parentCategory   Category @relation("parent", fields: [parentCategoryId], references: [id])
+    subCategorytId   Int
+    subCategory      Category @relation("sub", fields: [subCategorytId], references: [id])
 }
 
 model ItemCategory {
@@ -94,14 +100,14 @@ model ItemReview {
     itemId    Int
     item      Item     @relation(fields: [itemId], references: [id])
     lesseeId  Int
-    lessee    Lessee   @relation(fields: [lesseeId], references: [id])
+    lessee    Lessee   @relation(fields: [lesseeId], references: [lesseeId])
 }
 
 model Transaction {
-    owner     Owner             @relation(fields: [ownerId], references: [id])
+    owner     Owner             @relation(fields: [ownerId], references: [ownerId])
     ownerId   Int
     lesseeId  Int
-    lessee    Lessee            @relation(fields: [lesseeId], references: [id])
+    lessee    Lessee            @relation(fields: [lesseeId], references: [lesseeId])
     id        Int               @id @default(autoincrement())
     itemId    Int
     item      Item              @relation(fields: [itemId], references: [id])
@@ -136,9 +142,9 @@ model ProductOwnerReview {
     updatedAt      DateTime @updatedAt
     createdAt      DateTime @default(now())
     lesseeId       Int
-    lessee         Lessee   @relation(fields: [lesseeId], references: [id])
+    lessee         Lessee   @relation(fields: [lesseeId], references: [lesseeId])
     productOwnerId Int
-    productOwner   Owner    @relation(fields: [productOwnerId], references: [id])
+    productOwner   Owner    @relation(fields: [productOwnerId], references: [ownerId])
 }
 
 model LesseeReview {
@@ -148,9 +154,9 @@ model LesseeReview {
     updatedAt      DateTime @updatedAt
     createdAt      DateTime @default(now())
     lesseeId       Int
-    lessee         Lessee   @relation(fields: [lesseeId], references: [id])
+    lessee         Lessee   @relation(fields: [lesseeId], references: [lesseeId])
     productOwnerId Int
-    productOwner   Owner    @relation(fields: [productOwnerId], references: [id])
+    productOwner   Owner    @relation(fields: [productOwnerId], references: [ownerId])
 }
 
 model Paypal {
@@ -166,7 +172,7 @@ model PaypalOwner {
     paypalId Int
     paypal   Paypal             @relation(fields: [paypalId], references: [id])
     ownerId  Int
-    owner    Owner              @relation(fields: [ownerId], references: [id])
+    owner    Owner              @relation(fields: [ownerId], references: [ownerId])
 }
 
 model PaypalLessee {
@@ -175,7 +181,7 @@ model PaypalLessee {
     paypalId Int
     paypal   Paypal             @relation(fields: [paypalId], references: [id])
     lesseeId Int
-    lessee   Lessee             @relation(fields: [lesseeId], references: [id])
+    lessee   Lessee             @relation(fields: [lesseeId], references: [lesseeId])
 }
 
 model Stripe {
@@ -192,7 +198,7 @@ model StripeOwner {
     stripeId Int
     stripe   Stripe             @relation(fields: [stripeId], references: [id])
     ownerId  Int
-    owner    Owner              @relation(fields: [ownerId], references: [id])
+    owner    Owner              @relation(fields: [ownerId], references: [ownerId])
 }
 
 model StripeLessee {
@@ -201,15 +207,26 @@ model StripeLessee {
     stripeId Int
     stripe   Stripe             @relation(fields: [stripeId], references: [id])
     lesseeId Int
-    lessee   Lessee             @relation(fields: [lesseeId], references: [id])
+    lessee   Lessee             @relation(fields: [lesseeId], references: [lesseeId])
 }
 
 model Message {
-    id       Int    @id @default(autoincrement())
-    ownerId  Int
-    owner    Owner  @relation(fields: [ownerId], references: [id])
-    lesseeId Int
-    lessee   Lessee @relation(fields: [lesseeId], references: [id])
+    id      Int    @id @default(autoincrement())
+    message String
+    chatId  Int
+    userId  Int
+    user    User   @relation(fields: [userId], references: [id])
+    chat    Chat   @relation(fields: [chatId], references: [id])
+}
+
+model Chat {
+    id           Int       @id @default(autoincrement())
+    user1Id      Int
+    user2Id      Int
+    messageCount Int
+    user1        User      @relation("user1", fields: [user1Id], references: [id])
+    user2        User      @relation("user2", fields: [user2Id], references: [id])
+    Message      Message[]
 }
 
 enum VerificationStatus {
