@@ -1,0 +1,227 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+//Models and Relations
+
+model User {
+    id                Int                 @id @default(autoincrement())
+    email             String              @unique
+    firstName         String
+    lastName          String
+    userName          String
+    password          String
+    owner             Owner?
+    lessee            Lessee?
+    VerificationTable VerificationTable[]
+}
+
+model Owner {
+    id                 Int                  @id @default(autoincrement())
+    rating             Float
+    totalRatingCount   Int
+    userId             Int
+    user               User                 @relation(fields: [userId], references: [id])
+    Items              Item[]
+    ProductOwnerReview ProductOwnerReview[]
+    LesseeReview       LesseeReview[]
+    PaypalOwner        PaypalOwner[]
+    StripeOwner        StripeOwner[]
+    Transactions       Transaction[]
+    Message            Message[]
+}
+
+model Lessee {
+    id                 Int                  @id @default(autoincrement())
+    rating             Float
+    totalRatingCount   Int
+    user               User                 @relation(fields: [userId], references: [id])
+    userId             Int
+    ItemReview         ItemReview[]
+    ProductOwnerReview ProductOwnerReview[]
+    LesseeReview       LesseeReview[]
+    PaypalLessee       PaypalLessee[]
+    StripeLessee       StripeLessee[]
+    Transactions       Transaction[]
+    Message            Message[]
+}
+
+model Item {
+    id               Int            @id @default(autoincrement())
+    itemName         String
+    price            Float
+    itemRating       Float
+    totalRatingCount Int
+    description      String
+    updatedAt        DateTime       @updatedAt
+    createdAt        DateTime       @default(now())
+    owner            Owner          @relation(fields: [ownerId], references: [id])
+    ownerId          Int
+    ItemCategory     ItemCategory[]
+    ItemReview       ItemReview[]
+    Transactions     Transaction?
+}
+
+model Category {
+    id            Int            @id @default(autoincrement())
+    category      String
+    subcategoryId Int
+    subcategory   Category       @relation(fields: [subcategoryId], references: [id])
+    ItemCategory  ItemCategory[]
+    SubCategories Category[]     @relation("CategoryToCategory")
+}
+
+model ItemCategory {
+    id         Int      @id @default(autoincrement())
+    itemId     Int
+    categoryId Int
+    item       Item     @relation(fields: [itemId], references: [id])
+    category   Category @relation(fields: [categoryId], references: [id])
+
+}
+
+model ItemReview {
+    id        Int      @id @default(autoincrement())
+    rating    Float
+    comment   String
+    updatedAt DateTime @updatedAt
+    createdAt DateTime @default(now())
+    itemId    Int
+    item      Item     @relation(fields: [itemId], references: [id])
+    lesseeId  Int
+    lessee    Lessee   @relation(fields: [lesseeId], references: [id])
+}
+
+model Transaction {
+    owner     Owner             @relation(fields: [ownerId], references: [id])
+    ownerId   Int
+    lesseeId  Int
+    lessee    Lessee            @relation(fields: [lesseeId], references: [id])
+    id        Int               @id @default(autoincrement())
+    itemId    Int
+    item      Item              @relation(fields: [itemId], references: [id])
+    startDate String
+    endDate   String
+    salePrice Float
+    status    TransactionStatus
+    updatedAt DateTime          @updatedAt
+    createdAt DateTime          @default(now())
+}
+
+model VerificationTable {
+    id                 Int                @id @default(autoincrement())
+    verified           VerificationStatus
+    updatedAt          DateTime           @updatedAt
+    verificationDataId Int
+    verificationData   VerificationData   @relation(fields: [verificationDataId], references: [id])
+    userId             Int
+    user               User               @relation(fields: [userId], references: [id])
+}
+
+model VerificationData {
+    id                Int                 @id @default(autoincrement())
+    userIdImageUrl    String
+    VerificationTable VerificationTable[]
+}
+
+model ProductOwnerReview {
+    id             Int      @id @default(autoincrement())
+    rating         Float
+    comment        String
+    updatedAt      DateTime @updatedAt
+    createdAt      DateTime @default(now())
+    lesseeId       Int
+    lessee         Lessee   @relation(fields: [lesseeId], references: [id])
+    productOwnerId Int
+    productOwner   Owner    @relation(fields: [productOwnerId], references: [id])
+}
+
+model LesseeReview {
+    id             Int      @id @default(autoincrement())
+    rating         Float
+    comment        String
+    updatedAt      DateTime @updatedAt
+    createdAt      DateTime @default(now())
+    lesseeId       Int
+    lessee         Lessee   @relation(fields: [lesseeId], references: [id])
+    productOwnerId Int
+    productOwner   Owner    @relation(fields: [productOwnerId], references: [id])
+}
+
+model Paypal {
+    id           Int            @id @default(autoincrement())
+    paypalToken  String
+    PaypalOwner  PaypalOwner[]
+    PaypalLessee PaypalLessee[]
+}
+
+model PaypalOwner {
+    id       Int                @id @default(autoincrement())
+    verified VerificationStatus
+    paypalId Int
+    paypal   Paypal             @relation(fields: [paypalId], references: [id])
+    ownerId  Int
+    owner    Owner              @relation(fields: [ownerId], references: [id])
+}
+
+model PaypalLessee {
+    id       Int                @id @default(autoincrement())
+    verified VerificationStatus
+    paypalId Int
+    paypal   Paypal             @relation(fields: [paypalId], references: [id])
+    lesseeId Int
+    lessee   Lessee             @relation(fields: [lesseeId], references: [id])
+}
+
+model Stripe {
+    id          Int    @id @default(autoincrement())
+    stripeToken String
+
+    StripeOwner  StripeOwner[]
+    StripeLessee StripeLessee[]
+}
+
+model StripeOwner {
+    id       Int                @id @default(autoincrement())
+    verified VerificationStatus
+    stripeId Int
+    stripe   Stripe             @relation(fields: [stripeId], references: [id])
+    ownerId  Int
+    owner    Owner              @relation(fields: [ownerId], references: [id])
+}
+
+model StripeLessee {
+    id       Int                @id @default(autoincrement())
+    verified VerificationStatus
+    stripeId Int
+    stripe   Stripe             @relation(fields: [stripeId], references: [id])
+    lesseeId Int
+    lessee   Lessee             @relation(fields: [lesseeId], references: [id])
+}
+
+model Message {
+    id       Int    @id @default(autoincrement())
+    ownerId  Int
+    owner    Owner  @relation(fields: [ownerId], references: [id])
+    lesseeId Int
+    lessee   Lessee @relation(fields: [lesseeId], references: [id])
+}
+
+enum VerificationStatus {
+    PENDING
+    VERIFIED
+    UNVERIFIED
+}
+
+enum TransactionStatus {
+    PENDING
+    APPROVED
+    REJECTED
+    ACTIVE
+    COMPLETED
+}
