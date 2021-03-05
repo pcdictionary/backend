@@ -20,6 +20,9 @@ model User {
   Message           Message[]
   owner             Owner?
   VerificationTable VerificationTable[]
+  Question          Question[]
+  QuestionVotes     QuestionVotes[]
+  ReplyVotes        ReplyVotes[]
 }
 
 model Owner {
@@ -45,7 +48,7 @@ model Lessee {
   PaypalLessee       PaypalLessee[]
   ProductOwnerReview ProductOwnerReview[]
   StripeLessee       StripeLessee[]
-  Transactions       Transaction[]
+  Cart               Cart[]
 }
 
 model Item {
@@ -62,6 +65,7 @@ model Item {
   ItemCategory     ItemCategory[]
   ItemReview       ItemReview[]
   Transactions     Transaction?
+  Question         Question[]
 }
 
 model Category {
@@ -88,6 +92,46 @@ model ItemCategory {
   item       Item     @relation(fields: [itemId], references: [id])
 }
 
+model Question {
+  id            Int             @id @default(autoincrement())
+  itemId        Int
+  userId        Int
+  question      Int
+  likes         Int
+  dislikes      Int
+  item          Item            @relation(fields: [itemId], references: [id])
+  user          User            @relation(fields: [userId], references: [id])
+  Reply         Reply[]
+  QuestionVotes QuestionVotes[]
+}
+
+model Reply {
+  id         Int          @id @default(autoincrement())
+  questionId Int
+  likes      Int
+  dislikes   Int
+  question   Question     @relation(fields: [questionId], references: [id])
+  ReplyVotes ReplyVotes[]
+}
+
+model QuestionVotes {
+  id         Int      @id @default(autoincrement())
+  userId     Int
+  questionId Int
+  vote       Int
+  user       User     @relation(fields: [userId], references: [id])
+  question   Question @relation(fields: [questionId], references: [id])
+}
+
+model ReplyVotes {
+  id      Int   @id @default(autoincrement())
+  userId  Int
+  replyId Int
+  vote    Int
+  user    User  @relation(fields: [userId], references: [id])
+  reply   Reply @relation(fields: [replyId], references: [id])
+}
+
 model ItemReview {
   id        Int      @id @default(autoincrement())
   rating    Float
@@ -108,12 +152,21 @@ model Transaction {
   updatedAt DateTime          @updatedAt
   createdAt DateTime          @default(now())
   ownerId   Int
-  lesseeId  Int
   itemId    Int               @unique
   salePrice Float
+  cartId    Int
+  cart      Cart              @relation(fields: [cartId], references: [id])
   item      Item              @relation(fields: [itemId], references: [id])
-  lessee    Lessee            @relation(fields: [lesseeId], references: [lesseeId])
   owner     Owner             @relation(fields: [ownerId], references: [ownerId])
+}
+
+model Cart {
+  id            Int           @id @default(autoincrement())
+  lesseeId      Int
+  paymentMethod String
+  totalPrice    Float
+  lessee        Lessee        @relation(fields: [lesseeId], references: [lesseeId])
+  Transaction   Transaction[]
 }
 
 model VerificationTable {

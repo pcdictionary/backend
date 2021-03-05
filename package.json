@@ -6,7 +6,6 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -e js,graphql src/index.js",
-    "get-schema": "graphql-codegen --config ./codegen.yml"
   },
   "type": "module",
   "keywords": [],
