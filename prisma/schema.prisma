@@ -96,7 +96,7 @@ model Question {
   id            Int             @id @default(autoincrement())
   itemId        Int
   userId        Int
-  question      Int
+  question      String
   likes         Int
   dislikes      Int
   item          Item            @relation(fields: [itemId], references: [id])
@@ -112,6 +112,7 @@ model Reply {
   dislikes   Int
   question   Question     @relation(fields: [questionId], references: [id])
   ReplyVotes ReplyVotes[]
+  reply      String
 }
 
 model QuestionVotes {
@@ -167,6 +168,7 @@ model Cart {
   totalPrice    Float
   lessee        Lessee        @relation(fields: [lesseeId], references: [lesseeId])
   Transaction   Transaction[]
+  status        CartStatus
 }
 
 model VerificationTable {
@@ -288,6 +290,11 @@ enum TransactionStatus {
   PENDING
   APPROVED
   REJECTED
+  ACTIVE
+  COMPLETED
+}
+
+enum CartStatus {
   ACTIVE
   COMPLETED
 }
