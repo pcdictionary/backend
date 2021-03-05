@@ -1,6 +1,6 @@
 import { resolvers } from "./resolvers/index.js";
 import typeDefs from "./typeDefs.js";
-import express from "express";
+import express, { request } from "express";
 import { graphqlHTTP } from "express-graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import pkg from "@prisma/client";
@@ -15,10 +15,10 @@ export const schema = makeExecutableSchema({
 const app = express();
 app.use(
   "/graphql",
-  graphqlHTTP({
+  graphqlHTTP(async (request, response, graphQLParams) => ({
     schema,
     graphiql: true,
-    context: { prisma },
-  })
+    context: { prisma, request },
+  }))
 );
 app.listen(4000, () => [console.log("Server is running")]);
