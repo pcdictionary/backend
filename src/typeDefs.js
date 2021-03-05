@@ -15,6 +15,7 @@ type Mutation {
   createUser(data: CreateUserInput) : AuthPayload!
   updateUser(data: UpdateUserInput) : User!
   deleteUser: User!
+  createItem(data: CreateItemInput) : Item!
 }
 
 type AuthPayload {
@@ -40,6 +41,14 @@ input UpdateUserInput{
   email : String
   password : String
   userName: String
+}
+input CreateItemInput{
+  itemName : String!
+  price : Int!
+  itemRating : Int
+  totalRatingsCount : Int!
+  ownerId: Int!
+
 }
 `;
 
