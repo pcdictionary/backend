@@ -1,6 +1,8 @@
 const typeDefs = `type Query {
   allUsers: [User!]!
   getUser(id: Int!): User! 
+  allUserItems: (id: Int!): [Item]!
+  getItem:(id: Int!): Item!
 }
 type Mutation {
   login(data: LoginUserInput): AuthPayload!
@@ -9,7 +11,7 @@ type Mutation {
   deleteUser: User!
   createItem(data: CreateItemInput) : Item!
   updateItem(data: UpdateItemInput) : Item!
-  deleteIt
+  deleteItem(data: DeleteItemInput) : Item!
 }
 type AuthPayload {
   token: String!
