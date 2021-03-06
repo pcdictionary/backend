@@ -60,31 +60,32 @@ const Mutation = {
     }
     return prisma.user.delete({ where: { id: userId } });
   },
-  async createItem(parent, args, {prisma, request}, info){
+  async createItem(parent, args, { prisma, request }, info) {
     // const userId = getUserId(request);
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId= 1
-    const user = await prisma.user.findUnique({
-      where:{
-        id: userId
-      }
-    })
-    const newItem = {...args.data}
-
-    newItem.itemCategory = []
-    newItem.itemReview = []
-    newItem.transaction = []
-    newItem.question = []
-
-    console.log(args.data)
+    const userId = 17;
+    const owner = await prisma.owner.findUnique({
+      where: {
+        id: userId,
+      },
+    });
     return prisma.item.create({
-      data: {...args.data, ownerId: {connect: {Id: userId}}}
-
-    })
-  }
+      data: {
+        ...args.data,
+        Owner: {
+          connect: {
+            id: owner.id,
+          },
+        },
+      },
+      include: {
+        Owner: true,
+      },
+    });
+  },
 };
 
 export default Mutation;

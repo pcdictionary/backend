@@ -67,7 +67,7 @@ type Lessee{
   stripeLessee: [StripeLessee!]!
 }
 type Owner{
-  Id: User!
+  id: User!
   rating: Float!
   totalRatingCount: Int!
   Items: [Item!]!
@@ -84,11 +84,12 @@ type Item{
   itemRating: Float
   totalRatingCount: Int
   description: String!
-  ownerId: Owner!
+  ownerId: Int!
   itemCategory: [ItemCategory!]!
   itemReview: [ItemReview!]!
   transactions: [Transaction!]!
   question: [Question!]
+  Owner: Owner!
 }
 type Category {
   id: Int!
