@@ -47,35 +47,37 @@ type User {
   userName: String!
   owner: Owner
   lessee: Lessee
-  message: [Message!]!
-  verificationTable: [VerificationTable!]!
-  question: [Question!]!
-  questionVotes: [QuestionVotes!]!
-  replyVotes: [ReplyVotes!]!
-  ownerMessages: [Chat]
-  requestMessages: [Chat]
+  Message: [Message!]!
+  VerificationTable: [VerificationTable!]!
+  Question: [Question!]!
+  QuestionVotes: [QuestionVotes!]!
+  ReplyVotes: [ReplyVotes!]!
+  OwnerMessages: [Chat]
+  RequestMessages: [Chat]
 }
 type Lessee{
-  lesseeId: User!
+  id: Int!
+  User: User!
   rating: Float!
   totalRatingCount: Int!
-  cart: [Cart!]!
-  itemReview: [ItemReview!]!
-  lesseeReview: [LesseeReview!]!
-  paypalLessee: [PaypalLessee]!
-  prodcutOwnerReview: [ProductOwnerReview!]!
-  stripeLessee: [StripeLessee!]!
+  Cart: [Cart!]!
+  ItemReview: [ItemReview!]!
+  LesseeReview: [LesseeReview!]!
+  PaypalLessee: [PaypalLessee]!
+  ProdcutOwnerReview: [ProductOwnerReview!]!
+  StripeLessee: [StripeLessee!]!
 }
 type Owner{
-  id: User!
+  id: Int!
+  User: User!
   rating: Float!
   totalRatingCount: Int!
   Items: [Item!]!
-  lesseeReview: [LesseeReview!]!
-  paypalOwner: [PaypalOwner]!
-  prodcutOwnerReview: [ProductOwnerReview!]!
-  stripeOwner: [StripeOwner!]!
-  transactions: [Transaction!]!
+  LesseeReview: [LesseeReview!]!
+  PaypalOwner: [PaypalOwner]!
+  ProdcutOwnerReview: [ProductOwnerReview!]!
+  StripeOwner: [StripeOwner!]!
+  Transactions: [Transaction!]!
 }
 type Item{
   id: Int!
@@ -85,65 +87,81 @@ type Item{
   totalRatingCount: Int
   description: String!
   ownerId: Int!
-  itemCategory: [ItemCategory!]!
-  itemReview: [ItemReview!]!
-  transactions: [Transaction!]!
-  question: [Question!]
   Owner: Owner!
+  ItemCategory: [ItemCategory!]!
+  ItemReview: [ItemReview!]!
+  Transactions: [Transaction!]!
+  Question: [Question!]
 }
 type Category {
   id: Int!
   category: String!
-  ItemCategoryId: [ItemCategory!]!
-  parentCategoryId: [SubCategory!]!
-  subCategoryId: [SubCategory!]!
+  itemCategoryId: Int!
+  parentCategoryId: Int!
+  subCategoryId: Int! 
+  ItemCategory: [ItemCategory!]!
+  ParentCategory: [SubCategory!]!
+  SubCategory: [SubCategory!]!
 }
 type SubCategory{
   id: Int!
-  parentCategoryId: Category!
-  subCategoryId: Category!
+  parentCategoryId: Int!
+  subCategoryId: Int! 
+  ParentCategory: Category!
+  SubCategory: Category!
 }
 type ItemCategory{
   id: Int!
-  itemId: Item!
-  categoryId: Category!
+  itemId: Int!
+  Item: Item!
+  categoryId: Int!
+  Category: Category!
 }
 type Question{
   id: Int!
-  itemId: Item!
-  userId: User!
+  itemId: Int!
+  userId: Int!
+  Item: Item!
+  User: User!
   question: String!
   likes: Int!
   dislikes: Int!
-  reply: [Reply!]!
-  questionVotes: [QuestionVotes!]!
+  Reply: [Reply!]!
+  QuestionVotes: [QuestionVotes!]!
 }
 type Reply {
   id: Int!
-  questionId: Question!
+  questionId: Int!
+  Question: Question!
   likes: Int!
   dislikes: Int!
   reply: String!
-  replyVotes: [ReplyVotes!]!
+  ReplyVotes: [ReplyVotes!]!
 }
 type QuestionVotes{
   id: Int!
-  userId: User!
-  questionId: Question!
   vote: Int!
+  userId: Int!
+  User: User!
+  questionId: Int!
+  Question: Question!
 }
 type ReplyVotes{
   id: Int!
-  userId: User!
-  replyId: Reply!
   vote: Int!
+  userId: Int!
+  User: User!
+  replyId: Int!
+  Reply: Reply!
 }
 type ItemReview {
   id: Int!
   rating: Float!
   comment: String!
-  itemId: Item!
-  lesseeId: Lessee!
+  itemId: Int!
+  Itme: Item!
+  lesseeId: Int!
+  Lessee: Lessee!
 }
 type Transaction{
   id: Int!
@@ -151,91 +169,114 @@ type Transaction{
   startDate: String!
   endDate: String!
   salePrice: Float!
-  ownerId: Owner!
-  itemId: Item!
-  cartId: Cart!
+  ownerId: Int!
+  Owner: Owner!
+  itemId: Int!
+  Item: Item!
+  cartId: Int!
+  Cart: Cart!
 }
 type Cart{
   id: Int!
-  lesseeId: Lessee!
+  lesseeId: Int!
+  Lessee: Lessee!
   paymentMethod: String!
   totalPrice: Float!
-  transaction: [Transaction!]!
+  Transaction: [Transaction!]!
   status: CartStatus!
 }
 type VerificationTable{
   id: Int!
   verified: VerificationStatus!
-  verificationDataId: VerificationData!
-  userId: User!
+  verificationDataId: Int!
+  VerificationData: VerificationData!
+  userId: Int!
+  User: User!
 }
 type VerificationData{
   id: Int!
   userIdImageUrl: String!
-  verificationTable: [VerificationTable!]!
+  VerificationTable: [VerificationTable!]!
 }
 type ProductOwnerReview{
   id: Int!
   rating: Float!
   comment: String!
-  lessseId: Lessee!
-  productOwnerId: Owner!
+  lessseId: Int!
+  Lessee: Lessee!
+  productOwnerId: Int!
+  productOwner: Owner!
 }
 type LesseeReview {
   id: Int!
   rating: Float!
   comment: String!
-  lesseeId: Lessee!
-  productOwnerId: Owner!
+  lesseeId: Int!
+  Lessee: Lessee!
+  productOwnerId: Int!
+  productOwner: Owner!
+
 }
 type Paypal{
   id: Int!
   paypalToken: String!
-  paypalLessee: [PaypalLessee!]!
-  paypalOwner: [PaypalOwner!]!
+  PaypalLessee: [PaypalLessee!]!
+  PaypalOwner: [PaypalOwner!]!
 }
 type PaypalOwner{
   id: Int!
   verified: VerificationStatus!
-  paypalId: Paypal!
-  ownerId: Owner! 
+  paypalId: Int!
+  Paypal: Paypal!
+  ownerId: Int!
+  Owner: Owner!
 }
 type PaypalLessee{
   id: Int!
   verified: VerificationStatus!
-  paypalId: Paypal!
-  lesseeId: Lessee! 
+  paypalId: Int!
+  Paypal: Paypal!
+  lesseeId: Int!
+  Lessee: Lessee!
 }
 type Stripe{
   id: Int!
   stripeToken: String!
-  stripeLessee: [StripeLessee!]!
-  stripeOwner: [StripeOwner!]!
+  StripeLessee: [StripeLessee!]!
+  StripeOwner: [StripeOwner!]!
 }
 type StripeOwner{
   id: Int!
   verified: VerificationStatus!
-  stripeId: Stripe!
-  ownerId: Owner! 
+  stripeId: Int!
+  Stripe: Stripe!
+  ownerId: Int!
+  Owner: Owner! 
 }
 type StripeLessee{
   id: Int!
   verified: VerificationStatus!
-  stripeId: Stripe!
-  lesseeId: Lessee! 
+  stripeId: Int!
+  Stripe: Stripe!
+  lesseeId: Int!
+  Lessee: Lessee!
 }
 type Message{
   id: Int!
   message: String!
-  chatId: Chat!
-  userId: User!
+  chatId: Int!
+  Chat: Chat!
+  userId: Int!
+  User: User!
 }
 type Chat{
   id: Int!
-  user1Id: User!
-  user2Id: User!
+  user1Id: Int!
+  User1: User!
+  user2Id: Int!
+  User2: User!
   messageCount: Int!
-  message: [Message!]!
+  Message: [Message!]!
 }
 enum VerificationStatus {
   PENDING
