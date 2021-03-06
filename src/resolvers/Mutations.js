@@ -60,19 +60,30 @@ const Mutation = {
     }
     return prisma.user.delete({ where: { id: userId } });
   },
-  createItem(parent, args, {prisma, request}, info){
-    const userId = getUserId(request);
-    if (!userId) {
-      throw new Error("Login in to delete Account!");
-    }
-    const createdItem = {
-      ...args.data
-    }
-    createdItem[itemRating] = 0
-    return prisma.item.create({
-      data: createdItem
-    })
+  async createItem(parent, args, {prisma, request}, info){
+    // const userId = getUserId(request);
+    // if (!userId) {
+    //   throw new Error("Login in to delete Account!");
+    // }
 
+    const userId= 1
+    const user = await prisma.user.findUnique({
+      where:{
+        id: userId
+      }
+    })
+    const newItem = {...args.data}
+
+    newItem.itemCategory = []
+    newItem.itemReview = []
+    newItem.transaction = []
+    newItem.question = []
+
+    console.log(args.data)
+    return prisma.item.create({
+      data: {...args.data, ownerId: {connect: {Id: userId}}}
+
+    })
   }
 };
 

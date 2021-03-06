@@ -28,8 +28,8 @@ model User {
 model Owner {
   rating             Float
   totalRatingCount   Int
-  ownerId            Int                  @id @default(autoincrement())
-  user               User                 @relation(fields: [ownerId], references: [id])
+  Id            Int                  @id @default(autoincrement())
+  user               User                 @relation(fields: [Id], references: [id])
   Items              Item[]
   LesseeReview       LesseeReview[]
   PaypalOwner        PaypalOwner[]
@@ -60,8 +60,8 @@ model Item {
   description      String
   updatedAt        DateTime       @updatedAt
   createdAt        DateTime       @default(now())
-  ownerId          Int
-  owner            Owner          @relation(fields: [ownerId], references: [ownerId])
+  Id          Int
+  owner            Owner          @relation(fields: [Id], references: [Id])
   ItemCategory     ItemCategory[]
   ItemReview       ItemReview[]
   Transactions     Transaction?
@@ -152,13 +152,13 @@ model Transaction {
   status    TransactionStatus
   updatedAt DateTime          @updatedAt
   createdAt DateTime          @default(now())
-  ownerId   Int
+  Id   Int
   itemId    Int               @unique
   salePrice Float
   cartId    Int
   cart      Cart              @relation(fields: [cartId], references: [id])
   item      Item              @relation(fields: [itemId], references: [id])
-  owner     Owner             @relation(fields: [ownerId], references: [ownerId])
+  owner     Owner             @relation(fields: [Id], references: [Id])
 }
 
 model Cart {
@@ -196,7 +196,7 @@ model ProductOwnerReview {
   lesseeId       Int
   productOwnerId Int
   lessee         Lessee   @relation(fields: [lesseeId], references: [lesseeId])
-  productOwner   Owner    @relation(fields: [productOwnerId], references: [ownerId])
+  productOwner   Owner    @relation(fields: [productOwnerId], references: [Id])
 }
 
 model LesseeReview {
@@ -208,7 +208,7 @@ model LesseeReview {
   lesseeId       Int
   productOwnerId Int
   lessee         Lessee   @relation(fields: [lesseeId], references: [lesseeId])
-  productOwner   Owner    @relation(fields: [productOwnerId], references: [ownerId])
+  productOwner   Owner    @relation(fields: [productOwnerId], references: [Id])
 }
 
 model Paypal {
@@ -222,8 +222,8 @@ model PaypalOwner {
   id       Int                @id @default(autoincrement())
   verified VerificationStatus
   paypalId Int
-  ownerId  Int
-  owner    Owner              @relation(fields: [ownerId], references: [ownerId])
+  Id  Int
+  owner    Owner              @relation(fields: [Id], references: [Id])
   paypal   Paypal             @relation(fields: [paypalId], references: [id])
 }
 
@@ -247,8 +247,8 @@ model StripeOwner {
   id       Int                @id @default(autoincrement())
   verified VerificationStatus
   stripeId Int
-  ownerId  Int
-  owner    Owner              @relation(fields: [ownerId], references: [ownerId])
+  Id  Int
+  owner    Owner              @relation(fields: [Id], references: [Id])
   stripe   Stripe             @relation(fields: [stripeId], references: [id])
 }
 

@@ -33,11 +33,10 @@ input UpdateUserInput{
 }
 input CreateItemInput{
   itemName : String!
+  description: String!
   price : Int!
   itemRating : Int
-  totalRatingsCount : Int!
-  ownerId: Int!
-
+  totalRatingCount : Int!
 }
 type User {
   id: Int!
@@ -68,7 +67,7 @@ type Lessee{
   stripeLessee: [StripeLessee!]!
 }
 type Owner{
-  ownerId: User!
+  Id: User!
   rating: Float!
   totalRatingCount: Int!
   Items: [Item!]!
@@ -165,7 +164,7 @@ type Cart{
 }
 type VerificationTable{
   id: Int!
-  verified: VerifiedStatus!
+  verified: VerificationStatus!
   verificationDataId: VerificationData!
   userId: User!
 }
