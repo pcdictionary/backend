@@ -8,6 +8,8 @@ type Mutation {
   updateUser(data: UpdateUserInput) : User!
   deleteUser: User!
   createItem(data: CreateItemInput) : Item!
+  updateItem(data: UpdateItemInput) : Item!
+  deleteIt
 }
 type AuthPayload {
   token: String!
@@ -37,6 +39,15 @@ input CreateItemInput{
   price : Int!
   itemRating : Int
   totalRatingCount : Int!
+}
+input UpdateItemInput{
+  itemName: String
+  description: String
+  price: Int
+  id: Int!
+}
+input DeleteItemInput{
+  id: Int!
 }
 type User {
   id: Int!
