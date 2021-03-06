@@ -7,6 +7,7 @@ type Mutation {
   createUser(data: CreateUserInput) : AuthPayload!
   updateUser(data: UpdateUserInput) : User!
   deleteUser: User!
+  createItem(data: CreateItemInput) : Item!
 }
 type AuthPayload {
   token: String!
@@ -29,6 +30,13 @@ input UpdateUserInput{
   email: String
   password: String
   userName: String
+}
+input CreateItemInput{
+  itemName : String!
+  description: String!
+  price : Int!
+  itemRating : Int
+  totalRatingCount : Int!
 }
 type User {
   id: Int!
@@ -59,7 +67,7 @@ type Lessee{
   stripeLessee: [StripeLessee!]!
 }
 type Owner{
-  ownerId: User!
+  Id: User!
   rating: Float!
   totalRatingCount: Int!
   Items: [Item!]!
@@ -156,7 +164,7 @@ type Cart{
 }
 type VerificationTable{
   id: Int!
-  verified: VerifiedStatus!
+  verified: VerificationStatus!
   verificationDataId: VerificationData!
   userId: User!
 }
