@@ -1,8 +1,8 @@
 const typeDefs = `type Query {
   allUsers: [User!]!
   getUser(id: Int!): User! 
-  allUserItems: (id: Int!): [Item]!
-  getItem:(id: Int!): Item!
+  allUserItems(id: Int!): [Item]!
+  getItem(id: Int!): Item!
   getCategories: [Category]!
 }
 type Mutation {
@@ -58,7 +58,7 @@ input CreateItemCategoryInput{
   itemId: Int!
   categoryId: Int!
 }
-input CreateCategory{
+input CreateCategoryInput{
   category: String!
 }
 type User {
