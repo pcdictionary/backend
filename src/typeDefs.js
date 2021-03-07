@@ -3,6 +3,7 @@ const typeDefs = `type Query {
   getUser(id: Int!): User! 
   allUserItems: (id: Int!): [Item]!
   getItem:(id: Int!): Item!
+  getCategories: [Category]!
 }
 type Mutation {
   login(data: LoginUserInput): AuthPayload!

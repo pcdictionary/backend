@@ -14,5 +14,11 @@ const item = {
             }
         })
     },
+    getCategories(parent, args, {prisma}, info){
+        return prisma.categories.findMany({
+            where:{},
+            distinct: ["category"]
+        })
+    }
 };
 export default item;
