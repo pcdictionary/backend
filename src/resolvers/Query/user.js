@@ -1,3 +1,4 @@
+import getUserId from "../../utils/getUserId.js";
 const user = {
     allUsers(parent, args, { prisma }, info) {
         return prisma.user.findMany();

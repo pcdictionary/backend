@@ -59,23 +59,32 @@ const item = {
           },
         },
         Category: {
-          connect:{
-            id: args.data.categoryId
-          }
-        }
+          connect: {
+            id: args.data.categoryId,
+          },
+        },
       },
       include: {
         ItemCategoryId: true,
-        Category: true
+        Category: true,
       },
     });
   },
-  createCategory(parent, args, {prisma}, info){
+  createCategory(parent, args, { prisma }, info) {
     return prisma.category.create({
-      data:{
-        ...args.data
-      }
-    })
-  }
+      data: {
+        ...args.data,
+      },
+    });
+  },
+  // createSubcategory(parent, args, {prisma}, info){
+  //   return prisma.SubCategory.create({
+  //     data:{
+  //       Category:{
+
+  //       }
+  //     }
+  //   })
+  // }
 };
 export default item;
