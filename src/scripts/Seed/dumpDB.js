@@ -1,16 +1,12 @@
 import pkg from "@prisma/client";
 import {seedData} from './seedData.js'
+import {dumpDB as main} from './dumpDBFunction'
 const { PrismaClient } = pkg;
+
 
 const prisma = new PrismaClient();
 
-async function main() {
-    await prisma.item.deleteMany();
-    await prisma.owner.deleteMany();
-    await prisma.user.deleteMany();
-}
-
-main()
+main(prism)
   .catch((e) => {
     console.error(e);
     process.exit(1);
@@ -18,3 +14,4 @@ main()
   .finally(async () => {
     await prisma.$disconnect();
   });
+
