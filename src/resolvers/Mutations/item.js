@@ -65,7 +65,7 @@ const item = {
         },
       },
       include: {
-        ItemCategory: true,
+        Item: true,
         Category: true,
       },
     });
