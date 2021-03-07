@@ -1,5 +1,5 @@
-import Query from "./Query.js";
-import Mutation from "./Mutations.js";
+import Query from "./Query/index.js";
+import Mutation from "./Mutations/index.js";
 // import Subscription from "./Subscriptions.js";
 
 const resolvers = { Query, Mutation };
