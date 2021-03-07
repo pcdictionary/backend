@@ -46,5 +46,36 @@ const item = {
     // }
     return prisma.item.delete({ where: { id: args.data.id } });
   },
+  createItemCategory(parent, args, { prisma, request }, info) {
+    const userId = getUserId(request);
+    // if (!userId) {
+    //   throw new Error("Login in to delete Account!");
+    // }
+    return prisma.itemCategoryId.create({
+      data: {
+        Item: {
+          connect: {
+            id: args.data.itemId,
+          },
+        },
+        Category: {
+          connect:{
+            id: args.data.categoryId
+          }
+        }
+      },
+      include: {
+        ItemCategoryId: true,
+        Category: true
+      },
+    });
+  },
+  createCategory(parent, args, {prisma}, info){
+    return prisma.category.create({
+      data:{
+        ...args.data
+      }
+    })
+  }
 };
 export default item;
