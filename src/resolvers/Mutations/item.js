@@ -46,7 +46,7 @@ const item = {
     // }
     return prisma.item.delete({ where: { id: args.data.id } });
   },
-  createCategory(parent, args, { prisma, request }, info) {
+  createItemCategory(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
@@ -70,5 +70,12 @@ const item = {
       },
     });
   },
+  createCategory(parent, args, {prisma}, info){
+    return prisma.category.create({
+      data:{
+        ...args.data
+      }
+    })
+  }
 };
 export default item;

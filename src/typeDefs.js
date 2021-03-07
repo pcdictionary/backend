@@ -13,7 +13,8 @@ type Mutation {
   createItem(data: CreateItemInput) : Item!
   updateItem(data: UpdateItemInput) : Item!
   deleteItem(data: DeleteItemInput) : Item!
-  createCategory(data: CreateItemCategoryInput) : ItemCategory
+  createItemCategory(data: CreateItemCategoryInput) : ItemCategory!
+  createCategory(data: CreateCategoryInput) : Category!
 }
 type AuthPayload {
   token: String!
@@ -56,6 +57,9 @@ input DeleteItemInput{
 input CreateItemCategoryInput{
   itemId: Int!
   categoryId: Int!
+}
+input CreateCategory{
+  category: String!
 }
 type User {
   id: Int!
