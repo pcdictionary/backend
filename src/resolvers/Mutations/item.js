@@ -51,7 +51,7 @@ const item = {
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
-    return prisma.itemCategoryId.create({
+    return prisma.itemCategory.create({
       data: {
         Item: {
           connect: {
@@ -65,7 +65,7 @@ const item = {
         },
       },
       include: {
-        ItemCategoryId: true,
+        ItemCategory: true,
         Category: true,
       },
     });
@@ -80,7 +80,7 @@ const item = {
   // createSubcategory(parent, args, {prisma}, info){
   //   return prisma.SubCategory.create({
   //     data:{
-  //       Category:{
+  //       SubCategory:{
 
   //       }
   //     }
