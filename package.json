@@ -6,7 +6,8 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -e js,graphql src/index.js",
-    "seed": "node src/seed.js"
+    "seed": "node src/scripts/Seed/seed.js",
+    "dump": "node src/scripts/Seed/dumpDB.js"
   },
   "type": "module",
   "keywords": [],
