@@ -12,7 +12,7 @@ const user = {
             password,
           },
         });
-    
+        console.log(user)
         return { user, token: generateAuthToken(user.id) };
       },
       async login(parent, args, { prisma }, info) {
