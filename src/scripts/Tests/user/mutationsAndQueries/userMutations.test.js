@@ -1,6 +1,6 @@
 
-import { userMutations } from './index.js'
-import { seedData } from './index.js'
+import { userMutations } from '../../index.js'
+import { seedData } from '../../index.js'
 import { PrismaClient } from "@prisma/client";
 const prisma = new PrismaClient();
 xdescribe('User creation', ()=>{

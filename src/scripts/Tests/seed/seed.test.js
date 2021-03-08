@@ -1,5 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import {seed} from '../index.js'
+import {dumpDB} from '../index.js'
 let prisma = new PrismaClient();
 
 describe('Seed script', ()=>{
@@ -24,9 +25,7 @@ describe('Seed script', ()=>{
         })
     })
     it("Clean up", async ()=>{
-        await prisma.item.deleteMany();
-        await prisma.owner.deleteMany();
-        await prisma.user.deleteMany();
+        dumpDB(prisma)
         await prisma.$disconnect();
     })
 })

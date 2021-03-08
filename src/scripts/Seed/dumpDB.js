@@ -1,5 +1,4 @@
 import pkg from "@prisma/client";
-import {seedData} from './seedData.js'
 import {dumpDB as main} from './dumpDBFunction.js'
 const { PrismaClient } = pkg;
 

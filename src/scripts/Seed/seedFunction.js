@@ -1,13 +1,12 @@
-import { seedData } from './seedData.js'
+import { seedData } from './seedData10000.js'
+import { dumpDB } from './dumpDBFunction.js'
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min) ) + min;
 }
 
 export async function seed(client, test = false, testFailure=false) {
-
-  await client.item.deleteMany();
-  await client.owner.deleteMany();
-  await client.user.deleteMany();
+    console.log(seedData.userList.length)
+ await dumpDB(client)
  const validUserIds = []
  const validItemIds = []
  if(testFailure){
@@ -28,7 +27,7 @@ export async function seed(client, test = false, testFailure=false) {
      process.exit(1);
    } 
  }
-
+console.log(validUserIds.length)
  for(let i = 0; i<seedData.itemList.length; i++){
    try {
      let ownerId = validUserIds[getRndInteger(0, validUserIds.length-1)]
