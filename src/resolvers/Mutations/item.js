@@ -6,7 +6,11 @@ const item = {
     //   throw new Error("Login in to delete Account!");
     // }
 
+<<<<<<< HEAD
     const userId = 6;
+=======
+    const userId = 28;
+>>>>>>> af348b1c62caa6eaae1b6a572f3c355ff6449f1d
 
     const item = await prisma.item.create({
       data: {
@@ -15,7 +19,7 @@ const item = {
           connect: {
             id: userId,
           },
-        }
+        },
       },
       include: {
         Owner: true,
@@ -23,6 +27,7 @@ const item = {
       },
     });
     await prisma.itemCategory.update({
+<<<<<<< HEAD
       where: {
         categoryId: args.categoryId
       },
@@ -38,6 +43,22 @@ const item = {
       }
     })
     return item
+=======
+      data: {
+        Item: {
+          connect: {
+            id: item.id,
+          },
+        },
+        Category: {
+          connect: {
+            id: args.categoryId,
+          },
+        },
+      },
+    });
+    return item;
+>>>>>>> af348b1c62caa6eaae1b6a572f3c355ff6449f1d
   },
   updateItem(parent, args, { prisma, request }, info) {
     //should we validate only with user?
@@ -100,7 +121,7 @@ const item = {
   //     data:{
   //       SubCategory:{
   //         connect:{
-  //           id: 
+  //           id:
   //         }
   //       }
   //     }
