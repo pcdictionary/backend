@@ -1,7 +1,7 @@
 const typeDefs = `type Query {
   allUsers: [User!]!
   getUser(id: Int!): User! 
-  allUserItems(id: Int!): [Item]!
+  allUserItems: [Item]!
   getItem(id: Int!): Item!
   getCategories: [Category]!
 }
@@ -15,6 +15,7 @@ type Mutation {
   deleteItem(data: DeleteItemInput) : Item!
   createItemCategory(data: CreateItemCategoryInput) : ItemCategory!
   createCategory(data: CreateCategoryInput) : Category!
+  createSubcategory(data: CreateCategoryInput) : Category!
 }
 type AuthPayload {
   token: String!
@@ -60,6 +61,7 @@ input CreateItemCategoryInput{
 }
 input CreateCategoryInput{
   category: String!
+  parentCategoryId: Int
 }
 type User {
   id: Int!
@@ -119,19 +121,16 @@ type Item{
 type Category {
   id: Int!
   category: String!
-  itemCategoryId: Int!
-  parentCategoryId: Int!
-  subCategoryId: Int! 
   ItemCategory: [ItemCategory!]!
-  ParentCategory: [SubCategory!]!
-  SubCategory: [SubCategory!]!
+  ParentCategory: SubCategory
+  SubCategory: [SubCategory]
 }
 type SubCategory{
   id: Int!
   parentCategoryId: Int!
   subCategoryId: Int! 
   ParentCategory: Category!
-  SubCategory: Category!
+  SubCategory: Category
 }
 type ItemCategory{
   id: Int!

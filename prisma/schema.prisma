@@ -72,8 +72,8 @@ model Category {
   id             Int            @id @default(autoincrement())
   category       String
   ItemCategory   ItemCategory[]
-  ParentCategory SubCategory[]  @relation("parent")
-  SubCategory    SubCategory[]  @relation("sub")
+  ParentCategory SubCategory?  @relation("parent")
+  SubCategory    SubCategory?  @relation("sub")
 }
 
 model SubCategory {
