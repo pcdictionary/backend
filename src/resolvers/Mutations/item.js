@@ -6,7 +6,7 @@ const item = {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId = 2;
+    const userId = 6;
 
     const item = await prisma.item.create({
       data: {
@@ -19,6 +19,7 @@ const item = {
       },
       include: {
         Owner: true,
+        ItemCategory: true
       },
     });
     await prisma.itemCategory.update({
@@ -26,16 +27,14 @@ const item = {
         categoryId: args.categoryId
       },
       data:{
-        item:{
+        Item:{
           connect:{
             id: item.id
           }
         }
       },
       include:{
-        item:{
-          item: true
-        }
+        Item: true
       }
     })
     return item
