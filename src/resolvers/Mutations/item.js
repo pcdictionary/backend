@@ -1,26 +1,44 @@
 import getUserId from "../../utils/getUserId.js";
 const item = {
-  createItem(parent, args, { prisma, request }, info) {
+  async createItem(parent, args, { prisma, request }, info) {
     // const userId = getUserId(request);
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId = 1;
+    const userId = 2;
 
-    return prisma.item.create({
+    const item = await prisma.item.create({
       data: {
         ...args.data,
         Owner: {
           connect: {
             id: userId,
           },
-        },
+        }
       },
       include: {
         Owner: true,
       },
     });
+    await prisma.itemCategory.update({
+      where: {
+        categoryId: args.categoryId
+      },
+      data:{
+        item:{
+          connect:{
+            id: item.id
+          }
+        }
+      },
+      include:{
+        item:{
+          item: true
+        }
+      }
+    })
+    return item
   },
   updateItem(parent, args, { prisma, request }, info) {
     //should we validate only with user?

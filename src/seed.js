@@ -7,6 +7,9 @@ async function main() {
   await prisma.item.deleteMany();
   await prisma.owner.deleteMany();
   await prisma.user.deleteMany();
+  await prisma.category.deleteMany();
+  await prisma.itemCategory.deleteMany();
+
 
   const user1 = await prisma.user.create({
     data: {
@@ -15,10 +18,12 @@ async function main() {
       lastName: "sherpa",
       userName: "phrbshrp",
       password: "abc123",
-      owner: { create: { rating: 3.6, totalRatingCount: 1 } },
+      Owner: { create: { rating: 3.6, totalRatingCount: 1 } },
     },
   });
-
+  const category = await prisma.category.create({
+    data:{category: "tools"}
+  })
   const item = await prisma.item.create({
     data: {
       ownerId: user1.id,
@@ -30,6 +35,21 @@ async function main() {
     },
   });
 
+  const itemCategory = await prisma.itemCategory.create({
+    data:{
+      Item: {
+        connect:{
+          id: item.id
+        }
+      },
+      Category:{
+        connect: {
+          id: category.id
+        }
+      }
+    }
+  })
+
   const user2 = await prisma.user.create({
     data: {
       email: "don@email.com",
@@ -37,7 +57,7 @@ async function main() {
       lastName: "ng",
       userName: "itizidon",
       password: "abc123",
-      owner: {
+      Owner: {
         create: {
           rating: 3.0,
           totalRatingCount: 1,
