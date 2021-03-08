@@ -6,7 +6,7 @@ const item = {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId = 17;
+    const userId = 1;
 
     return prisma.item.create({
       data: {
@@ -23,6 +23,7 @@ const item = {
     });
   },
   updateItem(parent, args, { prisma, request }, info) {
+    //should we validate only with user?
     const userId = getUserId(request);
 
     // if (!userId) {
@@ -81,7 +82,9 @@ const item = {
   //   return prisma.SubCategory.create({
   //     data:{
   //       SubCategory:{
-
+  //         connect:{
+  //           id: 
+  //         }
   //       }
   //     }
   //   })
