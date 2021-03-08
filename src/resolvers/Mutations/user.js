@@ -6,13 +6,12 @@ import hashPassword from "../../utils/hashPassword.js"
 const user = {
     async createUser(parent, args, { prisma }, info) {
         const password = await hashPassword(args.data.password);
-        const user = prisma.user.create({
+        const user = await prisma.user.create({
           data: {
             ...args.data,
             password,
           },
         });
-        console.log(user)
         return { user, token: generateAuthToken(user.id) };
       },
       async login(parent, args, { prisma }, info) {

@@ -8,10 +8,15 @@ export async function seed(client, test = false, testFailure=false) {
   await client.item.deleteMany();
   await client.owner.deleteMany();
   await client.user.deleteMany();
- //console.log(seedData.userList[0])
  const validUserIds = []
  const validItemIds = []
- if(testFailure) await client.user.create()
+ if(testFailure){
+     try {
+        await client.user.create({data:{}})
+     } catch (error) {
+         return error
+     }
+ }
  for(let i = 0; i<seedData.userList.length; i++){
   try {
     let user = await client.user.create({data:seedData.userList[i]})  
