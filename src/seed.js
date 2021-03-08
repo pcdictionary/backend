@@ -4,12 +4,11 @@ const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
 
 async function main() {
+  await prisma.itemCategory.deleteMany();
   await prisma.item.deleteMany();
   await prisma.owner.deleteMany();
   await prisma.user.deleteMany();
   await prisma.category.deleteMany();
-  await prisma.itemCategory.deleteMany();
-
 
   const user1 = await prisma.user.create({
     data: {
@@ -22,8 +21,8 @@ async function main() {
     },
   });
   const category = await prisma.category.create({
-    data:{category: "tools"}
-  })
+    data: { category: "tools" },
+  });
   const item = await prisma.item.create({
     data: {
       ownerId: user1.id,
@@ -36,19 +35,19 @@ async function main() {
   });
 
   const itemCategory = await prisma.itemCategory.create({
-    data:{
+    data: {
       Item: {
-        connect:{
-          id: item.id
-        }
-      },
-      Category:{
         connect: {
-          id: category.id
-        }
-      }
-    }
-  })
+          id: item.id,
+        },
+      },
+      Category: {
+        connect: {
+          id: category.id,
+        },
+      },
+    },
+  });
 
   const user2 = await prisma.user.create({
     data: {

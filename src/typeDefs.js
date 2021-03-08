@@ -10,7 +10,7 @@ type Mutation {
   createUser(data: CreateUserInput) : AuthPayload!
   updateUser(data: UpdateUserInput) : User!
   deleteUser: User!
-  createItem(data: CreateItemInput) : Item!
+  createItem(data: CreateItemInput, categoryId: Int!) : Item!
   updateItem(data: UpdateItemInput) : Item!
   deleteItem(data: DeleteItemInput) : Item!
   createItemCategory(data: CreateItemCategoryInput) : ItemCategory!
