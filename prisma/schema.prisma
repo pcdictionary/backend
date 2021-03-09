@@ -52,44 +52,30 @@ model Lessee {
 }
 
 model Item {
-  id               Int            @id @default(autoincrement())
+  id               Int           @id @default(autoincrement())
   itemName         String
   price            Float
   itemRating       Float
   totalRatingCount Int
   description      String
-  updatedAt        DateTime?      @updatedAt
-  createdAt        DateTime?      @default(now())
+  updatedAt        DateTime?     @updatedAt
+  createdAt        DateTime?     @default(now())
   ownerId          Int
-  Owner            Owner          @relation(fields: [ownerId], references: [id])
-  ItemCategory     ItemCategory[]
+  Owner            Owner         @relation(fields: [ownerId], references: [id])
+  Categories       Category[]    @relation("ItemCategories")
   ItemReview       ItemReview[]
   Transactions     Transaction[]
   Question         Question[]
 }
 
 model Category {
-  id             Int            @id @default(autoincrement())
-  category       String
-  ItemCategory   ItemCategory[]
-  ParentCategory SubCategory?  @relation("parent")
-  SubCategory    SubCategory?  @relation("sub")
-}
+  id               Int        @id @default(autoincrement())
+  category         String
+  subCategory      Category[] @relation("SubToParent")
+  parentCategory   Category?  @relation("SubToParent", fields: [parentCategoryId], references: [id])
+  parentCategoryId Int?
+  Items            Item[]     @relation("ItemCategories")
 
-model SubCategory {
-  id               Int      @id @default(autoincrement())
-  parentCategoryId Int
-  subCategorytId   Int
-  ParentCategory   Category @relation("parent", fields: [parentCategoryId], references: [id])
-  SubCategory      Category @relation("sub", fields: [subCategorytId], references: [id])
-}
-
-model ItemCategory {
-  id         Int      @id @default(autoincrement())
-  itemId     Int
-  categoryId Int
-  Category   Category @relation(fields: [categoryId], references: [id])
-  Item       Item     @relation(fields: [itemId], references: [id])
 }
 
 model Question {

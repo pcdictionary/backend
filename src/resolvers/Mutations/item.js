@@ -6,7 +6,7 @@ const item = {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId = 1;
+    const userId = 24;
 
     const item = await prisma.item.create({
       data: {
@@ -16,26 +16,21 @@ const item = {
             id: userId,
           },
         },
+        Categories: {
+          connect: [{ id: args.categoryId }],
+        },
       },
       include: {
-        Owner: true,
-        ItemCategory: true
-      },
-    });
-    await prisma.itemCategory.create({
-      data: {
-        Item: {
-          connect: {
-            id: item.id,
+        Owner: {
+          select: {
+            id: true,
+            User: true,
           },
         },
-        Category: {
-          connect: {
-            id: args.categoryId,
-          },
-        },
+        Categories: true,
       },
     });
+
     return item;
   },
   updateItem(parent, args, { prisma, request }, info) {
@@ -63,30 +58,6 @@ const item = {
     // }
     return prisma.item.delete({ where: { id: args.data.id } });
   },
-  // createItemCategory(parent, args, { prisma, request }, info) {
-  //   const userId = getUserId(request);
-  //   // if (!userId) {
-  //   //   throw new Error("Login in to delete Account!");
-  //   // }
-  //   return prisma.itemCategory.create({
-  //     data: {
-  //       Item: {
-  //         connect: {
-  //           id: args.data.itemId,
-  //         },
-  //       },
-  //       Category: {
-  //         connect: {
-  //           id: args.data.categoryId,
-  //         },
-  //       },
-  //     },
-  //     include: {
-  //       Item: true,
-  //       Category: true,
-  //     },
-  //   });
-  // },
   createCategory(parent, args, { prisma }, info) {
     return prisma.category.create({
       data: {
@@ -94,37 +65,27 @@ const item = {
       },
     });
   },
-  async createSubcategory(parent, args, {prisma}, info){
-    console.log(args.data)
-    const subCategory = await prisma.category.create({
-      data:{
-          category: args.data.category,
-          ParentCategory:{
-            connectOrCreate: {
-              create:{
-                parentCategoryId: args.data.parentCategoryId
-              }
-            }
-          }
-        }
-      })
-      console.log(subCategory)
-      await prisma.subCategory.create({
-        data:{
-          ParentCategory:{
-            connect:{
-              id: args.data.parentCategoryId
-            }
+  async createSubcategory(parent, args, { prisma }, info) {
+    const category = await prisma.category.create({
+      data: {
+        category: args.data.category,
+        parentCategory: {
+          connect: {
+            id: args.data.parentCategoryId,
           },
-          SubCategory:{
-            connect: {
-              id: subCategory.id
-            }
-          }
-        }
-      })
-      
-      return subCategory
-  }
+        },
+      },
+      include: {
+        parentCategory: {
+          select: {
+            category: true,
+            subCategory: true,
+          },
+        },
+      },
+    });
+
+    return category;
+  },
 };
 export default item;
