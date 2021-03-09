@@ -11,7 +11,7 @@ type Mutation {
   updateUser(data: UpdateUserInput) : User!
   deleteUser: User!
   createItem(data: CreateItemInput, categoryId: Int!) : Item!
-  updateItem(data: UpdateItemInput) : Item!
+  updateItem(data: UpdateItemInput, categoryId: Int) : Item!
   deleteItem(data: DeleteItemInput) : Item!
   createItemCategory(data: CreateItemCategoryInput) : ItemCategory!
   createCategory(data: CreateCategoryInput) : Category!

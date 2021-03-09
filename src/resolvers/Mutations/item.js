@@ -46,7 +46,7 @@ const item = {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    return prisma.item.update(
+    const item = prisma.item.update(
       {
         where: {
           id: args.data.id,
@@ -55,6 +55,27 @@ const item = {
       },
       info
     );
+    if(args.categoryId){
+    await prisma.itemCategory.update({
+      where:{
+        id: args.categoryId
+      },
+      data: {
+        Item: {
+          connect: {
+            id: item.id,
+          },
+        },
+        Category: {
+          connect: {
+            id: args.categoryId,
+          },
+        },
+      },
+    });
+  }
+  return item
+
   },
   deleteItem(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
@@ -101,9 +122,7 @@ const item = {
           category: args.data.category,
           ParentCategory:{
             connectOrCreate: {
-              create:{
                 parentCategoryId: args.data.parentCategoryId
-              }
             }
           }
         }
