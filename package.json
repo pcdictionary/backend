@@ -4,10 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "test": "npm run dump & npm run test-seed & npm run test-user",
-    "test-leaks": "npm run dump & jest ./src/scripts/Tests/ --verbose --detectOpenHandles",
+    "test": "npm run dump & jest ./src/scripts/Tests/ --verbose --runInBand",
+    "test-leaks": "npm run dump & jest ./src/scripts/Tests/ --verbose --detectOpenHandles --runInBand",
     "test-seed": "npm run dump & jest ./src/scripts/Tests/seed/ --verbose",
-    "test-user": "npm run dump & jest /src/scripts/Tests/user/ --verbose",
+    "test-user": "npm run dump & jest /src/scripts/Tests/user/ --verbose --runInBand",
     "test-user-leaks": "npm run dump & jest /src/scripts/Tests/user/ --detectOpenHandles",
     "start": "nodemon -e js,graphql src/index.js",
     "seed": "npm run dump & npm run seed-function",

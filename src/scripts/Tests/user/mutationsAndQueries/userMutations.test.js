@@ -1,7 +1,7 @@
 /**
  * @jest-environment node
  */
-import { userMutations, userQueries, seedData, seed, dumpDB, flushPromises } from '../../index.js'
+import { userMutations, userQueries, seedData, seed, dumpDB } from '../../index.js'
 import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
@@ -20,7 +20,7 @@ const incorrectPasswords = ["", "abcd"]
 
 describe('User creation', ()=>{
     beforeAll(async ()=>{
-        await dumpDB(prisma)
+        await dumpDB(prisma, "mutations start")
     })
     afterAll(async()=>{
         await dumpDB(prisma)
@@ -28,7 +28,6 @@ describe('User creation', ()=>{
     it("Creates user succesfully and hashes password, and exists in the database", ()=>{
         return userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
         .then(data=>{
-            console.log(data.user.email)
             expect(data.user.email).toEqual(seedData.userList[0].email)
             expect(data.user.password).not.toEqual(seedData.userList[0].password)
             return userQueries.getUser(undefined, {id:data.user.id}, {prisma: prisma})
@@ -65,8 +64,12 @@ describe('User creation', ()=>{
             expect(data.message.startsWith("Password must be")).toEqual(true)
         })
     })
-    
-
+    // it("Cleans up", ()=>{
+    //     return dumpDB(prisma, "mutations clean up")
+    //     .finally(()=>{
+    //         return prisma.$disconnect()
+    //     })
+    // })
 })
 
     //login function returns token, user

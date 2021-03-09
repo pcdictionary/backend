@@ -4,7 +4,7 @@ function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min) ) + min;
 }
 
-export async function seed(client, test = false, testFailure=false) {
+export async function seed(client, test = false, testFailure=false, source = "default") {
  const validUserIds = []
  const validOwnerIds = []
  const validItemIds = []
@@ -27,14 +27,13 @@ export async function seed(client, test = false, testFailure=false) {
    } 
  }
  for(let i = 0; i<seedData.ownerList.length; i++){
+     let userId = validUserIds[i]
      try {
-         let userId = validUserIds[i]
          let owner = await client.owner.create({data:{userId: userId, ...seedData.ownerList[i]}})
          validOwnerIds.push(owner.id)
-         
      } catch (error) {
         console.log("Seed Owner Error on entry:\n")
-        console.log(seedData.ownerList[i])
+        console.log(seedData.ownerList[i], userId, source)
         console.log(error)
         process.exit(1);
      }
