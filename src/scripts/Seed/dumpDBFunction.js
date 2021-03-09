@@ -1,4 +1,6 @@
-
+/**
+ * @jest-environment node
+ */
 export async function dumpDB(client) {
    // const tableArray = ['item', 'user', 'owner'] // this is for client.I.deleteMany()
     const tableArray = ['"Item"', '"User"', '"Owner"']//this is for queryRaw

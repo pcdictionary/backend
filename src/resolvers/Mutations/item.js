@@ -1,28 +1,45 @@
 import getUserId from "../../utils/getUserId.js";
 const item = {
-  createItem(parent, args, { prisma, request }, info) {
+  async createItem(parent, args, { prisma, request }, info) {
     // const userId = getUserId(request);
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId = 17;
+    const userId = 909;
 
-    return prisma.item.create({
+    const item = await prisma.item.create({
       data: {
         ...args.data,
-        Owner: {
+        // Owner: {
+        //   connect: {
+        //     id: args.data.ownerId,
+        //   },
+        // },
+      },
+      // include: {
+      //   Owner: true,
+      //   ItemCategory: true
+      // },
+    });
+    await prisma.itemCategory.create({
+      data: {
+        Item: {
           connect: {
-            id: userId,
+            id: item.id,
+          },
+        },
+        Category: {
+          connect: {
+            id: args.categoryId,
           },
         },
       },
-      include: {
-        Owner: true,
-      },
     });
+    return item;
   },
   updateItem(parent, args, { prisma, request }, info) {
+    //should we validate only with user?
     const userId = getUserId(request);
 
     // if (!userId) {
@@ -46,30 +63,30 @@ const item = {
     // }
     return prisma.item.delete({ where: { id: args.data.id } });
   },
-  createItemCategory(parent, args, { prisma, request }, info) {
-    const userId = getUserId(request);
-    // if (!userId) {
-    //   throw new Error("Login in to delete Account!");
-    // }
-    return prisma.itemCategory.create({
-      data: {
-        Item: {
-          connect: {
-            id: args.data.itemId,
-          },
-        },
-        Category: {
-          connect: {
-            id: args.data.categoryId,
-          },
-        },
-      },
-      include: {
-        Item: true,
-        Category: true,
-      },
-    });
-  },
+  // createItemCategory(parent, args, { prisma, request }, info) {
+  //   const userId = getUserId(request);
+  //   // if (!userId) {
+  //   //   throw new Error("Login in to delete Account!");
+  //   // }
+  //   return prisma.itemCategory.create({
+  //     data: {
+  //       Item: {
+  //         connect: {
+  //           id: args.data.itemId,
+  //         },
+  //       },
+  //       Category: {
+  //         connect: {
+  //           id: args.data.categoryId,
+  //         },
+  //       },
+  //     },
+  //     include: {
+  //       Item: true,
+  //       Category: true,
+  //     },
+  //   });
+  // },
   createCategory(parent, args, { prisma }, info) {
     return prisma.category.create({
       data: {
@@ -77,14 +94,37 @@ const item = {
       },
     });
   },
-  // createSubcategory(parent, args, {prisma}, info){
-  //   return prisma.SubCategory.create({
-  //     data:{
-  //       SubCategory:{
-
-  //       }
-  //     }
-  //   })
-  // }
+  async createSubcategory(parent, args, {prisma}, info){
+    console.log(args.data)
+    const subCategory = await prisma.category.create({
+      data:{
+          category: args.data.category,
+          ParentCategory:{
+            connectOrCreate: {
+              create:{
+                parentCategoryId: args.data.parentCategoryId
+              }
+            }
+          }
+        }
+      })
+      console.log(subCategory)
+      await prisma.subCategory.create({
+        data:{
+          ParentCategory:{
+            connect:{
+              id: args.data.parentCategoryId
+            }
+          },
+          SubCategory:{
+            connect: {
+              id: subCategory.id
+            }
+          }
+        }
+      })
+      
+      return subCategory
+  }
 };
 export default item;

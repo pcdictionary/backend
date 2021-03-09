@@ -1,3 +1,8 @@
+
+/**
+ * @jest-environment node
+ */
+
 import jwt from "jsonwebtoken";
 
 const getUserId = (request, requireAuth = true) => {

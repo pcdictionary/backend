@@ -29,8 +29,9 @@ model Owner {
   rating             Float
   totalRatingCount   Int
   id                 Int                  @id @default(autoincrement())
-  User               User                 @relation(fields: [id], references: [id])
-  Item               Item?
+  userId             Int
+  User               User                 @relation(fields: [userId], references: [id])
+  Item               Item[]
   LesseeReview       LesseeReview[]
   PaypalOwner        PaypalOwner[]
   ProductOwnerReview ProductOwnerReview[]
@@ -42,7 +43,8 @@ model Lessee {
   rating             Float
   totalRatingCount   Int
   id                 Int                  @id @default(autoincrement())
-  User               User                 @relation(fields: [id], references: [id])
+  userId             Int
+  User               User                 @relation(fields: [userId], references: [id])
   Cart               Cart[]
   ItemReview         ItemReview[]
   LesseeReview       LesseeReview[]
@@ -60,8 +62,8 @@ model Item {
   description      String
   updatedAt        DateTime?      @updatedAt
   createdAt        DateTime?      @default(now())
-  ownerId          Int
-  Owner            Owner          @relation(fields: [id], references: [id])
+  ownerId          Int            
+  Owner            Owner          @relation(fields: [ownerId], references: [id])
   ItemCategory     ItemCategory[]
   ItemReview       ItemReview[]
   Question         Question[]
@@ -72,8 +74,8 @@ model Category {
   id             Int            @id @default(autoincrement())
   category       String
   ItemCategory   ItemCategory[]
-  ParentCategory SubCategory[]  @relation("parent")
-  SubCategory    SubCategory[]  @relation("sub")
+  ParentCategory SubCategory?  @relation("parent")
+  SubCategory    SubCategory?  @relation("sub")
 }
 
 model SubCategory {

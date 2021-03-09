@@ -1,3 +1,6 @@
+/**
+ * @jest-environment node
+ */
 import pkg from "@prisma/client";
 import {dumpDB as main} from './dumpDBFunction.js'
 const { PrismaClient } = pkg;

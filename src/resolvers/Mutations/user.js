@@ -5,14 +5,18 @@ import hashPassword from "../../utils/hashPassword.js"
 
 const user = {
     async createUser(parent, args, { prisma }, info) {
-        const password = await hashPassword(args.data.password);
-        const user = await prisma.user.create({
+      try {
+          const password = await hashPassword(args.data.password);
+          const user = await prisma.user.create({
           data: {
-            ...args.data,
-            password,
-          },
-        });
-        return { user, token: generateAuthToken(user.id) };
+              ...args.data,
+              password,
+            },
+          });
+          return { user, token: generateAuthToken(user.id) };
+        } catch (error) {
+          return error
+        }
       },
       async login(parent, args, { prisma }, info) {
         const user = await prisma.user.findUnique({

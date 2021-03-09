@@ -1,13 +1,12 @@
-import { seedData } from './seedData10000.js'
+import { seedData } from './seedDataDumps/seedData100.js'
 import { dumpDB } from './dumpDBFunction.js'
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min) ) + min;
 }
 
 export async function seed(client, test = false, testFailure=false) {
-    console.log(seedData.userList.length)
- await dumpDB(client)
  const validUserIds = []
+ const validOwnerIds = []
  const validItemIds = []
  if(testFailure){
      try {
@@ -27,10 +26,22 @@ export async function seed(client, test = false, testFailure=false) {
      process.exit(1);
    } 
  }
-console.log(validUserIds.length)
+ for(let i = 0; i<seedData.ownerList.length; i++){
+     try {
+         let userId = validUserIds[i]
+         let owner = await client.owner.create({data:{userId: userId, ...seedData.ownerList[i]}})
+         validOwnerIds.push(owner.id)
+         
+     } catch (error) {
+        console.log("Seed Owner Error on entry:\n")
+        console.log(seedData.ownerList[i])
+        console.log(error)
+        process.exit(1);
+     }
+ }
  for(let i = 0; i<seedData.itemList.length; i++){
    try {
-     let ownerId = validUserIds[getRndInteger(0, validUserIds.length-1)]
+     let ownerId = validOwnerIds[getRndInteger(0, validOwnerIds.length-1)]
      let item = await client.item.create({data:{ownerId: ownerId, ...seedData.itemList[i]}})
      validItemIds.push(item.id)
    } catch (error) {
@@ -40,5 +51,5 @@ console.log(validUserIds.length)
     process.exit(1);
    }
  }
-    if(test) return [validUserIds.length, validItemIds.length]
+   if(test) return [validUserIds.length, validItemIds.length]
 }

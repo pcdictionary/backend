@@ -1,11 +1,20 @@
+/**
+ * @jest-environment node
+ */
+
 import { PrismaClient } from "@prisma/client";
-import {seed} from '../index.js'
-import {dumpDB} from '../index.js'
+import {seed, dumpDB} from '../index.js'
+
 let prisma = new PrismaClient();
+
 
 describe('Seed script', ()=>{
     beforeEach(()=>{
         prisma = new PrismaClient();
+    })
+    afterAll(async ()=>{
+        await dumpDB(prisma)
+        await prisma.$disconnect();
     })
     it("Executes succesfully", ()=>{
         return seed(prisma, true).then(data =>{
@@ -24,8 +33,5 @@ describe('Seed script', ()=>{
             await prisma.$disconnect();
         })
     })
-    it("Clean up", async ()=>{
-        dumpDB(prisma)
-        await prisma.$disconnect();
-    })
+
 })
