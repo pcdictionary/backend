@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon -e js,graphql src/index.js",
     "seed": "node src/seed.js",
-    "reset" : "prisma migrate dev --preview-feature && node src/seed.js && prisma studio"
+    "reset": "prisma migrate dev --preview-feature && node src/seed.js && prisma studio"
   },
   "type": "module",
   "keywords": [],
