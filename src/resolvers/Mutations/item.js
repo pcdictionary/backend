@@ -38,15 +38,15 @@ const item = {
     });
     return item;
   },
-  updateItem(parent, args, { prisma, request }, info) {
+  async updateItem(parent, args, { prisma, request }, info) {
     //should we validate only with user?
-    const userId = getUserId(request);
+    // const userId = getUserId(request);
 
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const item = prisma.item.update(
+    const item = await prisma.item.update(
       {
         where: {
           id: args.data.id,
