@@ -1,4 +1,5 @@
 import pkg from "@prisma/client";
+import hashPassword from "./utils/hashPassword.js";
 const { PrismaClient } = pkg;
 
 const prisma = new PrismaClient();
@@ -10,13 +11,15 @@ async function main() {
   await prisma.user.deleteMany();
   await prisma.category.deleteMany();
 
+  const password = await hashPassword("abc12345");
+
   const user1 = await prisma.user.create({
     data: {
       email: "phurba@email.com",
       firstName: "phurba",
       lastName: "sherpa",
       userName: "phrbshrp",
-      password: "abc123",
+      password,
       Owner: { create: { rating: 3.6, totalRatingCount: 1 } },
     },
   });
@@ -50,7 +53,7 @@ async function main() {
       firstName: "don",
       lastName: "ng",
       userName: "itizidon",
-      password: "abc123",
+      password,
       Owner: {
         create: {
           rating: 3.0,

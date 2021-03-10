@@ -1,17 +1,17 @@
 import getUserId from "../../utils/getUserId.js";
 const item = {
-  allUserItems(parent, args, { prisma }, info) {
-    // const userId = getUserId(request);
-    // if (!userId) {
-    //   throw new Error("Login in to delete Account!");
-    // }
-    const userId = 6
+  async allUserItems(parent, args, { prisma, request }, info) {
+    const userId = await getUserId(request);
+    if (!userId) {
+      throw new Error("Login in to view Items!");
+    }
 
-    return prisma.item.findMany({
+    const items = await prisma.item.findMany({
       where: {
-        ownderId: userId,
+        ownerId: userId,
       },
     });
+    return items;
   },
   getItem(parent, args, { prisma }, info) {
     return prisma.item.findUnique({
