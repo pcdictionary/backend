@@ -4,7 +4,7 @@
 import { userMutations, userQueries, seedData, seed, dumpDB } from '../../index.js'
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+let prisma = new PrismaClient();
 
 
 
@@ -23,8 +23,8 @@ describe('User creation', ()=>{
         await dumpDB(prisma, "mutations start")
     })
     afterAll(async()=>{
-        await dumpDB(prisma)
-        await prisma.$disconnect()})
+        await prisma.$disconnect()
+    })
     it("Creates user succesfully and hashes password, and exists in the database", ()=>{
         return userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
         .then(data=>{
@@ -67,8 +67,37 @@ describe('User creation', ()=>{
 })
 
     //updateUser updates
+ //login function returns token, user
 
-describe('User creation', ()=>{
+describe("Login", ()=>{
+    beforeAll(()=>{
+        prisma = new PrismaClient();
+    })
+    let testUser = {...seedData.userList[0]}
+    afterAll(async ()=>{
+        await prisma.$disconnect()
+    })
+    it("Logs in user with correct credentials", async ()=>{
+        const loggedIn = await userMutations.login(undefined, {data:testUser}, {prisma})
+        expect(loggedIn.user).not.toBeNull()
+        expect(loggedIn.user.firstName).toEqual(testUser.firstName)
+        expect(loggedIn.token).not.toBeNull()
+    })
+    it("Fails gracefully on an incorrect password", async ()=>{
+        testUser.password = ""
+        const loggedIn = await userMutations.login(undefined, {data:testUser}, {prisma})
+        expect(loggedIn.message).toEqual("Unable to login.")
+    })
+    it("Fails gracefully on an incorrect email", async ()=>{
+        testUser = {...seedData.userList[0]}
+        testUser.email = "a@a.a"
+        const loggedIn = await userMutations.login(undefined, {data:testUser}, {prisma})
+        expect(loggedIn.message).toEqual("Unable to login.")
+    })
+})
+
+
+xdescribe('User update', ()=>{
     let userData
     beforeAll(async ()=>{
         await dumpDB(prisma, "mutations start")
@@ -77,8 +106,9 @@ describe('User creation', ()=>{
     afterAll(async()=>{
         await dumpDB(prisma)
         await prisma.$disconnect()
+       
     })
-    it("Updates user succesfully", ()=>{
+    it("Updates user succesfully", async ()=>{
         const dummyKeys = Object.keys(dummyUserData)
         for(let i = 0; i<dummyKeys.length; i++){
             userData[dummyKeys[i]] = dummyUserData[dummyKeys[i]]
@@ -87,6 +117,13 @@ describe('User creation', ()=>{
     })
 
 })
+
+// cleanUp()
+// async function cleanUp(){
+//     await dumpDB(prisma)
+//     await prisma.$disconnect()
+// }
+
     //updateUser fails gracefully
     //updateUser updates updates password
     //updateUser fails password update gracefully
@@ -95,6 +132,6 @@ describe('User creation', ()=>{
     //deleteUser 
 
 
-    //login function returns token, user
+   
 
     

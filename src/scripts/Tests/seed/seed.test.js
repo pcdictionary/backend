@@ -16,22 +16,15 @@ describe('Seed script', ()=>{
         await dumpDB(prisma)
         await prisma.$disconnect();
     })
-    it("Executes succesfully", ()=>{
-        return seed(prisma, true).then(data =>{
-            expect(data[0]).toEqual(100)
-            expect(data[1]).toEqual(100)
-        })
-        .finally(async () => {
-            await prisma.$disconnect();
-        })
+    it("Executes succesfully", async ()=>{
+        const data = await seed(prisma, true)
+        expect(data[0]).toEqual(10)
+        expect(data[1]).toEqual(10)
+        expect(data[2]).toEqual(100)
+    
     })
-    it("Returns an error when it fails", ()=>{
-        return seed(prisma, true, true).then(data =>{
-            expect(data.message.indexOf("Invalid `prisma.user.create()` invocation")).not.toEqual(-1)
-        })
-        .finally(async () => {
-            await prisma.$disconnect();
-        })
+    it("Returns an error when it fails", async ()=>{
+        const data = await seed(prisma, true, true)
+        expect(data.message.indexOf("Invalid `prisma.user.create()` invocation")).not.toEqual(-1)
     })
-
 })

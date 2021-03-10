@@ -6,21 +6,20 @@ import { PrismaClient } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const dummyUserData = {
-    'userName': 'Ejivjuggehomexmuas',
-    'email': 'Weyazuycomunxoevanukodocvofmeoqwotagredidbeejumxefipzur@email.io',
-    'firstName': 'Xagtoihsugjoikabyivdemalwenevagcud',
-    'lastName': 'Jo',
-    'password': 'QECCujhitojetzudersicosvapyikofsohukoj204!'
-}
+const dummyUserData = {'userName': 'Yugfap', 
+'email': 'Ziwnemibufuuzcihwehyulevmautsadyacfubaviajwevqa@mail.org', 
+'firstName': 'Qapmurgiscot', 
+'lastName': 'Hewiyungilarzon', 
+'password': 'NEYUqlafazareczogiytojagvuuysahisub118,'}
 
 describe("Find User", ()=>{
     beforeAll(async ()=>{
         await dumpDB(prisma, "query")
+        await seed(prisma, true, false, 'query')
     })
-    beforeAll(async ()=>{
-        await seed(prisma, false, false, 'query')
-    })
+    afterAll(async()=>{
+        await prisma.$disconnect()
+        })
     it("Finds user by email", async ()=>{
         const data = await userQueries.getUser(undefined, {email:dummyUserData.email}, {prisma: prisma})
         expect(data.firstName).toEqual(dummyUserData.firstName)
@@ -48,7 +47,7 @@ describe("Find all Users", ()=>{
     it("Finds all users", ()=>{
         return userQueries.allUsers(undefined, undefined, {prisma: prisma})
         .then(data=>{
-            expect(data.length).toEqual(100)
+            expect(data.length).toEqual(10)
         })
         }
     )
@@ -62,3 +61,4 @@ describe("Find all Users", ()=>{
         })
     })
 })
+

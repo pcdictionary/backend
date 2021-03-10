@@ -1,5 +1,10 @@
+
+/**
+ * @jest-environment node
+ */
+
 import { seedData } from './seedDataDumps/seedData100.js'
-import { dumpDB } from './dumpDBFunction.js'
+import hashPassword from "../../utils/hashPassword.js"
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min) ) + min;
 }
@@ -15,8 +20,11 @@ export async function seed(client, test = false, testFailure=false, source = "de
          return error
      }
  }
- for(let i = 0; i<seedData.userList.length; i++){
+ let userLength = seedData.userList.length
+ if(test) userLength = 10
+ for(let i = 0; i<userLength; i++){
   try {
+    seedData.userList[i].password = await hashPassword(seedData.userList[i].password)
     let user = await client.user.create({data:seedData.userList[i]})  
     validUserIds.push(user.id)
    } catch (error) {
@@ -26,7 +34,10 @@ export async function seed(client, test = false, testFailure=false, source = "de
      process.exit(1);
    } 
  }
- for(let i = 0; i<seedData.ownerList.length; i++){
+ let ownerLength = seedData.ownerList.length
+ if(test) ownerLength = 10
+
+ for(let i = 0; i<ownerLength; i++){
      let userId = validUserIds[i]
      try {
          let owner = await client.owner.create({data:{userId: userId, ...seedData.ownerList[i]}})
@@ -50,5 +61,5 @@ export async function seed(client, test = false, testFailure=false, source = "de
     process.exit(1);
    }
  }
-   if(test) return [validUserIds.length, validItemIds.length]
+   if(test) return [validUserIds.length, validOwnerIds.length, validItemIds.length]
 }

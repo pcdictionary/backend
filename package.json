@@ -6,8 +6,10 @@
   "scripts": {
     "test": "npm run dump & jest ./src/scripts/Tests/ --verbose --runInBand",
     "test-leaks": "npm run dump & jest ./src/scripts/Tests/ --verbose --detectOpenHandles --runInBand",
-    "test-seed": "npm run dump & jest ./src/scripts/Tests/seed/ --verbose",
+    "test-seed": "npm run dump & jest ./src/scripts/Tests/seed/ --verbose --runInBand",
     "test-user": "npm run dump & jest /src/scripts/Tests/user/ --verbose --runInBand",
+    "test-user-mutations": "npm run dump & jest /src/scripts/Tests/user/mutationsAndQueries/userMutations.test.js --verbose",
+    "test-user-queries": "npm run dump & jest /src/scripts/Tests/user/mutationsAndQueries/userQueries.test.js --verbose",
     "test-user-leaks": "npm run dump & jest /src/scripts/Tests/user/ --detectOpenHandles",
     "start": "nodemon -e js,graphql src/index.js",
     "seed": "npm run dump & npm run seed-function",

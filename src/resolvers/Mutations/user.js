@@ -4,6 +4,7 @@ import generateAuthToken from "../../utils/generateAuthToken.js"
 import hashPassword from "../../utils/hashPassword.js"
 
 const user = {
+
     async createUser(parent, args, { prisma }, info) {
       try {
           const password = await hashPassword(args.data.password);
@@ -18,44 +19,54 @@ const user = {
           return error
         }
       },
+
       async login(parent, args, { prisma }, info) {
-        const user = await prisma.user.findUnique({
-          where: {
-            email: args.data.email,
-          },
-        });
-    
-        if (!user) {
-          throw new Error("Unable to login");
-        }
-        const isMatch = await bcrypt.compare(args.data.password, user.password);
-    
-        if (!isMatch) {
-          throw new Error("Unable to login");
-        }
-    
-        return {
-          user,
-          token: generateAuthToken(user.id),
-        };
-      },
-      async updateUser(parent, args, { prisma, request }, info) {
-        const userId = getUserId(request);
-    
-        if (typeof args.data.password === "string") {
-          args.data.password = await hashPassword(args.data.password);
-        }
-    
-        return prisma.user.update(
-          {
+        try {
+          const user = await prisma.user.findUnique({
             where: {
-              id: userId,
+              email: args.data.email,
             },
-            data: args.data,
-          },
-          info
-        );
+          });
+      
+          if (!user) {
+            throw new Error("Unable to login.");
+          }
+          const isMatch = await bcrypt.compare(args.data.password, user.password);
+      
+          if (!isMatch) {
+            throw new Error("Unable to login.");
+          }
+          return {
+            user,
+            token: generateAuthToken(user.id),
+          };
+        } catch (error) {
+          return error
+        }
       },
+
+      async updateUser(parent, args, { prisma, request }, info) {
+        try {
+          const userId = getUserId(request);
+          if (typeof args.data.password === "string") {
+            args.data.password = await hashPassword(args.data.password);
+          }
+          const updatedUser = await prisma.user.update(
+            {
+              where: {
+                id: userId,
+              },
+              data: args.data,
+            },
+            info
+          );
+          console.log(updatedUser)
+          return updatedUser
+        } catch (error) {
+          return error
+        }
+      },
+
       deleteUser(parent, args, { prisma, request }, info) {
         const userId = getUserId(request);
         if (!userId) {
@@ -63,6 +74,8 @@ const user = {
         }
         return prisma.user.delete({ where: { id: userId } });
       },
+
+
 }
 
 export default user
