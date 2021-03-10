@@ -64,22 +64,37 @@ describe('User creation', ()=>{
             expect(data.message.startsWith("Password must be")).toEqual(true)
         })
     })
-    // it("Cleans up", ()=>{
-    //     return dumpDB(prisma, "mutations clean up")
-    //     .finally(()=>{
-    //         return prisma.$disconnect()
-    //     })
-    // })
 })
 
-    //login function returns token, user
-
     //updateUser updates
+
+describe('User creation', ()=>{
+    let userData
+    beforeAll(async ()=>{
+        await dumpDB(prisma, "mutations start")
+        userData = await userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
+    })
+    afterAll(async()=>{
+        await dumpDB(prisma)
+        await prisma.$disconnect()
+    })
+    it("Updates user succesfully", ()=>{
+        const dummyKeys = Object.keys(dummyUserData)
+        for(let i = 0; i<dummyKeys.length; i++){
+            userData[dummyKeys[i]] = dummyUserData[dummyKeys[i]]
+            await userMutations.updateUser(undefines, {data: userData}, {prisma, })
+        }
+    })
+
+})
     //updateUser fails gracefully
     //updateUser updates updates password
     //updateUser fails password update gracefully
     //delete user deletes 
     //delete user fails gracefully
     //deleteUser 
+
+
+    //login function returns token, user
 
     
