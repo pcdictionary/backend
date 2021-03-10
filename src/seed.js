@@ -1,14 +1,17 @@
 import pkg from "@prisma/client";
+import hashPassword from "./utils/hashPassword.js";
 const { PrismaClient } = pkg;
 
 const prisma = new PrismaClient();
 
 async function main() {
-  await prisma.itemCategory.deleteMany();
+  // await prisma.itemCategory.deleteMany();
   await prisma.item.deleteMany();
   await prisma.owner.deleteMany();
   await prisma.user.deleteMany();
   await prisma.category.deleteMany();
+
+  const password = await hashPassword("abc12345");
 
   const user1 = await prisma.user.create({
     data: {
@@ -16,13 +19,11 @@ async function main() {
       firstName: "phurba",
       lastName: "sherpa",
       userName: "phrbshrp",
-      password: "abc123",
+      password,
       Owner: { create: { rating: 3.6, totalRatingCount: 1 } },
     },
   });
-  const category = await prisma.category.create({
-    data: { category: "tools" },
-  });
+
   const item = await prisma.item.create({
     data: {
       ownerId: user1.id,
@@ -32,19 +33,16 @@ async function main() {
       totalRatingCount: 10,
       description: "high quality speakers, long lasting battery",
     },
+    include: {
+      Categories: true,
+    },
   });
 
-  const itemCategory = await prisma.itemCategory.create({
+  const category = await prisma.category.create({
     data: {
-      Item: {
-        connect: {
-          id: item.id,
-        },
-      },
-      Category: {
-        connect: {
-          id: category.id,
-        },
+      category: "tools",
+      Items: {
+        connect: [{ id: item.id }],
       },
     },
   });
@@ -55,7 +53,7 @@ async function main() {
       firstName: "don",
       lastName: "ng",
       userName: "itizidon",
-      password: "abc123",
+      password,
       Owner: {
         create: {
           rating: 3.0,

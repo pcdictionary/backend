@@ -13,14 +13,13 @@ type Mutation {
   createItem(data: CreateItemInput, categoryId: Int!) : Item!
   updateItem(data: UpdateItemInput, categoryId: Int) : Item!
   deleteItem(data: DeleteItemInput) : Item!
-  createItemCategory(data: CreateItemCategoryInput) : ItemCategory!
   createCategory(data: CreateCategoryInput) : Category!
   createSubcategory(data: CreateCategoryInput) : Category!
   createTransaction(data: CreateTransactionInput, paymentMethod: String!, totalPrice: Float!, itemId: Int!, ownerId: Int!) : Transaction!
 }
 type AuthPayload {
   token: String!
-  user: User!
+  user: User! 
 }
 input LoginUserInput {
   email: String!
@@ -55,10 +54,6 @@ input UpdateItemInput{
 }
 input DeleteItemInput{
   id: Int!
-}
-input CreateItemCategoryInput{
-  itemId: Int!
-  categoryId: Int!
 }
 input CreateCategoryInput{
   category: String!
@@ -120,32 +115,19 @@ type Item{
   description: String!
   ownerId: Int!
   Owner: Owner!
-  ItemCategory: [ItemCategory!]!
+  Categories: [Category!]!
   ItemReview: [ItemReview!]!
   Transactions: [Transaction!]!
   Question: [Question!]
 }
 type Category {
   id: Int!
-  category: String!
-  ItemCategory: [ItemCategory!]!
-  ParentCategory: SubCategory
-  SubCategory: [SubCategory]
+  category: String
+  subCategory: [Category!]
+  parentCategoryId: Int
+  parentCategory: Category
 }
-type SubCategory{
-  id: Int!
-  parentCategoryId: Int!
-  subCategoryId: Int! 
-  ParentCategory: Category!
-  SubCategory: Category
-}
-type ItemCategory{
-  id: Int!
-  itemId: Int!
-  Item: Item!
-  categoryId: Int!
-  Category: Category!
-}
+
 type Question{
   id: Int!
   itemId: Int!
