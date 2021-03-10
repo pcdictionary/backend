@@ -23,7 +23,7 @@ const getUserId = (request, requireAuth = true) => {
   }
 
   if (requireAuth) {
-    throw new Error("Authentication required");
+    return new Error("Authentication required");
   }
 
   return null;
