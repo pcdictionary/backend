@@ -33,15 +33,15 @@ const item = {
 
     return item;
   },
-  updateItem(parent, args, { prisma, request }, info) {
+  async updateItem(parent, args, { prisma, request }, info) {
     //should we validate only with user?
-    const userId = getUserId(request);
+    // const userId = getUserId(request);
 
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    return prisma.item.update(
+    const item = await prisma.item.update(
       {
         where: {
           id: args.data.id,
@@ -50,6 +50,26 @@ const item = {
       },
       info
     );
+    if (args.categoryId) {
+      await prisma.itemCategory.update({
+        where: {
+          id: args.categoryId,
+        },
+        data: {
+          Item: {
+            connect: {
+              id: item.id,
+            },
+          },
+          Category: {
+            connect: {
+              id: args.categoryId,
+            },
+          },
+        },
+      });
+    }
+    return item;
   },
   deleteItem(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);

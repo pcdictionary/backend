@@ -11,14 +11,14 @@ type Mutation {
   updateUser(data: UpdateUserInput) : User!
   deleteUser: User!
   createItem(data: CreateItemInput, categoryId: Int!) : Item!
-  updateItem(data: UpdateItemInput) : Item!
+  updateItem(data: UpdateItemInput, categoryId: Int) : Item!
   deleteItem(data: DeleteItemInput) : Item!
   createCategory(data: CreateCategoryInput) : Category!
   createSubcategory(data: CreateCategoryInput) : Category!
 }
 type AuthPayload {
   token: String!
-  user: User!
+  user: User! 
 }
 input LoginUserInput {
   email: String!
