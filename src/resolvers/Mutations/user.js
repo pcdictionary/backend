@@ -48,19 +48,20 @@ const user = {
       async updateUser(parent, args, { prisma, request }, info) {
         try {
           const userId = getUserId(request);
+          let  newPassword = undefined
           if (typeof args.data.password === "string") {
-            args.data.password = await hashPassword(args.data.password);
+            newPassword = await hashPassword(args.data.password);
           }
           const updatedUser = await prisma.user.update(
             {
               where: {
                 id: userId,
               },
-              data: args.data,
+              data: {...args.data, password:newPassword}
             },
             info
           );
-          console.log(updatedUser)
+          //console.log(updatedUser)
           return updatedUser
         } catch (error) {
           return error
