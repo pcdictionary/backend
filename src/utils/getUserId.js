@@ -5,7 +5,8 @@
 
 import jwt from "jsonwebtoken";
 
-const getUserId = (request, requireAuth = true) => {
+const getUserId = (request) => {
+  console.log("in getuserid", request.headers.cookie)
   const cookie = request.headers.cookie ? request.headers.cookie : null;
   if (cookie) {
     const token = cookie.split("=");

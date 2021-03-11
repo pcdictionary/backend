@@ -23,6 +23,7 @@ describe("Find User", ()=>{
     it("Finds user by email", async ()=>{
         const data = await userQueries.getUser(undefined, {email:dummyUserData.email}, {prisma: prisma})
         expect(data.firstName).toEqual(dummyUserData.firstName)
+        console.log("found user", data)
     })
     it("Finds user by id", async ()=>{
         const data = await userQueries.getUser(undefined, {email:dummyUserData.email}, {prisma: prisma})

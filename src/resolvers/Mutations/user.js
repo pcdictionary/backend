@@ -47,7 +47,8 @@ const user = {
 
       async updateUser(parent, args, { prisma, request }, info) {
         try {
-          const userId = getUserId(request);
+         // const userId = getUserId(request);
+          //const userId = request.verifiedUserId
           let  newPassword = undefined
           if (typeof args.data.password === "string") {
             newPassword = await hashPassword(args.data.password);
@@ -55,7 +56,7 @@ const user = {
           const updatedUser = await prisma.user.update(
             {
               where: {
-                id: userId,
+                id: request.verifiedUserId
               },
               data: {...args.data, password:newPassword}
             },
@@ -69,11 +70,11 @@ const user = {
       },
 
       deleteUser(parent, args, { prisma, request }, info) {
-        const userId = getUserId(request);
-        if (!userId) {
+        //const userId = getUserId(request);
+        if (!request.verifiedUserId) {
           throw new Error("Login in to delete Account!");
         }
-        return prisma.user.delete({ where: { id: userId } });
+        return prisma.user.delete({ where: { id: request.verifiedUserId } });
       },
 
 

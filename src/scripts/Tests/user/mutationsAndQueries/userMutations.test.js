@@ -106,60 +106,86 @@ describe('User update', ()=>{
         await dumpDB(prisma)
        await prisma.$disconnect()
     })
+    
     it("Updates user succesfully", async ()=>{
+        
         const dummyKeys = Object.keys(dummyUserData)
         for(let i = 0; i<dummyKeys.length; i++){
             let tempUser = {...userData.user}
             if(dummyKeys[i]==="password") continue
             tempUser[dummyKeys[i]] = dummyUserData[dummyKeys[i]]
+            // const updatedUser = await userMutations.updateUser(
+            //     undefined, {data: tempUser}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
+            
             const updatedUser = await userMutations.updateUser(
-                undefined, {data: tempUser}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
+                undefined, {data: tempUser}, {prisma:prisma, request:{verifiedUserId: userData.user.id}})
             expect(updatedUser[dummyKeys[i]]).toEqual(dummyUserData[dummyKeys[i]])
         }
     })
     let tempUser = {...userData.user}
     it("Updates password succesfully", async()=>{
         tempUser.password = "Abcdefghijklm4"
+        // const updatedUser = await userMutations.updateUser(
+        //     undefined, {data: {...tempUser}}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
         const updatedUser = await userMutations.updateUser(
-            undefined, {data: {...tempUser}}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
+            undefined, {data: tempUser}, {prisma:prisma, request:{verifiedUserId: userData.user.id}})
         expect(await bcrypt.compare(tempUser.password, updatedUser.password)).toEqual(true)
     })
     it("Fails gracefully when password is invalid", async()=>{
         tempUser.password = "Ab"
+        // const updatedUser = await userMutations.updateUser(
+        //     undefined, {data: {...tempUser}}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
         const updatedUser = await userMutations.updateUser(
-            undefined, {data: {...tempUser}}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
+            undefined, {data: tempUser}, {prisma:prisma, request:{verifiedUserId: userData.user.id}})
         expect(updatedUser.message).toEqual("Password must be 8 characters or longer")
     })
-    it("Fails gracefully on invalid token", async()=>{
-        tempUser.password = "Abcdefghijklm4"
-        const updatedUser = await userMutations.updateUser(
-            undefined, {data: {...tempUser}}, {prisma:prisma, request:{headers:{cookie:"token=test12421412"}}})
-        expect(updatedUser.message).toEqual("jwt malformed")
-    })
-    it("Fails gracefully on fake token", async()=>{
-        const updatedUser = await userMutations.updateUser(
-            undefined, {data: {...tempUser}}, {prisma:prisma, request:{headers:{cookie:'token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE5Mjg4LCJpYXQiOjE2MTU0MjE0OTd9.O1wHNB_OteykRIzGMYZTk6GkiGmG-vhLpyJUWklXi2I'}}})
-        expect(updatedUser.meta.cause).toEqual('Record to update not found.')
-    })
+    //Due to login middleware these can no longer be checked at this level:
+    // it("Fails gracefully on invalid token", async()=>{
+    //     tempUser.password = "Abcdefghijklm4"
+    //     const updatedUser = await userMutations.updateUser(
+    //         undefined, {data: {...tempUser}}, {prisma:prisma, request:{headers:{cookie:"token=test12421412"}}})
+    //     expect(updatedUser.message).toEqual("jwt malformed")
+    // })
+    // xit("Fails gracefully on fake token", async()=>{
+    //     const updatedUser = await userMutations.updateUser(
+    //         undefined, {data: {...tempUser}}, {prisma:prisma, request:{headers:{cookie:'token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VySWQiOjE5Mjg4LCJpYXQiOjE2MTU0MjE0OTd9.O1wHNB_OteykRIzGMYZTk6GkiGmG-vhLpyJUWklXi2I'}}})
+    //     expect(updatedUser.meta.cause).toEqual('Record to update not found.')
+    // })
     it("Updates partial values succesfully", async()=>{
+        // const updatedUser = await userMutations.updateUser(
+        //     undefined, {data: {email:"a@a.a"}}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
         const updatedUser = await userMutations.updateUser(
-            undefined, {data: {email:"a@a.a"}}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
+            undefined, {data: {email:"a@a.a"}}, {prisma:prisma, request:{verifiedUserId: userData.user.id}})
         expect(updatedUser.email).toEqual("a@a.a")
     })
     it("Fails gracefully when an incorrect parameter is passed", async()=>{
+        // const updatedUser = await userMutations.updateUser(
+        //     undefined, {data: {test:"a@a.a"}}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
         const updatedUser = await userMutations.updateUser(
-            undefined, {data: {test:"a@a.a"}}, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
-            expect(updatedUser.message.indexOf("Invalid `prisma.user.update()` invocation:")).not.toEqual(-1)
+            undefined, {data: {test:"a@a.a"}}, {prisma:prisma, request:{verifiedUserId: userData.user.id}})
+        expect(updatedUser.message.indexOf("Invalid `prisma.user.update()` invocation:")).not.toEqual(-1)
     })
 })
 
-
-
-    //delete user deletes 
-    //delete user fails gracefully
-    //deleteUser 
-
-
-   
-
+xdescribe('User deletion', ()=>{
+    beforeAll(async ()=>{
+        prisma = new PrismaClient();
+        await dumpDB(prisma)
+    })
     
+    afterAll(async()=>{
+       await dumpDB(prisma)
+       await prisma.$disconnect()
+    })
+    it("Deletes user", async ()=>{
+        let userData = await userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
+        const deletedUser = await userMutations.deleteUser(undefined, undefined, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
+        const checkUser = await userQueries.getUser(undefined, {email:deletedUser.email}, {prisma: prisma})
+        expect(checkUser.message).toEqual("No such user found.")
+    })
+
+    //doesnt delete user without token
+    //doesnt delete user with wrong token
+    //doesnt delete user that doesnt exist
+
+})

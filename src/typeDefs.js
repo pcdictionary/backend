@@ -1,6 +1,6 @@
 const typeDefs = `type Query {
   allUsers: [User!]!
-  getUser(id: Int!): User! 
+  getUser(id: Int, email: String): ReturnUser!
   allUserItems: [Item]!
   getItem(id: Int!): Item!
   getCategories: [Category]!
@@ -8,8 +8,8 @@ const typeDefs = `type Query {
 type Mutation {
   login(data: LoginUserInput): AuthPayload!
   createUser(data: CreateUserInput) : AuthPayload!
-  updateUser(data: UpdateUserInput) : User!
-  deleteUser: User!
+  updateUser(data: UpdateUserInput) : ReturnUser!
+  deleteUser: ReturnUser!
   createItem(data: CreateItemInput, categoryId: Int!) : Item!
   updateItem(data: UpdateItemInput, categoryId: Int) : Item!
   deleteItem(data: DeleteItemInput) : Item!
@@ -18,12 +18,13 @@ type Mutation {
 }
 type AuthPayload {
   token: String!
-  user: User! 
+  user: ReturnUser! 
 }
 input LoginUserInput {
   email: String!
   password: String!
 }
+
 input CreateUserInput {
   firstName: String!
   lastName: String!
@@ -58,6 +59,22 @@ input DeleteItemInput{
 input CreateCategoryInput{
   category: String!
   parentCategoryId: Int
+}
+type ReturnUser {
+  id: Int!
+  email: String!
+  firstName: String!
+  lastName: String!
+  userName: String!
+  owner: Owner
+  lessee: Lessee
+  Message: [Message!]!
+  VerificationTable: [VerificationTable!]!
+  Question: [Question!]!
+  QuestionVotes: [QuestionVotes!]!
+  ReplyVotes: [ReplyVotes!]!
+  OwnerMessages: [Chat]
+  RequestMessages: [Chat]
 }
 type User {
   id: Int!
