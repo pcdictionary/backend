@@ -7,10 +7,10 @@ import { PrismaClient } from "@prisma/client";
 let prisma = new PrismaClient();
 
 describe('Dump script', ()=>{
-    it("Executes succesfully", ()=>{
-        return dumpDB(prisma)
-        .finally(async () => {
-            await prisma.$disconnect();
-        })
+    afterAll(async()=>{
+        await prisma.$disconnect();
+    })
+    it("Executes succesfully", async ()=>{
+        await dumpDB(prisma)
     })
 })

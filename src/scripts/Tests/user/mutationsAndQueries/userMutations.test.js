@@ -6,8 +6,7 @@ import { PrismaClient } from "@prisma/client";
 import bcrypt from "bcryptjs";
 
 
-let prisma = new PrismaClient();
-
+let prisma
 
 const dummyUserData = {
     'userName': 'Ejivjuggehomexmuas',
@@ -21,6 +20,7 @@ const incorrectPasswords = ["", "abcd"]
 
 describe('User creation', ()=>{
     beforeAll(async ()=>{
+        prisma = new PrismaClient();
         await dumpDB(prisma, "mutations start")
     })
     afterAll(async()=>{
@@ -177,7 +177,6 @@ describe('User deletion', ()=>{
         prisma = new PrismaClient();
         await dumpDB(prisma)
     })
-    
     afterAll(async()=>{
        await dumpDB(prisma)
        await prisma.$disconnect()

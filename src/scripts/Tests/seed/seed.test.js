@@ -5,14 +5,14 @@
 import { PrismaClient } from "@prisma/client";
 import {seed, dumpDB} from '../index.js'
 
-let prisma = new PrismaClient();
+let prisma
 
 
 describe('Seed script', ()=>{
     beforeEach(()=>{
         prisma = new PrismaClient();
     })
-    afterAll(async ()=>{
+    afterEach(async ()=>{
         await dumpDB(prisma)
         await prisma.$disconnect();
     })

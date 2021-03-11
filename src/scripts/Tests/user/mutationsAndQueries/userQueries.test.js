@@ -4,7 +4,7 @@
 import { userMutations, userQueries, seedData, seed, dumpDB} from '../../index.js'
 import { PrismaClient } from "@prisma/client";
 
-const prisma = new PrismaClient();
+let prisma
 
 const dummyUserData = {'userName': 'Yugfap', 
 'email': 'Ziwnemibufuuzcihwehyulevmautsadyacfubaviajwevqa@mail.org', 
@@ -14,6 +14,7 @@ const dummyUserData = {'userName': 'Yugfap',
 
 describe("Find User", ()=>{
     beforeAll(async ()=>{
+        prisma = new PrismaClient();
         await dumpDB(prisma, "query")
         await seed(prisma, true, false, 'query')
     })
@@ -23,7 +24,6 @@ describe("Find User", ()=>{
     it("Finds user by email", async ()=>{
         const data = await userQueries.getUser(undefined, {email:dummyUserData.email}, {prisma: prisma})
         expect(data.firstName).toEqual(dummyUserData.firstName)
-        console.log("found user", data)
     })
     it("Finds user by id", async ()=>{
         const data = await userQueries.getUser(undefined, {email:dummyUserData.email}, {prisma: prisma})
@@ -41,6 +41,9 @@ describe("Find User", ()=>{
 })
 
 describe("Find all Users", ()=>{
+    beforeAll(()=>{
+        prisma = new PrismaClient();
+    })
     afterAll(async()=>{
         await dumpDB(prisma)
         await prisma.$disconnect()
