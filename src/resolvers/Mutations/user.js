@@ -4,62 +4,84 @@ import generateAuthToken from "../../utils/generateAuthToken.js"
 import hashPassword from "../../utils/hashPassword.js"
 
 const user = {
+
     async createUser(parent, args, { prisma }, info) {
-        const password = await hashPassword(args.data.password);
-        const user = prisma.user.create({
+      try {
+          const password = await hashPassword(args.data.password);
+          const user = await prisma.user.create({
           data: {
-            ...args.data,
-            password,
-          },
-        });
-    
-        return { user, token: generateAuthToken(user.id) };
-      },
-      async login(parent, args, { prisma }, info) {
-        const user = await prisma.user.findUnique({
-          where: {
-            email: args.data.email,
-          },
-        });
-    
-        if (!user) {
-          throw new Error("Unable to login");
-        }
-        const isMatch = await bcrypt.compare(args.data.password, user.password);
-    
-        if (!isMatch) {
-          throw new Error("Unable to login");
-        }
-    
-        return {
-          user,
-          token: generateAuthToken(user.id),
-        };
-      },
-      async updateUser(parent, args, { prisma, request }, info) {
-        const userId = getUserId(request);
-    
-        if (typeof args.data.password === "string") {
-          args.data.password = await hashPassword(args.data.password);
-        }
-    
-        return prisma.user.update(
-          {
-            where: {
-              id: userId,
+              ...args.data,
+              password,
             },
-            data: args.data,
-          },
-          info
-        );
-      },
-      deleteUser(parent, args, { prisma, request }, info) {
-        const userId = getUserId(request);
-        if (!userId) {
-          throw new Error("Login in to delete Account!");
+          });
+          return { user, token: generateAuthToken(user.id) };
+        } catch (error) {
+          return error
         }
-        return prisma.user.delete({ where: { id: userId } });
       },
+
+      async login(parent, args, { prisma }, info) {
+        try {
+          const user = await prisma.user.findUnique({
+            where: {
+              email: args.data.email,
+            },
+          });
+      
+          if (!user) {
+            throw new Error("Unable to login.");
+          }
+          const isMatch = await bcrypt.compare(args.data.password, user.password);
+      
+          if (!isMatch) {
+            throw new Error("Unable to login.");
+          }
+          return {
+            user,
+            token: generateAuthToken(user.id),
+          };
+        } catch (error) {
+          return error
+        }
+      },
+
+      async updateUser(parent, args, { prisma, request }, info) {
+        try {
+         // const userId = getUserId(request);
+          //const userId = request.verifiedUserId
+          let  newPassword = undefined
+          if (typeof args.data.password === "string") {
+            newPassword = await hashPassword(args.data.password);
+          }
+          const updatedUser = await prisma.user.update(
+            {
+              where: {
+                id: request.verifiedUserId
+              },
+              data: {...args.data, password:newPassword}
+            },
+            info
+          );
+          //console.log(updatedUser)
+          return updatedUser
+        } catch (error) {
+          return error
+        }
+      },
+
+      async deleteUser(parent, args, { prisma, request }, info) {
+        //const userId = getUserId(request)
+        try {
+          if (!request.verifiedUserId) {
+            throw new Error("Login in to delete Account!");
+          }
+          return await prisma.user.delete({ where: { id: request.verifiedUserId } });
+        } catch (error) {
+          return error
+        }
+      },
+
+
 }
 
 export default user

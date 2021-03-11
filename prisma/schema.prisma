@@ -19,18 +19,19 @@ model User {
   Lessee            Lessee?
   Message           Message[]
   Owner             Owner?
-  VerificationTable VerificationTable[]
   Question          Question[]
   QuestionVotes     QuestionVotes[]
   ReplyVotes        ReplyVotes[]
+  VerificationTable VerificationTable[]
 }
 
 model Owner {
   rating             Float
   totalRatingCount   Int
   id                 Int                  @id @default(autoincrement())
-  User               User                 @relation(fields: [id], references: [id])
-  Items              Item[]
+  userId             Int
+  User               User                 @relation(fields: [userId], references: [id])
+  Item               Item[]
   LesseeReview       LesseeReview[]
   PaypalOwner        PaypalOwner[]
   ProductOwnerReview ProductOwnerReview[]
@@ -42,13 +43,14 @@ model Lessee {
   rating             Float
   totalRatingCount   Int
   id                 Int                  @id @default(autoincrement())
-  User               User                 @relation(fields: [id], references: [id])
+  userId             Int
+  User               User                 @relation(fields: [userId], references: [id])
+  Cart               Cart[]
   ItemReview         ItemReview[]
   LesseeReview       LesseeReview[]
   PaypalLessee       PaypalLessee[]
   ProductOwnerReview ProductOwnerReview[]
   StripeLessee       StripeLessee[]
-  Cart               Cart[]
 }
 
 model Item {
@@ -64,8 +66,8 @@ model Item {
   Owner            Owner         @relation(fields: [ownerId], references: [id])
   Categories       Category[]    @relation("ItemCategories")
   ItemReview       ItemReview[]
-  Transactions     Transaction[]
   Question         Question[]
+  Transactions     Transaction?
 }
 
 model Category {
@@ -87,8 +89,8 @@ model Question {
   dislikes      Int
   Item          Item            @relation(fields: [itemId], references: [id])
   User          User            @relation(fields: [userId], references: [id])
-  Reply         Reply[]
   QuestionVotes QuestionVotes[]
+  Reply         Reply[]
 }
 
 model Reply {
@@ -96,9 +98,9 @@ model Reply {
   questionId Int
   likes      Int
   dislikes   Int
+  Reply      String
   Question   Question     @relation(fields: [questionId], references: [id])
   ReplyVotes ReplyVotes[]
-  Reply      String
 }
 
 model QuestionVotes {
@@ -106,8 +108,8 @@ model QuestionVotes {
   userId     Int
   questionId Int
   vote       Int
-  User       User     @relation(fields: [userId], references: [id])
   Question   Question @relation(fields: [questionId], references: [id])
+  User       User     @relation(fields: [userId], references: [id])
 }
 
 model ReplyVotes {
@@ -115,8 +117,8 @@ model ReplyVotes {
   userId  Int
   replyId Int
   vote    Int
-  User    User  @relation(fields: [userId], references: [id])
   Reply   Reply @relation(fields: [replyId], references: [id])
+  User    User  @relation(fields: [userId], references: [id])
 }
 
 model ItemReview {
@@ -152,9 +154,10 @@ model Cart {
   lesseeId      Int
   paymentMethod String
   totalPrice    Float
+  status        CartStatus
   lessee        Lessee        @relation(fields: [lesseeId], references: [id])
   Transaction   Transaction[]
-  status        CartStatus
+  @@unique(fields:[lesseeId, status],name:"activecart")
 }
 
 model VerificationTable {
