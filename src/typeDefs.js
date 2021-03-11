@@ -16,6 +16,8 @@ type Mutation {
   createCategory(data: CreateCategoryInput) : Category!
   createSubcategory(data: CreateCategoryInput) : Category!
   createTransaction(data: CreateTransactionInput, paymentMethod: String!, totalPrice: Float!, itemId: Int!, ownerId: Int!) : Transaction!
+  createCart: Cart!
+  createLessee: Lessee!
 }
 type AuthPayload {
   token: String!
