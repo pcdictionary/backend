@@ -189,7 +189,7 @@ type Transaction{
 }
 type Cart{
   id: Int!
-  lesseeId: Int!
+  lesseeId: Int
   Lessee: Lessee!
   paymentMethod: String!
   totalPrice: Float!

@@ -155,6 +155,7 @@ model Cart {
   lessee        Lessee        @relation(fields: [lesseeId], references: [id])
   Transaction   Transaction[]
   status        CartStatus
+  @@unique(fields:[lesseeId, status],name:"activecart")
 }
 
 model VerificationTable {
