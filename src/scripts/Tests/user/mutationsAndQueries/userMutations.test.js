@@ -165,9 +165,14 @@ describe('User update', ()=>{
             undefined, {data: {test:"a@a.a"}}, {prisma:prisma, request:{verifiedUserId: userData.user.id}})
         expect(updatedUser.message.indexOf("Invalid `prisma.user.update()` invocation:")).not.toEqual(-1)
     })
+    it("Fails gracefully when userid isnt verified", async()=>{
+        const updatedUser = await userMutations.updateUser(
+            undefined, {data: {test:"a@a.a"}}, {prisma:prisma, request:{verifiedUserId: null}})
+        expect(updatedUser.message.indexOf("Argument id for where.id must not be null. Please use undefined instead.")).not.toEqual(-1)
+    })
 })
 
-xdescribe('User deletion', ()=>{
+describe('User deletion', ()=>{
     beforeAll(async ()=>{
         prisma = new PrismaClient();
         await dumpDB(prisma)
@@ -179,13 +184,23 @@ xdescribe('User deletion', ()=>{
     })
     it("Deletes user", async ()=>{
         let userData = await userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
-        const deletedUser = await userMutations.deleteUser(undefined, undefined, {prisma:prisma, request:{headers:{cookie:"token="+userData.token}}})
+        const deletedUser = await userMutations.deleteUser(undefined, undefined, {prisma:prisma, request:{verifiedUserId:userData.user.id}})
         const checkUser = await userQueries.getUser(undefined, {email:deletedUser.email}, {prisma: prisma})
         expect(checkUser.message).toEqual("No such user found.")
     })
-
-    //doesnt delete user without token
-    //doesnt delete user with wrong token
-    //doesnt delete user that doesnt exist
+    it("Fails to delete when userid isnt verified", async ()=>{
+        let userData = await userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
+        const deletedUser = await userMutations.deleteUser(undefined, undefined, {prisma:prisma, request:{verifiedUserId:null}})
+        expect(deletedUser.message).toEqual("Login in to delete Account!")
+        const checkUser = await userQueries.getUser(undefined, {email:seedData.userList[0].email}, {prisma: prisma})
+        expect(checkUser.email).toEqual(seedData.userList[0].email)
+    })
+    it("Fails to delete when userId doesnt exist in DB", async ()=>{
+        //let userData = await userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
+        const deletedUser = await userMutations.deleteUser(undefined, undefined, {prisma:prisma, request:{verifiedUserId:999999999}})
+        expect(deletedUser.meta.cause).toEqual("Record to delete does not exist.")
+        const checkUser = await userQueries.getUser(undefined, {email:seedData.userList[0].email}, {prisma: prisma})
+        expect(checkUser.email).toEqual(seedData.userList[0].email)
+    })
 
 })

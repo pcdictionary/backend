@@ -69,12 +69,16 @@ const user = {
         }
       },
 
-      deleteUser(parent, args, { prisma, request }, info) {
-        //const userId = getUserId(request);
-        if (!request.verifiedUserId) {
-          throw new Error("Login in to delete Account!");
+      async deleteUser(parent, args, { prisma, request }, info) {
+        //const userId = getUserId(request)
+        try {
+          if (!request.verifiedUserId) {
+            throw new Error("Login in to delete Account!");
+          }
+          return await prisma.user.delete({ where: { id: request.verifiedUserId } });
+        } catch (error) {
+          return error
         }
-        return prisma.user.delete({ where: { id: request.verifiedUserId } });
       },
 
 
