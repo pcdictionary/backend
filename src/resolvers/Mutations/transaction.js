@@ -6,24 +6,27 @@ const transaction = {
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
-    const userId = 1;
+    const userId = 2;
+
+    const owner = await prisma.owner.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    const lessee = await prisma.lessee.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+
+    console.log(lessee)
 
     return prisma.transaction.create({
       data: {
         ...args.data,
-        Cart: {
-          connect: {
-            where: {
-              activecart: {
-                lesseeId: userId,
-                status: "ACTIVE",
-              },
-            },
-          },
-        },
         Owner: {
           connect: {
-            id: args.ownerId,
+            id: owner.id
           },
         },
         Item: {
@@ -31,11 +34,20 @@ const transaction = {
             id: args.itemId,
           },
         },
+        Lessee:{
+          connect: {
+            id: lessee.id
+          }
+        }
       },
       include: {
         Owner: true,
+        Lessee: true
       },
     });
   },
+  deleteTransaction(parent, args, { prisma }, info){
+    return prisma.transaction.delete({ where: { id: args.transactionId } });
+  }
 };
 export default transaction;
