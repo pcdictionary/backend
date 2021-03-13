@@ -11,12 +11,13 @@ const lessee = {
       data: {
         rating: 0,
         totalRatingCount: 0,
-        User: {
-          connect: {
-            id: userId,
-          },
-        },
+        userId: userId,
       },
+      // include:{
+      //   User: {select: {
+          
+      //   }}
+      // }
     });
   },
 };
