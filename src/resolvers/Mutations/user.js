@@ -25,19 +25,29 @@ const user = {
             where: {
               email: args.data.email,
             },
+            include:{
+              Owner: {
+                select: {
+                  id: true
+                }
+              }
+            }
           });
       
           if (!user) {
             throw new Error("Unable to login.");
           }
           const isMatch = await bcrypt.compare(args.data.password, user.password);
-          //console.log("Match", isMatch)
+          let ownerId = null
+          let lesseeId = null
+          if(user.Owner) ownerId = user.Owner.id
+          if(user.Lessee) lesseeId = user.Lessee.id
           if (!isMatch) {
             throw new Error("Unable to login.");
           }
           return {
             user,
-            token: generateAuthToken(user.id),
+            token: generateAuthToken(user.id, ownerId, lesseeId),
           };
         } catch (error) {
           return error
@@ -81,14 +91,12 @@ const user = {
               include:{
                 Owner: {
                   select: {
-                    id: true,
-                    User: true,
+                    id: true
                   }
                 }
               }
             }
             )
-          console.log(102, loggedInUser)
           if(loggedInUser && loggedInUser.Owner!==null){
             await prisma.owner.delete({where: {userId: request.verifiedUserId}})
           }

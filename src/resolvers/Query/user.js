@@ -6,6 +6,7 @@ const user = {
       return error 
     }
   },
+  
   async getUser(parent, args, { prisma }, info) {
     try {
       let query = {}

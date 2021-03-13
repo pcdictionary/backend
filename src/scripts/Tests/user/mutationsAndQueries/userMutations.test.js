@@ -198,7 +198,6 @@ describe('User deletion', ()=>{
     it("Fails to delete when userId doesnt exist in DB", async ()=>{
         //let userData = await userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
         const deletedUser = await userMutations.deleteUser(undefined, undefined, {prisma:prisma, request:{verifiedUserId:999999999}})
-        console.log(deletedUser)
         expect(deletedUser.meta.cause).toEqual("Record to delete does not exist.")
         const checkUser = await userQueries.getUser(undefined, {email:seedData.userList[0].email}, {prisma: prisma})
         expect(checkUser.email).toEqual(seedData.userList[0].email)

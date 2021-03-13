@@ -11,6 +11,8 @@ type Mutation {
   createCart(data: CreateCartInput!): Cart!
   createUser(data: CreateUserInput) : AuthPayload!
   updateUser(data: UpdateUserInput) : ReturnUser!
+  createOwner(data: CreateOwnerInput): Owner!
+  updateOwner(data: UpdateOwnerInput): Owner!
   deleteUser: ReturnUser!
   createItem(data: CreateItemInput, categoryId: Int!) : Item!
   updateItem(data: UpdateItemInput, categoryId: Int) : Item!
@@ -31,7 +33,16 @@ input LoginUserInput {
   email: String!
   password: String!
 }
-
+input CreateOwnerInput{
+  rating: Float!
+  totalRatingCount: Int!
+  status: String
+}
+input UpdateOwnerInput{
+  rating: Float!
+  totalRatingCount: Int!
+  status: String
+}
 input CreateUserInput {
   firstName: String!
   lastName: String!
@@ -123,6 +134,7 @@ type Owner{
   User: User!
   rating: Float!
   totalRatingCount: Int!
+  status: String
   Items: [Item!]!
   LesseeReview: [LesseeReview!]!
   PaypalOwner: [PaypalOwner]!

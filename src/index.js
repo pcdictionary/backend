@@ -28,10 +28,13 @@ app.use(
   graphqlHTTP(async (request, response, graphQLParams) => {
     console.log("app.user headers", request.headers);
     console.log("params", graphQLParams);
+    const userIds = getUserId(request)
     return {
       schema,
       graphiql: true,
-      verifiedUserId: getUserId(request),
+      verifiedUserId: userIds.userId,
+      verifiedOwnerId: userIds.ownerId,
+      verifiedLesseeId: userIds.lesseeId,
       context: { prisma, request },
     };
   })
