@@ -6,7 +6,9 @@ const typeDefs = `type Query {
   getCategories: [Category]!
 }
 type Mutation {
+  deleteOwner(id: Int, userId: Int): Owner!
   login(data: LoginUserInput): AuthPayload!
+  createCart(data: CreateCartInput!): Cart!
   createUser(data: CreateUserInput) : AuthPayload!
   updateUser(data: UpdateUserInput) : ReturnUser!
   deleteUser: ReturnUser!
@@ -15,10 +17,15 @@ type Mutation {
   deleteItem(data: DeleteItemInput) : Item!
   createCategory(data: CreateCategoryInput) : Category!
   createSubcategory(data: CreateCategoryInput) : Category!
+  createTransaction(data: CreateTransactionInput, paymentMethod: String!, totalPrice: Float!, itemId: Int!, ownerId: Int!) : Transaction!
 }
 type AuthPayload {
   token: String!
   user: ReturnUser! 
+}
+input CreateCartInput{
+  lesseeId: Int!
+  paymentMethod: String!
 }
 input LoginUserInput {
   email: String!
@@ -75,6 +82,12 @@ type ReturnUser {
   ReplyVotes: [ReplyVotes!]!
   OwnerMessages: [Chat]
   RequestMessages: [Chat]
+}
+input CreateTransactionInput{
+  status: TransactionStatus
+  salePrice: Float!
+  startDate: String
+  endDate: String
 }
 type User {
   id: Int!
@@ -200,7 +213,7 @@ type Transaction{
 }
 type Cart{
   id: Int!
-  lesseeId: Int!
+  lesseeId: Int
   Lessee: Lessee!
   paymentMethod: String!
   totalPrice: Float!

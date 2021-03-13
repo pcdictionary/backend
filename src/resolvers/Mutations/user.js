@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import getUserId from "../../utils/getUserId.js"
 import generateAuthToken from "../../utils/generateAuthToken.js"
 import hashPassword from "../../utils/hashPassword.js"
 
@@ -32,7 +31,7 @@ const user = {
             throw new Error("Unable to login.");
           }
           const isMatch = await bcrypt.compare(args.data.password, user.password);
-      
+          //console.log("Match", isMatch)
           if (!isMatch) {
             throw new Error("Unable to login.");
           }
@@ -73,8 +72,27 @@ const user = {
         //const userId = getUserId(request)
         try {
           if (!request.verifiedUserId) {
-            throw new Error("Login in to delete Account!");
+            return new Error("Login in to delete Account!");
           }
+         // let deletedOwner
+          const loggedInUser = await prisma.user.findUnique(
+            {
+              where:{id:request.verifiedUserId},
+              include:{
+                Owner: {
+                  select: {
+                    id: true,
+                    User: true,
+                  }
+                }
+              }
+            }
+            )
+          console.log(102, loggedInUser)
+          if(loggedInUser && loggedInUser.Owner!==null){
+            await prisma.owner.delete({where: {userId: request.verifiedUserId}})
+          }
+          //console.log(789, deletedOwner)
           return await prisma.user.delete({ where: { id: request.verifiedUserId } });
         } catch (error) {
           return error

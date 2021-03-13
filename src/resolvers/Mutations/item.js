@@ -1,4 +1,3 @@
-import getUserId from "../../utils/getUserId.js";
 const item = {
   async createItem(parent, args, { prisma, request }, info) {
     // const userId = getUserId(request);
@@ -6,7 +5,7 @@ const item = {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId = 24;
+    const userId = request.verifiedUserId
 
     const item = await prisma.item.create({
       data: {
@@ -72,7 +71,7 @@ const item = {
     return item;
   },
   deleteItem(parent, args, { prisma, request }, info) {
-    const userId = getUserId(request);
+    const userId = request.verifiedUserId
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
