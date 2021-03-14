@@ -1,5 +1,5 @@
 import { resolvers } from "./resolvers/index.js";
-import typeDefs from "./typeDefs.js";
+import typeDefs from "./typeDefs/_typeDefs.js";
 import express, { request } from "express";
 import { graphqlHTTP } from "express-graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";

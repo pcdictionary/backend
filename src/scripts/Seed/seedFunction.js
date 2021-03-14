@@ -53,10 +53,10 @@ export async function seed(client, test = false, testFailure=false, source = "de
  for(let i = 0; i<seedData.categoryList.length; i++){
   try {
     let category = await client.category.create({data:{...seedData.categoryList[i]}})
-    console.log(category)
+    //console.log(category)
   } catch (error) {
     console.log("Seed Category Error on entry:\n")
-    console.log(seedData.categoryList[i], source)
+    console.log(seedData.categoryList[i], source, "index: ", i)
     console.log(error)
     process.exit(1);
   }

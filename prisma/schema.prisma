@@ -83,7 +83,7 @@ model Category {
   approved         Boolean    @default(true)
   subCategory      Category[] @relation("SubToParent")
   parentCategory   Category?  @relation("SubToParent", fields: [parentCategoryId], references: [id])
-  parentCategoryId Int?
+  parentCategoryId Int?       
   Items            Item[]     @relation("ItemCategories")
 }
 
