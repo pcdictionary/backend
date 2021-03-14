@@ -4,6 +4,7 @@ const typeDefs = `type Query {
   allUserItems: [Item]!
   getItem(id: Int!): Item!
   getCategories: [Category]!
+  getOwner(userId: Int!): Owner!
 }
 type Mutation {
   deleteOwner(id: Int, userId: Int): Owner!
@@ -15,11 +16,18 @@ type Mutation {
   updateOwner(data: UpdateOwnerInput): Owner!
   deleteUser: ReturnUser!
   createItem(data: CreateItemInput, categoryId: Int!) : Item!
-  updateItem(data: UpdateItemInput, categoryId: Int) : Item!
+  updateItem(data: UpdateItemInput, categoryId: Int, itemId: Int!) : Item!
   deleteItem(data: DeleteItemInput) : Item!
   createCategory(data: CreateCategoryInput) : Category!
   createSubcategory(data: CreateCategoryInput) : Category!
+<<<<<<< HEAD
   createTransaction(data: CreateTransactionInput, paymentMethod: String!, totalPrice: Float!, itemId: Int!, ownerId: Int!) : Transaction!
+=======
+  createTransaction(data: CreateTransactionInput, itemId: Int!) : Transaction!
+  createWishList: WishList!
+  createLessee: Lessee!
+  deleteTransaction(transactionId: Int!) : Transaction!
+>>>>>>> 0e11dc9ec29a04432e7bae7083f5af678d89510b
 }
 type AuthPayload {
   token: String!
@@ -59,7 +67,6 @@ input UpdateUserInput{
 }
 input CreateItemInput{
   itemName : String!
-  ownerId: Int!
   description: String!
   price : Float!
   itemRating : Float
@@ -69,7 +76,8 @@ input UpdateItemInput{
   itemName: String
   description: String
   price: Int
-  id: Int!
+
+  totalRatingCount : Int!
 }
 input DeleteItemInput{
   id: Int!
@@ -77,6 +85,13 @@ input DeleteItemInput{
 input CreateCategoryInput{
   category: String!
   parentCategoryId: Int
+}
+input CreateTransactionInput{
+  status: TransactionStatus
+  salePrice: Float!
+  startDate: String
+  endDate: String
+  paymentMethod: String!
 }
 type ReturnUser {
   id: Int!
@@ -120,18 +135,20 @@ type User {
 type Lessee{
   id: Int!
   User: User!
+  userId: Int!
   rating: Float!
   totalRatingCount: Int!
-  Cart: [Cart!]!
   ItemReview: [ItemReview!]!
   LesseeReview: [LesseeReview!]!
   PaypalLessee: [PaypalLessee]!
   ProdcutOwnerReview: [ProductOwnerReview!]!
   StripeLessee: [StripeLessee!]!
+  Transactions: [Transaction!]!
 }
 type Owner{
   id: Int!
   User: User!
+  userId: Int!
   rating: Float!
   totalRatingCount: Int!
   status: String
@@ -155,6 +172,7 @@ type Item{
   ItemReview: [ItemReview!]!
   Transactions: [Transaction!]!
   Question: [Question!]
+  WishlistItems: [WishListItems!]
 }
 type Category {
   id: Int!
@@ -216,21 +234,33 @@ type Transaction{
   startDate: String!
   endDate: String!
   salePrice: Float!
+  paymentMethod: String
   ownerId: Int!
   Owner: Owner!
   itemId: Int!
+  lesseeId: Int!
   Item: Item!
-  cartId: Int!
-  Cart: Cart!
+  Lessee: Lessee!
 }
-type Cart{
+type WishList{
   id: Int!
+<<<<<<< HEAD
   lesseeId: Int
   Lessee: Lessee!
+=======
+  userId: Int!
+  User: User!
+>>>>>>> 0e11dc9ec29a04432e7bae7083f5af678d89510b
   paymentMethod: String!
   totalPrice: Float!
-  Transaction: [Transaction!]!
-  status: CartStatus!
+  WishListItems: [WishListItems!]!
+}
+type WishListItems{
+  id: Int!
+  wishListId: Int!
+  itemId: Int!
+  WishList: WishList!
+  Item: Item!
 }
 type VerificationTable{
   id: Int!
@@ -334,10 +364,6 @@ enum TransactionStatus {
   PENDING
   APPROVED
   REJECTED
-  ACTIVE
-  COMPLETED
-}
-enum CartStatus {
   ACTIVE
   COMPLETED
 }
