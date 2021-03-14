@@ -49,6 +49,19 @@ export async function seed(client, test = false, testFailure=false, source = "de
         process.exit(1);
      }
  }
+
+ for(let i = 0; i<seedData.categoryList.length; i++){
+  try {
+    let category = await client.category.create({data:{...seedData.categoryList[i]}})
+    console.log(category)
+  } catch (error) {
+    console.log("Seed Category Error on entry:\n")
+    console.log(seedData.categoryList[i], source)
+    console.log(error)
+    process.exit(1);
+  }
+ }
+
  for(let i = 0; i<seedData.itemList.length; i++){
    try {
      let ownerId = validOwnerIds[getRndInteger(0, validOwnerIds.length-1)]

@@ -6,7 +6,6 @@ const transaction = {
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
-<<<<<<< HEAD
     const userId = 6;
 
     // const cart = await prisma.cart.findUnique({
@@ -19,27 +18,10 @@ const transaction = {
     // });
 
     // console.log(cart);
-=======
-    const userId = 2;
-
-    const owner = await prisma.owner.findUnique({
-      where: {
-        userId: userId,
-      },
-    });
-    const lessee = await prisma.lessee.findUnique({
-      where: {
-        userId: userId,
-      },
-    });
-
-    console.log(lessee)
->>>>>>> 0e11dc9ec29a04432e7bae7083f5af678d89510b
 
     return prisma.transaction.create({
       data: {
         ...args.data,
-<<<<<<< HEAD
         Cart: {
           connectOrCreate: {
             where: { lesseeId: userId, status: "ACTIVE" },
@@ -67,11 +49,6 @@ const transaction = {
         Owner: {
           connect: {
             id: args.ownerId,
-=======
-        Owner: {
-          connect: {
-            id: owner.id
->>>>>>> 0e11dc9ec29a04432e7bae7083f5af678d89510b
           },
         },
         Item: {
@@ -79,7 +56,6 @@ const transaction = {
             id: args.itemId,
           },
         },
-<<<<<<< HEAD
       },
     });
 
@@ -135,22 +111,5 @@ const transaction = {
     // console.log(transaction,"this is transaction")
     // return transaction
   },
-=======
-        Lessee:{
-          connect: {
-            id: lessee.id
-          }
-        }
-      },
-      include: {
-        Owner: true,
-        Lessee: true
-      },
-    });
-  },
-  deleteTransaction(parent, args, { prisma }, info){
-    return prisma.transaction.delete({ where: { id: args.transactionId } });
-  }
->>>>>>> 0e11dc9ec29a04432e7bae7083f5af678d89510b
 };
 export default transaction;
