@@ -12,6 +12,7 @@ const item = {
     });
     return items;
   },
+  
   getItem(parent, args, { prisma }, info) {
     return prisma.item.findUnique({
       where: {

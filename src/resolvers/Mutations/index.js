@@ -1,11 +1,13 @@
 import user from './user.js'
 import item from './item.js'
 import transaction from './transaction.js'
+import owner from './owner.js'
 
 const Mutation = {
   ...user,
   ...item,
-  ...transaction
+  ...transaction,
+  ...owner
 };
 
 export default Mutation;
