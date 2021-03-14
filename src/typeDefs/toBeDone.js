@@ -1,4 +1,5 @@
-const typeDefs = `
+import gql from 'graphql-tag'
+const typeDefs = gql`
   input CreateItemInput{
     itemName : String!
     description: String!

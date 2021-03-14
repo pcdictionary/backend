@@ -1,4 +1,6 @@
-const typeDefs = `
+import gql from 'graphql-tag'
+
+const typeDefs = gql`
     type Query {
         allUsers: [User!]!
         allOwners: [Owner!]!

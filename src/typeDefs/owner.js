@@ -1,4 +1,6 @@
-const typeDefs = `
+import gql from 'graphql-tag'
+
+const typeDefs = gql`
     type Owner{
         id: Int!
         User: User!
