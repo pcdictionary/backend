@@ -12,10 +12,12 @@ const typeDefs = gql`
     updateItem(data: UpdateItemInput, categoryId: Int, itemId: Int!): Item!
     deleteItem(data: DeleteItemInput): Item!
     createCategory(data: CreateCategoryInput): Category!
+    updateCategory(data: UpdateCategoryInput): Category!
     createSubcategory(data: CreateCategoryInput): Category!
     createTransaction(data: CreateTransactionInput, itemId: Int!): Transaction!
     createWishList: WishList!
     createLessee: Lessee!
+    deleteCategory: Category!
     deleteTransaction(transactionId: Int!): Transaction!
     createChat(reciever: Int!): Chat!
     createMessage(data: CreateMessageInput): Chat!
