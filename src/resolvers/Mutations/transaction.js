@@ -6,7 +6,7 @@ const transaction = {
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
-    const userId = 6;
+    const userId = 2;
 
     // const cart = await prisma.cart.findUnique({
     //   where: {

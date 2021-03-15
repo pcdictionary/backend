@@ -57,10 +57,10 @@ const itemReview = {
 
     return prisma.itemReview.update({
       where:{
-        itemReview:{
+        // itemReview:{
           id: args.itemReviewId,
-          ownerId: owner.id
-        }
+          // ownerId: owner.id
+        // }
       },
       data: {
         ...args.data

@@ -139,6 +139,7 @@ model ItemReview {
   lesseeId  Int
   Item      Item     @relation(fields: [itemId], references: [id])
   Lessee    Lessee   @relation(fields: [lesseeId], references: [id])
+  // @@unique(fields: [id, ownerId], name: "itemReview")
 }
 
 model Transaction {
@@ -215,6 +216,7 @@ model LesseeReview {
   productOwnerId Int
   Lessee         Lessee   @relation(fields: [lesseeId], references: [id])
   ProductOwner   Owner    @relation(fields: [productOwnerId], references: [id])
+  @@unique(fields: [id, productOwnerId], name: "lesseeOwnerReview")
 }
 
 model Paypal {
