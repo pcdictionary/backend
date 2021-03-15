@@ -15,8 +15,6 @@ const itemReview = {
       },
     });
 
-    console.log(lessee,'this is lesseee')
-
     const transaction = await prisma.transaction.findUnique({
       where: {
         lesseeTransaction: {
@@ -25,7 +23,6 @@ const itemReview = {
         },
       },
     });
-    console.log(transaction,'this is transaction')
 
     if (!transaction) {
       throw new Error("Never bought item");
@@ -46,6 +43,23 @@ const itemReview = {
       },
     });
   },
+  async updateItemReview(parent, args, { prisma }, info){
+        // const userId = getUserId(request);
+    // if (!userId) {
+    //   throw new Error("Login in to delete Account!");
+    // }
+
+    const userId = 2;
+
+    return prisma.itemReview.update({
+      where:{
+        id: args.itemReviewId
+      },
+      data: {
+        ...args.data
+      },
+    });
+  }
 };
 
 export default itemReview;

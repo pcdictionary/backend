@@ -21,6 +21,7 @@ type Mutation {
   createLessee: Lessee!
   deleteTransaction(transactionId: Int!) : Transaction!
   createItemReview(data: CreateItemReviewInput, itemId: Int!): ItemReview!
+  updateItemReview(data: CreateItemReviewInput, itemReviewId: Int!): ItemReview!
 }
 type AuthPayload {
   token: String!
