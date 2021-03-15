@@ -35,6 +35,7 @@ app.use(
       verifiedUserId: userIds.userId,
       verifiedOwnerId: userIds.ownerId,
       verifiedLesseeId: userIds.lesseeId,
+      isAdmin: true,
       context: { prisma, request },
     };
   })

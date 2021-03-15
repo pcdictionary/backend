@@ -13,6 +13,7 @@
     "test-user-leaks": "npm run dump & jest /src/scripts/Tests/user/ --detectOpenHandles",
     "test-owner-mutations": "npm run dump & jest /src/scripts/Tests/owner/mutationsAndQueries/ownerMutations.test.js --verbose --runInBand",
     "test-owner-queries": "npm run dump & jest /src/scripts/Tests/owner/mutationsAndQueries/ownerQueries.test.js --verbose --runInBand",
+    "test-category-mutations": "npm run dump & jest /src/scripts/Tests/category/mutationsAndQueries/categoryMutations.test.js --verbose --runInBand",
     "start": "nodemon -e js,graphql src/index.js",
     "seed": "npm run dump & npm run seed-function",
     "seed-function": "node src/scripts/Seed/seed.js",
