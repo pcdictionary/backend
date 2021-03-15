@@ -1,15 +1,19 @@
 import user from './user.js'
 import item from './item.js'
 import transaction from './transaction.js'
-import cart from './cart.js'
+import wishlist from './wishlist.js'
 import lessee from './lessee.js'
+import category from './category.js'
+import itemReview from './itemReview.js'
 
 const Mutation = {
   ...user,
   ...item,
   ...transaction,
-  ...cart,
-  ...lessee
+  ...wishlist,
+  ...lessee,
+  ...category,
+  ...itemReview
 };
 
 export default Mutation;

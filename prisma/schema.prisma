@@ -17,6 +17,7 @@ model User {
   OwnerMessages     Chat?               @relation("user1")
   RequestMessages   Chat?               @relation("user2")
   Lessee            Lessee?
+  WishList          WishList[]
   Message           Message[]
   Owner             Owner?
   Question          Question[]
@@ -29,7 +30,7 @@ model Owner {
   rating             Float
   totalRatingCount   Int
   id                 Int                  @id @default(autoincrement())
-  userId             Int
+  userId             Int                  @unique
   User               User                 @relation(fields: [userId], references: [id])
   Item               Item[]
   LesseeReview       LesseeReview[]
@@ -43,36 +44,38 @@ model Lessee {
   rating             Float
   totalRatingCount   Int
   id                 Int                  @id @default(autoincrement())
-  userId             Int
+  userId             Int                  @unique
   User               User                 @relation(fields: [userId], references: [id])
-  Cart               Cart[]
   ItemReview         ItemReview[]
   LesseeReview       LesseeReview[]
   PaypalLessee       PaypalLessee[]
   ProductOwnerReview ProductOwnerReview[]
   StripeLessee       StripeLessee[]
+  Transactions       Transaction[]
 }
 
 model Item {
-  id               Int           @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   itemName         String
   price            Float
   itemRating       Float
   totalRatingCount Int
   description      String
-  updatedAt        DateTime?     @updatedAt
-  createdAt        DateTime?     @default(now())
+  updatedAt        DateTime?    @updatedAt
+  createdAt        DateTime?    @default(now())
   ownerId          Int
-  Owner            Owner         @relation(fields: [ownerId], references: [id])
-  Categories       Category[]    @relation("ItemCategories")
+  Owner            Owner        @relation(fields: [ownerId], references: [id])
+  Categories       Category[]   @relation("ItemCategories")
   ItemReview       ItemReview[]
   Question         Question[]
   Transactions     Transaction?
+  WishListItems    WishListItems?
+  @@unique         (fields:[ownerId,id], name:"itemOwner")
 }
 
 model Category {
   id               Int        @id @default(autoincrement())
-  category         String
+  category         String     @unique
   subCategory      Category[] @relation("SubToParent")
   parentCategory   Category?  @relation("SubToParent", fields: [parentCategoryId], references: [id])
   parentCategoryId Int?
@@ -83,7 +86,7 @@ model Category {
 model Question {
   id            Int             @id @default(autoincrement())
   itemId        Int
-  userId        Int
+  userId        Int             @unique
   question      String
   likes         Int
   dislikes      Int
@@ -105,7 +108,7 @@ model Reply {
 
 model QuestionVotes {
   id         Int      @id @default(autoincrement())
-  userId     Int
+  userId     Int      @unique
   questionId Int
   vote       Int
   Question   Question @relation(fields: [questionId], references: [id])
@@ -114,7 +117,7 @@ model QuestionVotes {
 
 model ReplyVotes {
   id      Int   @id @default(autoincrement())
-  userId  Int
+  userId  Int   @unique
   replyId Int
   vote    Int
   Reply   Reply @relation(fields: [replyId], references: [id])
@@ -134,30 +137,37 @@ model ItemReview {
 }
 
 model Transaction {
-  id        Int               @id @default(autoincrement())
-  startDate String
-  endDate   String
-  status    TransactionStatus
-  updatedAt DateTime          @updatedAt
-  createdAt DateTime          @default(now())
-  ownerId   Int
-  itemId    Int               @unique
-  salePrice Float
-  cartId    Int
-  Cart      Cart              @relation(fields: [cartId], references: [id])
-  Item      Item              @relation(fields: [itemId], references: [id])
-  Owner     Owner             @relation(fields: [ownerId], references: [id])
+  id            Int               @id @default(autoincrement())
+  startDate     String
+  endDate       String
+  status        TransactionStatus
+  updatedAt     DateTime          @updatedAt
+  createdAt     DateTime          @default(now())
+  ownerId       Int
+  itemId        Int               
+  salePrice     Float
+  paymentMethod String
+  lesseeId      Int               
+  Item          Item              @relation(fields: [itemId], references: [id])
+  Owner         Owner             @relation(fields: [ownerId], references: [id])
+  Lessee        Lessee            @relation(fields: [lesseeId], references: [id])
+  @@unique         (fields:[itemId, lesseeId], name:"lesseeTransaction")
 }
 
-model Cart {
-  id            Int           @id @default(autoincrement())
-  lesseeId      Int
-  paymentMethod String
-  totalPrice    Float
-  status        CartStatus
-  lessee        Lessee        @relation(fields: [lesseeId], references: [id])
-  Transaction   Transaction[]
-  @@unique(fields:[lesseeId, status],name:"activecart")
+model WishList {
+  id         Int   @id @default(autoincrement())
+  userId     Int  @unique
+  totalPrice Float
+  User       User  @relation(fields: [userId], references: [id])
+  WishListItems WishListItems[]
+}
+
+model WishListItems{
+  id         Int   @id @default(autoincrement())
+  wishListId Int
+  itemId     Int
+  WishList    WishList @relation(fields:[wishListId],references:[id])
+  Item Item @relation(fields:[itemId], references:[id])
 }
 
 model VerificationTable {
@@ -165,7 +175,7 @@ model VerificationTable {
   verified           VerificationStatus
   updatedAt          DateTime           @updatedAt
   verificationDataId Int
-  userId             Int
+  userId             Int                @unique
   User               User               @relation(fields: [userId], references: [id])
   VerificationData   VerificationData   @relation(fields: [verificationDataId], references: [id])
 }
@@ -254,7 +264,7 @@ model Message {
   id      Int    @id @default(autoincrement())
   message String
   chatId  Int
-  userId  Int
+  userId  Int     @unique
   Chat    Chat   @relation(fields: [chatId], references: [id])
   User    User   @relation(fields: [userId], references: [id])
 }
@@ -283,7 +293,7 @@ enum TransactionStatus {
   COMPLETED
 }
 
-enum CartStatus {
-  ACTIVE
-  COMPLETED
-}
+// enum CartStatus {
+//   ACTIVE
+//   COMPLETED
+// }

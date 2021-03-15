@@ -6,14 +6,14 @@ const item = {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId = 24;
+    const userId = 1;
 
     const item = await prisma.item.create({
       data: {
         ...args.data,
         Owner: {
           connect: {
-            id: userId,
+            userId: userId,
           },
         },
         Categories: {
@@ -23,7 +23,7 @@ const item = {
       include: {
         Owner: {
           select: {
-            id: true,
+            userId: true,
             User: true,
           },
         },
@@ -40,36 +40,65 @@ const item = {
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
+    const userId = 1;
 
-    const item = await prisma.item.update(
-      {
-        where: {
-          id: args.data.id,
-        },
-        data: args.data,
+    const owner = await prisma.owner.findUnique({
+      where: {
+        userId: userId,
       },
-      info
-    );
+    });
+
+    console.log(owner, "this is ownerrrrrrrrrr");
+
     if (args.categoryId) {
-      await prisma.itemCategory.update({
+      return prisma.item.update({
         where: {
-          id: args.categoryId,
+          itemOwner: {
+            id: args.itemId,
+            ownerId: owner.id,
+          },
         },
         data: {
-          Item: {
-            connect: {
-              id: item.id,
-            },
-          },
-          Category: {
-            connect: {
-              id: args.categoryId,
-            },
+          ...args.data,
+          // Owner: {
+          //   connect: {
+          //     userId: userId,
+          //   },
+          // },
+          Categories: {
+            connect: [{ id: args.categoryId }],
           },
         },
+        include: {
+          Owner: {
+            select: {
+              userId: true,
+              User: true,
+            },
+          },
+          Categories: true,
+        },
       });
+    } else {
+      return prisma.item.update(
+        {
+          where: {
+            id: args.data.id,
+          },
+          data: args.data,
+          include: {
+            Owner: {
+              select: {
+                userId: true,
+                User: true,
+              },
+            },
+            Categories: true,
+          },
+        },
+        info
+      );
     }
-    return item;
   },
   deleteItem(parent, args, { prisma, request }, info) {
     const userId = getUserId(request);
@@ -77,35 +106,6 @@ const item = {
     //   throw new Error("Login in to delete Account!");
     // }
     return prisma.item.delete({ where: { id: args.data.id } });
-  },
-  createCategory(parent, args, { prisma }, info) {
-    return prisma.category.create({
-      data: {
-        ...args.data,
-      },
-    });
-  },
-  async createSubcategory(parent, args, { prisma }, info) {
-    const category = await prisma.category.create({
-      data: {
-        category: args.data.category,
-        parentCategory: {
-          connect: {
-            id: args.data.parentCategoryId,
-          },
-        },
-      },
-      include: {
-        parentCategory: {
-          select: {
-            category: true,
-            subCategory: true,
-          },
-        },
-      },
-    });
-
-    return category;
   },
 };
 export default item;
