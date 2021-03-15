@@ -22,15 +22,16 @@ describe("Find User", ()=>{
         await prisma.$disconnect()
         })
     it("Finds user by email", async ()=>{
-        const data = await userQueries.getUser(undefined, {email:dummyUserData.email}, {prisma: prisma})
-        expect(data.firstName).toEqual(dummyUserData.firstName)
+        const data = await userQueries.getUser(undefined, {email:seedData.userList[5].email}, {prisma: prisma})
+        console.log(data)
+        expect(data.firstName).toEqual(seedData.userList[5].firstName)
     })
     it("Finds user by id", async ()=>{
-        const data = await userQueries.getUser(undefined, {email:dummyUserData.email}, {prisma: prisma})
-        expect(data.firstName).toEqual(dummyUserData.firstName)
+        const data = await userQueries.getUser(undefined, {email:seedData.userList[5].email}, {prisma: prisma})
+        expect(data.firstName).toEqual(seedData.userList[5].firstName)
     })
     it("Fails gracefully if incorrect parameters are passed", async ()=>{
-        const data = await userQueries.getUser(undefined, {firstName:dummyUserData.firstName}, {prisma: prisma})
+        const data = await userQueries.getUser(undefined, {firstName:seedData.userList[5].firstName}, {prisma: prisma})
         expect(data.message).toEqual("Invalid search parameters")
         expect(data.message).not.toEqual("test")
     })
@@ -38,6 +39,7 @@ describe("Find User", ()=>{
         const data = await userQueries.getUser(undefined, {email:"testemailthatsnotreal@fakeemailnode.fake"}, {prisma: prisma})
         expect(data.message).toEqual("No such user found.")
     })
+
 })
 
 describe("Find all Users", ()=>{

@@ -21,6 +21,7 @@ describe('Seed script', ()=>{
         expect(data[0]).toEqual(10)
         expect(data[1]).toEqual(10)
         expect(data[2]).toEqual(100)
+        expect(data[3]).toEqual(100)
     
     })
     it("Returns an error when it fails", async ()=>{

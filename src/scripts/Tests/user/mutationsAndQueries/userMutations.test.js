@@ -103,7 +103,7 @@ describe('User update', ()=>{
         userData = await userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
     })
     afterAll(async()=>{
-        await dumpDB(prisma)
+     //   await dumpDB(prisma)
        await prisma.$disconnect()
     })
     
@@ -184,6 +184,7 @@ describe('User deletion', ()=>{
     it("Deletes user", async ()=>{
         let userData = await userMutations.createUser(undefined, {data:seedData.userList[0]}, {prisma:prisma})
         const deletedUser = await userMutations.deleteUser(undefined, undefined, {prisma:prisma, request:{verifiedUserId:userData.user.id}})
+        console.log(deletedUser)
         const checkUser = await userQueries.getUser(undefined, {email:deletedUser.email}, {prisma: prisma})
         expect(checkUser.message).toEqual("No such user found.")
     })
