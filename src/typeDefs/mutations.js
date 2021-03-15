@@ -29,6 +29,7 @@ const typeDefs = gql`
       itemReviewId: Int!
     ): ItemReview!
     deleteItemReview(itemReviewId: Int!): ItemReview!
+    createProductOwnerReview(data:CreateProductOwnerReviewInput): ProductOwnerReview!
   }
 `;
 

@@ -1,7 +1,7 @@
 
 const item = {
-  async allUserItems(parent, args, { prisma, request }, info) {
-    const userId = request.verifiedUserId
+  async allUserItems(parent, args, { prisma, request, verifiedUserId }, info) {
+    const userId = verifiedUserId
     if (!userId) {
       throw new Error("Login in to view Items!");
     }

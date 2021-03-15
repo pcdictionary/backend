@@ -26,17 +26,17 @@ app.use(
 app.use(
   "/graphql",
   graphqlHTTP(async (request, response, graphQLParams) => {
-    console.log("app.user headers", request.headers);
-    console.log("params", graphQLParams);
-    const userIds = getUserId(request)
+    // console.log("app.user headers", request.headers);
+    // console.log("params", graphQLParams);
+    const userIds = await getUserId(request)
+    console.log(userIds)
     return {
       schema,
       graphiql: true,
-      verifiedUserId: userIds.userId,
-      verifiedOwnerId: userIds.ownerId,
-      verifiedLesseeId: userIds.lesseeId,
       isAdmin: true,
-      context: { prisma, request },
+      context: { prisma, request, verifiedUserId: userIds ? userIds.userId : null,
+      verifiedOwnerId: userIds ? userIds.ownerId: null,
+      verifiedLesseeId: userIds ? userIds.lesseeId: null, },
     };
   })
 );
