@@ -1,25 +1,26 @@
 import getUserId from "../../utils/getUserId.js";
-const cart = {
-  async createCart(parent, args, { prisma }, info) {
+const wishlist = {
+  async createWishList(parent, args, { prisma }, info) {
     // const userId = getUserId(request);
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
     const userId = 2;
 
-    return await prisma.cart.create({
+    return await prisma.wishList.create({
       data: {
-        paymentMethod: "",
-        status: "ACTIVE",
         totalPrice: 0,
-        lessee: {
+        User: {
           connect: {
             id: userId,
           },
         },
       },
+      include:{
+        User: true
+      }
     });
   },
 };
 
-export default cart;
+export default wishlist;
