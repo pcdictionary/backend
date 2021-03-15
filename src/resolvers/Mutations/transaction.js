@@ -8,47 +8,25 @@ const transaction = {
     // }
     const userId = 2;
 
-    // const cart = await prisma.cart.findUnique({
-    //   where: {
-    //     activecart: {
-    //       lesseeId: userId,
-    //       status: "ACTIVE",
-    //     },
-    //   },
-    // });
+    const owner = await prisma.owner.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
+    const lessee = await prisma.lessee.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
 
-    // console.log(cart);
+    console.log(lessee)
 
     return prisma.transaction.create({
       data: {
         ...args.data,
-        Cart: {
-          connectOrCreate: {
-            where: { lesseeId: userId, status: "ACTIVE" },
-            create: {
-              paymentMethod: args.paymentMethod,
-              totalPrice: args.totalPrice,
-              status: "ACTIVE",
-              lessee: {
-                connectOrCreate: {
-                  where: { id: userId },
-                  create: {
-                    rating: 0,
-                    totalRatingCount: 0,
-                    User: {
-                      connect: {
-                        id: userId,
-                      },
-                    },
-                  },
-                },
-              },
-            },
-          },
-        },
         Owner: {
           connect: {
-            id: args.ownerId,
+            id: owner.id
           },
         },
         Item: {
@@ -56,60 +34,20 @@ const transaction = {
             id: args.itemId,
           },
         },
+        Lessee:{
+          connect: {
+            id: lessee.id
+          }
+        }
+      },
+      include: {
+        Owner: true,
+        Lessee: true
       },
     });
-
-    // const cart = await prisma.cart.upsert({
-    //   where: {
-    //     id: userId,
-    //   },
-    //   select: {
-    //     status: "ACTIVE",
-    //   },
-    //   create: {
-    //     lessee: {
-    //       connectOrCreate: {
-    //         where: {
-    //           id: userId,
-    //         },
-    //         create: {
-    //           totalRatingCount: 2,
-    //           rating: 3,
-    //         },
-    //       },
-    //     },
-    //     status: "ACTIVE",
-    //     paymentMethod: args.paymentMethod,
-    //     totalPrice: args.totalPrice,
-    // },
-    //   update:{
-
-    //   }
-    // });
-    // console.log(cart, "THIS IS CARRRRRT");
-
-    // const transaction = await prisma.transaction.create({
-    //     data:{
-    //         ...args.data,
-    //         Cart: {
-    //             connect:{
-    //                 id: cart.id
-    //             }
-    //         },
-    //         Item: {
-    //             connect: {
-    //                 id: args.itemId
-    //             }
-    //         },
-    //         Owner: {
-    //             connect: {
-    //                 id: args.ownerId
-    //             }
-    //         }
-    //     }
-    // })
-    // console.log(transaction,"this is transaction")
-    // return transaction
   },
+  deleteTransaction(parent, args, { prisma }, info){
+    return prisma.transaction.delete({ where: { id: args.transactionId } });
+  }
 };
 export default transaction;
