@@ -20,7 +20,11 @@ const typeDefs = gql`
     category: String!
     parentCategoryId: Int
   }
-
+  input UpdateCategoryInput {
+    category: String
+    parentCategoryId: Int
+    approved: Boolean
+  }
   input CreateItemReviewInput {
     rating: Int!
     comment: String!
