@@ -47,6 +47,12 @@ const typeDefs = gql`
     endDate: String
     paymentMethod: String!
   }
+
+  input CreateLesseeReviewInput{
+    rating: Float!
+    comment: String!
+  }
+
   type Lessee {
     id: Int!
     User: User!

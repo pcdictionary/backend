@@ -43,17 +43,24 @@ const itemReview = {
       },
     });
   },
-  updateItemReview(parent, args, { prisma }, info){
+  async updateItemReview(parent, args, { prisma }, info){
         // const userId = getUserId(request);
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
-
     const userId = 2;
+    const owner = await prisma.owner.findUnique({
+      where: {
+        userId: userId,
+      },
+    });
 
     return prisma.itemReview.update({
       where:{
-        id: args.itemReviewId
+        // itemReview:{
+          id: args.itemReviewId,
+          // ownerId: owner.id
+        // }
       },
       data: {
         ...args.data
