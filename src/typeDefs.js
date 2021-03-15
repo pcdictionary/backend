@@ -4,6 +4,7 @@ const typeDefs = `type Query {
   allUserItems: [Item]!
   getItem(id: Int!): Item!
   getCategories: [Category]!
+  allChats: [Chat!]!
 }
 type Mutation {
   login(data: LoginUserInput): AuthPayload!
@@ -18,6 +19,10 @@ type Mutation {
   createTransaction(data: CreateTransactionInput, paymentMethod: String!, totalPrice: Float!, itemId: Int!, ownerId: Int!) : Transaction!
   createCart: Cart!
   createLessee: Lessee!
+  createChat(reciever: Int!) : Chat!
+  createMessage(data: CreateMessageInput) : Chat!
+  deleteChat(chatId: Int!): Chat!
+  deleteMessage(messageId: Int!): Message!
 }
 type AuthPayload {
   token: String!
@@ -26,6 +31,11 @@ type AuthPayload {
 input LoginUserInput {
   email: String!
   password: String!
+}
+
+input CreateMessageInput{
+  message: String!
+  chatId: Int!
 }
 
 input CreateUserInput {

@@ -14,8 +14,8 @@ model User {
   lastName          String
   userName          String
   password          String
-  OwnerMessages     Chat?               @relation("user1")
-  RequestMessages   Chat?               @relation("user2")
+  OwnerMessages     Chat[]              @relation("user1")
+  RequestMessages   Chat[]              @relation("user2")
   Lessee            Lessee?
   Message           Message[]
   Owner             Owner?
@@ -54,17 +54,17 @@ model Lessee {
 }
 
 model Item {
-  id               Int           @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   itemName         String
   price            Float
   itemRating       Float
   totalRatingCount Int
   description      String
-  updatedAt        DateTime?     @updatedAt
-  createdAt        DateTime?     @default(now())
+  updatedAt        DateTime?    @updatedAt
+  createdAt        DateTime?    @default(now())
   ownerId          Int
-  Owner            Owner         @relation(fields: [ownerId], references: [id])
-  Categories       Category[]    @relation("ItemCategories")
+  Owner            Owner        @relation(fields: [ownerId], references: [id])
+  Categories       Category[]   @relation("ItemCategories")
   ItemReview       ItemReview[]
   Question         Question[]
   Transactions     Transaction?
@@ -157,7 +157,8 @@ model Cart {
   status        CartStatus
   lessee        Lessee        @relation(fields: [lesseeId], references: [id])
   Transaction   Transaction[]
-  @@unique(fields:[lesseeId, status],name:"activecart")
+
+  @@unique(fields: [lesseeId, status], name: "activecart")
 }
 
 model VerificationTable {
@@ -261,11 +262,11 @@ model Message {
 
 model Chat {
   id           Int       @id @default(autoincrement())
-  user1Id      Int       @unique
-  user2Id      Int       @unique
+  user1Id      Int
+  user2Id      Int
   messageCount Int
-  User1        User      @relation("user1", fields: [user1Id], references: [id])
-  User2        User      @relation("user2", fields: [user2Id], references: [id])
+  User1        User      @relation(name: "user1", fields: [user1Id], references: [id])
+  User2        User      @relation(name: "user2", fields: [user2Id], references: [id])
   Message      Message[]
 }
 
