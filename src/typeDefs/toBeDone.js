@@ -35,6 +35,11 @@ const typeDefs = gql`
     chatId: Int!
   }
 
+  input CreateProductOwnerReviewInput{
+    comment: String!
+    rating: String!
+  }
+
   input CreateTransactionInput {
     status: TransactionStatus
     salePrice: Float!

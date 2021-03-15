@@ -1,7 +1,7 @@
-function generateSearchQuery(request){
+function generateSearchQuery(ids){
     let searchQuery = {}
-    if(request.verifiedOwnerId && request.verifiedUserId) searchQuery = {id:request.verifiedOwnerId}
-    else if(request.verifiedUserId) searchQuery = {userId: request.verifiedUserId}
+    if(ids.verifiedOwnerId && ids.verifiedUserId) searchQuery = {id:ids.verifiedOwnerId}
+    else if(ids.verifiedUserId) searchQuery = {userId: ids.verifiedUserId}
     else return new Error("Please login!")
     return searchQuery
 }
@@ -13,11 +13,13 @@ function checkForInvalidValues(data){
 }
 
 const owner = {
-    async createOwner(parent, args, {prisma, request}, info){
+    async createOwner(parent, args, {prisma, request, verifiedLesseeId, verifiedOwnerId, verifiedUserId}, info){
+        console.log('this is request', verifiedLesseeId,verifiedOwnerId,verifiedUserId)
         try {
             const ownerAlreadyExists = await prisma.owner.findUnique(
                 {
-                  where:{userId:request.verifiedUserId},
+                  where:{userId:verifiedUserId},
+                  include:{User:true}
                 }
                 )
             if(ownerAlreadyExists) throw new Error("User already has an Owner account attached.")
@@ -25,7 +27,10 @@ const owner = {
             if(isError) throw new Error("Got invalid value.")
             const owner = await prisma.owner.create({
                 data:{
-                    userId:request.verifiedUserId, ...args.data
+                    userId:verifiedUserId, ...args.data
+                },
+                include:{
+                    User:true
                 }
             })
             return owner
@@ -36,7 +41,7 @@ const owner = {
 
     async updateOwner(parent, args, {prisma, request}, info){
         try {
-            const searchQuery = generateSearchQuery(request)
+            const searchQuery = generateSearchQuery({verifiedLesseeId, verifiedOwnerId, verifiedUserId})
             if(searchQuery.message) return searchQuery
             const isValueError = checkForInvalidValues(args.data)
             if(isValueError) throw new Error("Got invalid value.")
@@ -54,7 +59,7 @@ const owner = {
 
     async deleteOwner(parent, args, {prisma, request}, info){
         try {
-            const searchQuery = generateSearchQuery(request)
+            const searchQuery = generateSearchQuery({verifiedLesseeId, verifiedOwnerId, verifiedUserId})
             if(searchQuery.message) return searchQuery
             return await prisma.owner.delete({where:{...searchQuery}})
         } catch (error) {

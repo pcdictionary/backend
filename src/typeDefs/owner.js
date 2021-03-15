@@ -15,7 +15,6 @@ const typeDefs = gql`
         Transactions: [Transaction!]!
     }
     input CreateOwnerInput{
-        userId: Int
         rating: Float
         totalRatingCount: Int
     }

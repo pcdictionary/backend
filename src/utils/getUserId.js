@@ -12,7 +12,7 @@ const getUserId = (request) => {
     const token = cookie.split("=");
     const decoded = jwt.verify(token[1], "thisisasecret");
     console.log("Decoded data", decoded)
-    return decoded.userId;
+    return decoded
   }
 
   return null;

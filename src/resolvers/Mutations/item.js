@@ -1,11 +1,11 @@
 const item = {
-  async createItem(parent, args, { prisma, request }, info) {
+  async createItem(parent, args, { prisma, request, verifiedUserId }, info) {
     // const userId = getUserId(request);
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }
 
-    const userId = request.verifiedUserId
+    const userId = verifiedUserId
 
     const item = await prisma.item.create({
       data: {
@@ -99,8 +99,8 @@ const item = {
       );
     }
   },
-  deleteItem(parent, args, { prisma, request }, info) {
-    const userId = request.verifiedUserId
+  deleteItem(parent, args, { prisma, request, verifiedUserId }, info) {
+    const userId = verifiedUserId
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
     // }

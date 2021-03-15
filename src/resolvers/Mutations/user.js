@@ -30,7 +30,8 @@ const user = {
                 select: {
                   id: true
                 }
-              }
+              },
+              Lessee: true
             }
           });
       
@@ -42,6 +43,7 @@ const user = {
           let lesseeId = null
           if(user.Owner) ownerId = user.Owner.id
           if(user.Lessee) lesseeId = user.Lessee.id
+          console.log(user)
           if (!isMatch) {
             throw new Error("Unable to login.");
           }
@@ -54,10 +56,10 @@ const user = {
         }
       },
 
-      async updateUser(parent, args, { prisma, request }, info) {
+      async updateUser(parent, args, { prisma, request, verifiedUserId }, info) {
         try {
          // const userId = getUserId(request);
-          //const userId = request.verifiedUserId
+          //const userId = verifiedUserId
           let  newPassword = undefined
           if (typeof args.data.password === "string") {
             newPassword = await hashPassword(args.data.password);
@@ -65,7 +67,7 @@ const user = {
           const updatedUser = await prisma.user.update(
             {
               where: {
-                id: request.verifiedUserId
+                id: verifiedUserId
               },
               data: {...args.data, password:newPassword}
             },
@@ -78,16 +80,16 @@ const user = {
         }
       },
 
-      async deleteUser(parent, args, { prisma, request }, info) {
+      async deleteUser(parent, args, { prisma, request, verifiedUserId }, info) {
         //const userId = getUserId(request)
         try {
-          if (!request.verifiedUserId) {
+          if (verifiedUserId) {
             return new Error("Login in to delete Account!");
           }
          // let deletedOwner
           const loggedInUser = await prisma.user.findUnique(
             {
-              where:{id:request.verifiedUserId},
+              where:{id:verifiedUserId},
               include:{
                 Owner: {
                   select: {
@@ -98,10 +100,10 @@ const user = {
             }
             )
           if(loggedInUser && loggedInUser.Owner!==null){
-            await prisma.owner.delete({where: {userId: request.verifiedUserId}})
+            await prisma.owner.delete({where: {userId: verifiedUserId}})
           }
           //console.log(789, deletedOwner)
-          return await prisma.user.delete({ where: { id: request.verifiedUserId } });
+          return await prisma.user.delete({ where: { id: verifiedUserId } });
         } catch (error) {
           return error
         }
