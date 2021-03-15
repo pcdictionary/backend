@@ -33,7 +33,11 @@ const category ={
       async deleteCategory(parent, args, { prisma, request }, info){
         if(!request.isAdmin) return new Error("Insufficient rights")
         try {
-
+          return await prisma.category.delete({
+            where:{
+              id: args.catId
+            }
+          })
         } catch (error) {
           return error
         }

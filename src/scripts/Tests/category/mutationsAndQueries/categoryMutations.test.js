@@ -136,3 +136,51 @@ const invalidCats = [{id: 99}, {category: "Pies"}, {id: "1", category: "Test"},
         }
     })
  })
+
+ describe('Category delete', ()=>{
+    let parentCategory
+    let childCategory
+    beforeAll(async ()=>{
+        prisma = new PrismaClient();
+        await dumpDB(prisma)
+    })
+    beforeEach(async ()=>{
+        parentCategory = await categoryMutations.createCategory(undefined,
+            {data:seedData.categoryList[0]}, {prisma: prisma, request:{isAdmin: true}})
+        childCategory = await categoryMutations.createCategory(undefined,
+            {data:{parentCategoryId: 0, ...seedData.categoryList[1]}}, {prisma: prisma, request:{isAdmin: true}})
+    })  
+    afterAll(async()=>{
+       await dumpDB(prisma)
+       await prisma.$disconnect()
+    })
+    it("Deletes succesfully", async()=>{
+        const deletedCategory = await categoryMutations.deleteCategory(undefined,
+            {catId: 0}, {prisma: prisma, request:{isAdmin: true}})
+        expect(deletedCategory.id).toEqual(0)
+        const notFound = await prisma.category.findUnique({where:{id:0}})
+        expect(notFound).toBeNull()
+    })
+    it("Fails gracefully when user doesnt have enough permissions", async()=>{
+        const deletedCategory = await categoryMutations.deleteCategory(undefined, 
+            {catId: parentCategory.id}, {prisma: prisma, request:{isAdmin: false}})
+        expect(deletedCategory.message).toEqual("Insufficient rights")
+    })
+    it("Fails gracefully when user doesnt have enough permissions", async()=>{
+        const deletedCategory = await categoryMutations.deleteCategory(undefined, 
+            {catId: 99999999}, {prisma: prisma, request:{isAdmin: true}})
+        expect(deletedCategory.meta.cause).toEqual('Record to delete does not exist.')
+    })
+    it("Appropriately removes parent references after deletion", async()=>{
+        const deletedCategory = await categoryMutations.deleteCategory(undefined,
+            {catId: 0}, {prisma: prisma, request:{isAdmin: true}})
+        const childOfDeleted = await prisma.category.findUnique({where:{id:1}})
+        expect(childOfDeleted.parentCategoryId).toBeNull()
+    })
+    it("Appropriately removes child references after deletion,", async()=>{
+        const deletedCategory = await categoryMutations.deleteCategory(undefined,
+            {catId: 1}, {prisma: prisma, request:{isAdmin: true}})
+        const parentOfDeleted = await prisma.category.findUnique({where:{id:0}, include:{subCategory:true}})
+        expect(parentOfDeleted.subCategory.length).toEqual(0)
+    })
+})
