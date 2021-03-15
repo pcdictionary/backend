@@ -14,8 +14,18 @@ const category ={
       },
       async updateCategory(parent, args, { prisma, request }, info){
         if(!request.isAdmin) return new Error("Insufficient rights")
+        if(args.data && args.catId!==undefined && (args.catId===args.data.parentCategoryId)) return new Error("Invalid parent category")
         try {
-
+          return await prisma.category.update({
+            where:{
+              id: args.catId
+            },
+            data:{
+              category:args.data.category,
+              approved:args.data.approved,
+              parentCategoryId:args.data.parentCategoryId
+            } 
+          })
         } catch (error) {
           return error
         }
