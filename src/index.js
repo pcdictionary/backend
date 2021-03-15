@@ -1,5 +1,5 @@
 import { resolvers } from "./resolvers/index.js";
-import typeDefs from "./typeDefs.js";
+import typeDefs from "./typeDefs/_typeDefs.js";
 import express, { request } from "express";
 import { graphqlHTTP } from "express-graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
@@ -28,10 +28,14 @@ app.use(
   graphqlHTTP(async (request, response, graphQLParams) => {
     console.log("app.user headers", request.headers);
     console.log("params", graphQLParams);
+    const userIds = getUserId(request)
     return {
       schema,
       graphiql: true,
-      verifiedUserId: getUserId(request),
+      verifiedUserId: userIds.userId,
+      verifiedOwnerId: userIds.ownerId,
+      verifiedLesseeId: userIds.lesseeId,
+      isAdmin: true,
       context: { prisma, request },
     };
   })

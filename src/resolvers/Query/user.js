@@ -1,5 +1,3 @@
-import getUserId from "../../utils/getUserId.js";
-
 const user = {
   async allUsers(parent, args, { prisma }, info) {
     try {
@@ -8,6 +6,7 @@ const user = {
       return error 
     }
   },
+  
   async getUser(parent, args, { prisma }, info) {
     try {
       let query = {}

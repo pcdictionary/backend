@@ -1,5 +1,4 @@
 import bcrypt from "bcryptjs";
-import getUserId from "../../utils/getUserId.js"
 import generateAuthToken from "../../utils/generateAuthToken.js"
 import hashPassword from "../../utils/hashPassword.js"
 
@@ -26,19 +25,29 @@ const user = {
             where: {
               email: args.data.email,
             },
+            include:{
+              Owner: {
+                select: {
+                  id: true
+                }
+              }
+            }
           });
       
           if (!user) {
             throw new Error("Unable to login.");
           }
           const isMatch = await bcrypt.compare(args.data.password, user.password);
-      
+          let ownerId = null
+          let lesseeId = null
+          if(user.Owner) ownerId = user.Owner.id
+          if(user.Lessee) lesseeId = user.Lessee.id
           if (!isMatch) {
             throw new Error("Unable to login.");
           }
           return {
             user,
-            token: generateAuthToken(user.id),
+            token: generateAuthToken(user.id, ownerId, lesseeId),
           };
         } catch (error) {
           return error
@@ -73,8 +82,25 @@ const user = {
         //const userId = getUserId(request)
         try {
           if (!request.verifiedUserId) {
-            throw new Error("Login in to delete Account!");
+            return new Error("Login in to delete Account!");
           }
+         // let deletedOwner
+          const loggedInUser = await prisma.user.findUnique(
+            {
+              where:{id:request.verifiedUserId},
+              include:{
+                Owner: {
+                  select: {
+                    id: true
+                  }
+                }
+              }
+            }
+            )
+          if(loggedInUser && loggedInUser.Owner!==null){
+            await prisma.owner.delete({where: {userId: request.verifiedUserId}})
+          }
+          //console.log(789, deletedOwner)
           return await prisma.user.delete({ where: { id: request.verifiedUserId } });
         } catch (error) {
           return error
