@@ -22,6 +22,7 @@ type Mutation {
   deleteTransaction(transactionId: Int!) : Transaction!
   createItemReview(data: CreateItemReviewInput, itemId: Int!): ItemReview!
   updateItemReview(data: CreateItemReviewInput, itemReviewId: Int!): ItemReview!
+  deleteItemReview(itemReviewId: Int!): ItemReview!
 }
 type AuthPayload {
   token: String!

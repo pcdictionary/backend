@@ -43,7 +43,7 @@ const itemReview = {
       },
     });
   },
-  async updateItemReview(parent, args, { prisma }, info){
+  updateItemReview(parent, args, { prisma }, info){
         // const userId = getUserId(request);
     // if (!userId) {
     //   throw new Error("Login in to delete Account!");
@@ -59,6 +59,14 @@ const itemReview = {
         ...args.data
       },
     });
+  },
+  deleteItemReview(parent, args, { prisma }, info){
+    return prisma.itemReview.delete({
+      where: {
+        id: args.itemReviewId,
+        // lesseeId: lesseeId
+      }
+    })
   }
 };
 
