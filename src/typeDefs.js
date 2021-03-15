@@ -4,11 +4,8 @@ const typeDefs = `type Query {
   allUserItems: [Item]!
   getItem(id: Int!): Item!
   getCategories: [Category]!
-<<<<<<< HEAD
   allChats: [Chat!]!
-=======
   getOwner(userId: Int!): Owner!
->>>>>>> 9c1dff79ccf4ab288b516cfda6f8568251d63dad
 }
 type Mutation {
   login(data: LoginUserInput): AuthPayload!
@@ -23,17 +20,14 @@ type Mutation {
   createTransaction(data: CreateTransactionInput, itemId: Int!) : Transaction!
   createWishList: WishList!
   createLessee: Lessee!
-<<<<<<< HEAD
   createChat(reciever: Int!) : Chat!
   createMessage(data: CreateMessageInput) : Chat!
   deleteChat(chatId: Int!): Chat!
   deleteMessage(messageId: Int!): Message!
-=======
   deleteTransaction(transactionId: Int!) : Transaction!
   createItemReview(data: CreateItemReviewInput, itemId: Int!): ItemReview!
   updateItemReview(data: CreateItemReviewInput, itemReviewId: Int!): ItemReview!
   deleteItemReview(itemReviewId: Int!): ItemReview!
->>>>>>> 9c1dff79ccf4ab288b516cfda6f8568251d63dad
 }
 type AuthPayload {
   token: String!
@@ -357,8 +351,6 @@ enum TransactionStatus {
   ACTIVE
   COMPLETED
 }
-
-
 `;
 
 export default typeDefs;
