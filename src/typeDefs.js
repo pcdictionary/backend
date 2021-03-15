@@ -20,6 +20,7 @@ type Mutation {
   createWishList: WishList!
   createLessee: Lessee!
   deleteTransaction(transactionId: Int!) : Transaction!
+  createItemReview(data: CreateItemReviewInput, itemId: Int!): ItemReview!
 }
 type AuthPayload {
   token: String!
@@ -71,6 +72,10 @@ input CreateTransactionInput{
   startDate: String
   endDate: String
   paymentMethod: String!
+}
+input CreateItemReviewInput{
+  rating: Int!
+  comment: String!
 }
 type ReturnUser {
   id: Int!

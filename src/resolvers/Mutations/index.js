@@ -4,7 +4,7 @@ import transaction from './transaction.js'
 import wishlist from './wishlist.js'
 import lessee from './lessee.js'
 import category from './category.js'
-import itemReview from './itemReview'
+import itemReview from './itemReview.js'
 
 const Mutation = {
   ...user,

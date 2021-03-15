@@ -144,13 +144,14 @@ model Transaction {
   updatedAt     DateTime          @updatedAt
   createdAt     DateTime          @default(now())
   ownerId       Int
-  itemId        Int               @unique
+  itemId        Int               
   salePrice     Float
   paymentMethod String
-  lesseeId      Int
+  lesseeId      Int               
   Item          Item              @relation(fields: [itemId], references: [id])
   Owner         Owner             @relation(fields: [ownerId], references: [id])
   Lessee        Lessee            @relation(fields: [lesseeId], references: [id])
+  @@unique         (fields:[itemId, lesseeId], name:"lesseeTransaction")
 }
 
 model WishList {
