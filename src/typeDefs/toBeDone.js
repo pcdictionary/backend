@@ -1,33 +1,44 @@
-import gql from 'graphql-tag'
+import gql from "graphql-tag";
 const typeDefs = gql`
-  input CreateItemInput{
-    itemName : String!
+  input CreateItemInput {
+    itemName: String!
     description: String!
-    price : Float!
-    itemRating : Float
-    totalRatingCount : Int!
+    price: Float!
+    itemRating: Float
+    totalRatingCount: Int!
   }
-  input UpdateItemInput{
+  input UpdateItemInput {
     itemName: String
     description: String
     price: Int
-    totalRatingCount : Int!
+    totalRatingCount: Int!
   }
-  input DeleteItemInput{
+  input DeleteItemInput {
     id: Int!
   }
-  input CreateCategoryInput{
+  input CreateCategoryInput {
     category: String!
     parentCategoryId: Int
   }
-  input CreateTransactionInput{
+
+  input CreateItemReviewInput {
+    rating: Int!
+    comment: String!
+  }
+
+  input CreateMessageInput {
+    message: String!
+    chatId: Int!
+  }
+
+  input CreateTransactionInput {
     status: TransactionStatus
     salePrice: Float!
     startDate: String
     endDate: String
     paymentMethod: String!
   }
-  type Lessee{
+  type Lessee {
     id: Int!
     User: User!
     userId: Int!
@@ -41,7 +52,7 @@ const typeDefs = gql`
     Transactions: [Transaction!]!
   }
 
-  type Item{
+  type Item {
     id: Int!
     itemName: String!
     price: Float!
@@ -63,7 +74,7 @@ const typeDefs = gql`
     parentCategoryId: Int
     parentCategory: Category
   }
-  type Question{
+  type Question {
     id: Int!
     itemId: Int!
     userId: Int!
@@ -84,7 +95,7 @@ const typeDefs = gql`
     reply: String!
     ReplyVotes: [ReplyVotes!]!
   }
-  type QuestionVotes{
+  type QuestionVotes {
     id: Int!
     vote: Int!
     userId: Int!
@@ -92,7 +103,7 @@ const typeDefs = gql`
     questionId: Int!
     Question: Question!
   }
-  type ReplyVotes{
+  type ReplyVotes {
     id: Int!
     vote: Int!
     userId: Int!
@@ -109,7 +120,7 @@ const typeDefs = gql`
     lesseeId: Int!
     Lessee: Lessee!
   }
-  type Transaction{
+  type Transaction {
     id: Int!
     status: TransactionStatus!
     startDate: String!
@@ -123,7 +134,7 @@ const typeDefs = gql`
     Item: Item!
     Lessee: Lessee!
   }
-  type WishList{
+  type WishList {
     id: Int!
     userId: Int!
     User: User!
@@ -131,14 +142,14 @@ const typeDefs = gql`
     totalPrice: Float!
     WishListItems: [WishListItems!]!
   }
-  type WishListItems{
+  type WishListItems {
     id: Int!
     wishListId: Int!
     itemId: Int!
     WishList: WishList!
     Item: Item!
   }
-  type VerificationTable{
+  type VerificationTable {
     id: Int!
     verified: VerificationStatus!
     verificationDataId: Int!
@@ -146,12 +157,12 @@ const typeDefs = gql`
     userId: Int!
     User: User!
   }
-  type VerificationData{
+  type VerificationData {
     id: Int!
     userIdImageUrl: String!
     VerificationTable: [VerificationTable!]!
   }
-  type ProductOwnerReview{
+  type ProductOwnerReview {
     id: Int!
     rating: Float!
     comment: String!
@@ -169,13 +180,13 @@ const typeDefs = gql`
     productOwnerId: Int!
     productOwner: Owner!
   }
-  type Paypal{
+  type Paypal {
     id: Int!
     paypalToken: String!
     PaypalLessee: [PaypalLessee!]!
     PaypalOwner: [PaypalOwner!]!
   }
-  type PaypalOwner{
+  type PaypalOwner {
     id: Int!
     verified: VerificationStatus!
     paypalId: Int!
@@ -183,7 +194,7 @@ const typeDefs = gql`
     ownerId: Int!
     Owner: Owner!
   }
-  type PaypalLessee{
+  type PaypalLessee {
     id: Int!
     verified: VerificationStatus!
     paypalId: Int!
@@ -191,21 +202,21 @@ const typeDefs = gql`
     lesseeId: Int!
     Lessee: Lessee!
   }
-  type Stripe{
+  type Stripe {
     id: Int!
     stripeToken: String!
     StripeLessee: [StripeLessee!]!
     StripeOwner: [StripeOwner!]!
   }
-  type StripeOwner{
+  type StripeOwner {
     id: Int!
     verified: VerificationStatus!
     stripeId: Int!
     Stripe: Stripe!
     ownerId: Int!
-    Owner: Owner! 
+    Owner: Owner!
   }
-  type StripeLessee{
+  type StripeLessee {
     id: Int!
     verified: VerificationStatus!
     stripeId: Int!
@@ -213,7 +224,7 @@ const typeDefs = gql`
     lesseeId: Int!
     Lessee: Lessee!
   }
-  type Message{
+  type Message {
     id: Int!
     message: String!
     chatId: Int!
@@ -221,7 +232,7 @@ const typeDefs = gql`
     userId: Int!
     User: User!
   }
-  type Chat{
+  type Chat {
     id: Int!
     user1Id: Int!
     User1: User!
@@ -242,6 +253,6 @@ const typeDefs = gql`
     ACTIVE
     COMPLETED
   }
-  `;
-  
-  export default typeDefs;
+`;
+
+export default typeDefs;

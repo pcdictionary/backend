@@ -15,8 +15,8 @@ model User {
   userName          String
   password          String
   status            String              @default("Registered")
-  OwnerMessages     Chat?               @relation("user1")
-  RequestMessages   Chat?               @relation("user2")
+  OwnerMessages     Chat[]              @relation("user1")
+  RequestMessages   Chat[]              @relation("user2")
   Lessee            Lessee?
   WishList          WishList[]
   Message           Message[]
@@ -57,24 +57,25 @@ model Lessee {
 }
 
 model Item {
-  id               Int          @id @default(autoincrement())
+  id               Int            @id @default(autoincrement())
   itemName         String
   price            Float
   itemRating       Float
   totalRatingCount Int
   description      String
-  updatedAt        DateTime?    @updatedAt
-  createdAt        DateTime?    @default(now())
+  updatedAt        DateTime?      @updatedAt
+  createdAt        DateTime?      @default(now())
   ownerId          Int
-  approved         Boolean      @default(true)
-  status           String       @default("Available")
-  Owner            Owner        @relation(fields: [ownerId], references: [id])
-  Categories       Category[]   @relation("ItemCategories")
+  approved         Boolean        @default(true)
+  status           String         @default("Available")
+  Owner            Owner          @relation(fields: [ownerId], references: [id])
+  Categories       Category[]     @relation("ItemCategories")
   ItemReview       ItemReview[]
   Question         Question[]
   Transactions     Transaction?
   WishListItems    WishListItems?
-  @@unique         (fields:[ownerId,id], name:"itemOwner")
+
+  @@unique(fields: [ownerId, id], name: "itemOwner")
 }
 
 model Category {
@@ -83,7 +84,7 @@ model Category {
   approved         Boolean    @default(true)
   subCategory      Category[] @relation("SubToParent")
   parentCategory   Category?  @relation("SubToParent", fields: [parentCategoryId], references: [id])
-  parentCategoryId Int?       
+  parentCategoryId Int?
   Items            Item[]     @relation("ItemCategories")
 }
 
@@ -148,30 +149,31 @@ model Transaction {
   updatedAt     DateTime          @updatedAt
   createdAt     DateTime          @default(now())
   ownerId       Int
-  itemId        Int               
+  itemId        Int
   salePrice     Float
   paymentMethod String
-  lesseeId      Int               
+  lesseeId      Int
   Item          Item              @relation(fields: [itemId], references: [id])
   Owner         Owner             @relation(fields: [ownerId], references: [id])
   Lessee        Lessee            @relation(fields: [lesseeId], references: [id])
-  @@unique         (fields:[itemId, lesseeId], name:"lesseeTransaction")
+
+  @@unique(fields: [itemId, lesseeId], name: "lesseeTransaction")
 }
 
 model WishList {
-  id         Int   @id @default(autoincrement())
-  userId     Int  @unique
-  totalPrice Float
-  User       User  @relation(fields: [userId], references: [id])
+  id            Int             @id @default(autoincrement())
+  userId        Int             @unique
+  totalPrice    Float
+  User          User            @relation(fields: [userId], references: [id])
   WishListItems WishListItems[]
 }
 
-model WishListItems{
-  id         Int   @id @default(autoincrement())
+model WishListItems {
+  id         Int      @id @default(autoincrement())
   wishListId Int
   itemId     Int
-  WishList    WishList @relation(fields:[wishListId],references:[id])
-  Item Item @relation(fields:[itemId], references:[id])
+  WishList   WishList @relation(fields: [wishListId], references: [id])
+  Item       Item     @relation(fields: [itemId], references: [id])
 }
 
 model VerificationTable {
@@ -268,18 +270,18 @@ model Message {
   id      Int    @id @default(autoincrement())
   message String
   chatId  Int
-  userId  Int     @unique
+  userId  Int    @unique
   Chat    Chat   @relation(fields: [chatId], references: [id])
   User    User   @relation(fields: [userId], references: [id])
 }
 
 model Chat {
   id           Int       @id @default(autoincrement())
-  user1Id      Int       @unique
-  user2Id      Int       @unique
+  user1Id      Int
+  user2Id      Int
   messageCount Int
-  User1        User      @relation("user1", fields: [user1Id], references: [id])
-  User2        User      @relation("user2", fields: [user2Id], references: [id])
+  User1        User      @relation(name: "user1", fields: [user1Id], references: [id])
+  User2        User      @relation(name: "user2", fields: [user2Id], references: [id])
   Message      Message[]
 }
 

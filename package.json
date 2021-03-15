@@ -18,7 +18,7 @@
     "seed": "npm run dump & npm run seed-function",
     "seed-function": "node src/scripts/Seed/seed.js",
     "dump": "node src/scripts/Seed/dumpDB.js",
-    "reset": "npm run dump & prisma migrate dev --preview-feature && npm run seed-function && prisma studio"
+    "reset": "rm -r prisma/migrations/* && npm run dump & prisma migrate dev --preview-feature && npm run seed-function && prisma studio"
   },
   "type": "module",
   "keywords": [],
