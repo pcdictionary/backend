@@ -158,6 +158,7 @@ model Transaction {
   Lessee        Lessee            @relation(fields: [lesseeId], references: [id])
 
   @@unique(fields: [itemId, lesseeId], name: "lesseeTransaction")
+  @@unique(fields: [itemId, ownerId, lesseeId], name: "reviewTransaction")
 }
 
 model WishList {
