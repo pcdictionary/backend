@@ -45,12 +45,17 @@ export async function seed(
   if (test) userLength = 10;
   for (let i = 0; i < seedData.categoryList.length; i++) {
     try {
-      const gameId = await client.game.create({ data: {} });
-      await client.team.create({
+      const gameId = await client.game.create({
         data: {
-          gameId: gameId.id,
           users: {
-            create: [
+            connect: [
+              { id: getRndInteger(1, 99) },
+              { id: getRndInteger(1, 99) },
+              { id: getRndInteger(1, 99) },
+            ],
+          },
+          users2: {
+            connect: [
               { id: getRndInteger(1, 99) },
               { id: getRndInteger(1, 99) },
               { id: getRndInteger(1, 99) },

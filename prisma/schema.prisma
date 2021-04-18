@@ -14,27 +14,24 @@ model User {
   lastName  String
   userName  String
   password  String
-  Game      Game[]
-  Team      Team?  @relation(fields: [teamId], references: [id])
-  teamId    Int?
+  games     Game[] @relation("UserGame")
+  games2    Game[] @relation("UserGame2")
 }
 
 model Game {
   id     Int                @id @default(autoincrement())
   score  VerificationStatus @default(PENDING)
-  Team1  Team?              @relation("team1")
-  Team2  Team?              @relation("team2")
-  User   User?              @relation(fields: [userId], references: [id])
-  userId Int?
+  users  User[]             @relation("UserGame")
+  users2 User[]             @relation("UserGame2")
 }
 
-model Team {
-  id     Int    @id @default(autoincrement())
-  gameId Int
-  Team1  Game   @relation(name: "team1", fields: [gameId], references: [id])
-  Team2  Game   @relation(name: "team2", fields: [gameId], references: [id])
-  users  User[]
-}
+// model Team {
+//   id Int @id @default(autoincrement())
+// gameId Int
+// Team1  Game   @relation(name: "team1", fields: [gameId], references: [id])
+// Team2  Game   @relation(name: "team2", fields: [gameId], references: [id])
+// users  User[]
+// }
 
 // model Owner {
 //   rating             Float                @default(0.00)
