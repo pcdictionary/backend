@@ -8,299 +8,308 @@ datasource db {
 }
 
 model User {
-  id                Int                 @id @default(autoincrement())
-  email             String              @unique
-  firstName         String
-  lastName          String
-  userName          String
-  password          String
-  status            String              @default("Registered")
-  OwnerMessages     Chat[]              @relation("user1")
-  RequestMessages   Chat[]              @relation("user2")
-  Lessee            Lessee?
-  WishList          WishList[]
-  Message           Message[]
-  Owner             Owner?
-  Question          Question[]
-  QuestionVotes     QuestionVotes[]
-  ReplyVotes        ReplyVotes[]
-  VerificationTable VerificationTable[]
+  id        Int    @id @default(autoincrement())
+  email     String @unique
+  firstName String
+  lastName  String
+  userName  String
+  password  String
+  Game      Game[]
+  Team      Team?  @relation(fields: [teamId], references: [id])
+  teamId    Int?
 }
 
-model Owner {
-  rating             Float                @default(0.00)
-  totalRatingCount   Int                  @default(0)
-  id                 Int                  @id @default(autoincrement())
-  userId             Int                  @unique
-  status             String               @default("Inactive")
-  User               User                 @relation(fields: [userId], references: [id])
-  Item               Item[]
-  LesseeReview       LesseeReview[]
-  PaypalOwner        PaypalOwner[]
-  ProductOwnerReview ProductOwnerReview[]
-  StripeOwner        StripeOwner[]
-  Transactions       Transaction[]
+model Game {
+  id     Int                @id @default(autoincrement())
+  score  VerificationStatus @default(PENDING)
+  Team1  Team?              @relation("team1")
+  Team2  Team?              @relation("team2")
+  User   User?              @relation(fields: [userId], references: [id])
+  userId Int?
 }
 
-model Lessee {
-  rating             Float
-  totalRatingCount   Int
-  id                 Int                  @id @default(autoincrement())
-  userId             Int                  @unique
-  User               User                 @relation(fields: [userId], references: [id])
-  ItemReview         ItemReview[]
-  LesseeReview       LesseeReview[]
-  PaypalLessee       PaypalLessee[]
-  ProductOwnerReview ProductOwnerReview[]
-  StripeLessee       StripeLessee[]
-  Transactions       Transaction[]
+model Team {
+  id     Int    @id @default(autoincrement())
+  gameId Int
+  Team1  Game   @relation(name: "team1", fields: [gameId], references: [id])
+  Team2  Game   @relation(name: "team2", fields: [gameId], references: [id])
+  users  User[]
 }
 
-model Item {
-  id               Int            @id @default(autoincrement())
-  itemName         String
-  price            Float
-  itemRating       Float
-  totalRatingCount Int
-  description      String
-  updatedAt        DateTime?      @updatedAt
-  createdAt        DateTime?      @default(now())
-  ownerId          Int
-  approved         Boolean        @default(true)
-  status           String         @default("Available")
-  Owner            Owner          @relation(fields: [ownerId], references: [id])
-  Categories       Category[]     @relation("ItemCategories")
-  ItemReview       ItemReview[]
-  Question         Question[]
-  Transactions     Transaction?
-  WishListItems    WishListItems?
+// model Owner {
+//   rating             Float                @default(0.00)
+//   totalRatingCount   Int                  @default(0)
+//   id                 Int                  @id @default(autoincrement())
+//   userId             Int                  @unique
+//   status             String               @default("Inactive")
+//   User               User                 @relation(fields: [userId], references: [id])
+//   Item               Item[]
+//   LesseeReview       LesseeReview[]
+//   PaypalOwner        PaypalOwner[]
+//   ProductOwnerReview ProductOwnerReview[]
+//   StripeOwner        StripeOwner[]
+//   Transactions       Transaction[]
+// }
 
-  @@unique(fields: [ownerId, id], name: "itemOwner")
-}
+// model Lessee {
+//   rating             Float
+//   totalRatingCount   Int
+//   id                 Int                  @id @default(autoincrement())
+//   userId             Int                  @unique
+//   User               User                 @relation(fields: [userId], references: [id])
+//   ItemReview         ItemReview[]
+//   LesseeReview       LesseeReview[]
+//   PaypalLessee       PaypalLessee[]
+//   ProductOwnerReview ProductOwnerReview[]
+//   StripeLessee       StripeLessee[]
+//   Transactions       Transaction[]
+// }
 
-model Category {
-  id               Int        @id
-  category         String     @unique
-  approved         Boolean    @default(true)
-  subCategory      Category[] @relation("SubToParent")
-  parentCategory   Category?  @relation("SubToParent", fields: [parentCategoryId], references: [id])
-  parentCategoryId Int?
-  Items            Item[]     @relation("ItemCategories")
-}
+// model Item {
+//   id               Int            @id @default(autoincrement())
+//   itemName         String
+//   price            Float
+//   itemRating       Float
+//   totalRatingCount Int
+//   description      String
+//   updatedAt        DateTime?      @updatedAt
+//   createdAt        DateTime?      @default(now())
+//   ownerId          Int
+//   approved         Boolean        @default(true)
+//   status           String         @default("Available")
+//   Owner            Owner          @relation(fields: [ownerId], references: [id])
+//   Categories       Category[]     @relation("ItemCategories")
+//   ItemReview       ItemReview[]
+//   Question         Question[]
+//   Transactions     Transaction?
+//   WishListItems    WishListItems?
 
-model Question {
-  id            Int             @id @default(autoincrement())
-  itemId        Int
-  userId        Int             @unique
-  question      String
-  likes         Int
-  dislikes      Int
-  Item          Item            @relation(fields: [itemId], references: [id])
-  User          User            @relation(fields: [userId], references: [id])
-  QuestionVotes QuestionVotes[]
-  Reply         Reply[]
-}
+//   @@unique(fields: [ownerId, id], name: "itemOwner")
+// }
 
-model Reply {
-  id         Int          @id @default(autoincrement())
-  questionId Int
-  likes      Int
-  dislikes   Int
-  Reply      String
-  Question   Question     @relation(fields: [questionId], references: [id])
-  ReplyVotes ReplyVotes[]
-}
+// model Category {
+//   id               Int        @id
+//   category         String     @unique
+//   approved         Boolean    @default(true)
+//   subCategory      Category[] @relation("SubToParent")
+//   parentCategory   Category?  @relation("SubToParent", fields: [parentCategoryId], references: [id])
+//   parentCategoryId Int?
+//   Items            Item[]     @relation("ItemCategories")
+// }
 
-model QuestionVotes {
-  id         Int      @id @default(autoincrement())
-  userId     Int      @unique
-  questionId Int
-  vote       Int
-  Question   Question @relation(fields: [questionId], references: [id])
-  User       User     @relation(fields: [userId], references: [id])
-}
+// model Question {
+//   id            Int             @id @default(autoincrement())
+//   itemId        Int
+//   userId        Int             @unique
+//   question      String
+//   likes         Int
+//   dislikes      Int
+//   Item          Item            @relation(fields: [itemId], references: [id])
+//   User          User            @relation(fields: [userId], references: [id])
+//   QuestionVotes QuestionVotes[]
+//   Reply         Reply[]
+// }
 
-model ReplyVotes {
-  id      Int   @id @default(autoincrement())
-  userId  Int   @unique
-  replyId Int
-  vote    Int
-  Reply   Reply @relation(fields: [replyId], references: [id])
-  User    User  @relation(fields: [userId], references: [id])
-}
+// model Reply {
+//   id         Int          @id @default(autoincrement())
+//   questionId Int
+//   likes      Int
+//   dislikes   Int
+//   Reply      String
+//   Question   Question     @relation(fields: [questionId], references: [id])
+//   ReplyVotes ReplyVotes[]
+// }
 
-model ItemReview {
-  id        Int      @id @default(autoincrement())
-  rating    Float
-  comment   String
-  updatedAt DateTime @updatedAt
-  createdAt DateTime @default(now())
-  itemId    Int
-  lesseeId  Int
-  Item      Item     @relation(fields: [itemId], references: [id])
-  Lessee    Lessee   @relation(fields: [lesseeId], references: [id])
-  // @@unique(fields: [id, ownerId], name: "itemReview")
-}
+// model QuestionVotes {
+//   id         Int      @id @default(autoincrement())
+//   userId     Int      @unique
+//   questionId Int
+//   vote       Int
+//   Question   Question @relation(fields: [questionId], references: [id])
+//   User       User     @relation(fields: [userId], references: [id])
+// }
 
-model Transaction {
-  id            Int               @id @default(autoincrement())
-  startDate     String
-  endDate       String
-  status        TransactionStatus
-  updatedAt     DateTime          @updatedAt
-  createdAt     DateTime          @default(now())
-  ownerId       Int
-  itemId        Int
-  salePrice     Float
-  paymentMethod String
-  lesseeId      Int
-  Item          Item              @relation(fields: [itemId], references: [id])
-  Owner         Owner             @relation(fields: [ownerId], references: [id])
-  Lessee        Lessee            @relation(fields: [lesseeId], references: [id])
+// model ReplyVotes {
+//   id      Int   @id @default(autoincrement())
+//   userId  Int   @unique
+//   replyId Int
+//   vote    Int
+//   Reply   Reply @relation(fields: [replyId], references: [id])
+//   User    User  @relation(fields: [userId], references: [id])
+// }
 
-  @@unique(fields: [itemId, lesseeId], name: "lesseeTransaction")
-  @@unique(fields: [itemId, ownerId, lesseeId], name: "reviewTransaction")
-}
+// model ItemReview {
+//   id        Int      @id @default(autoincrement())
+//   rating    Float
+//   comment   String
+//   updatedAt DateTime @updatedAt
+//   createdAt DateTime @default(now())
+//   itemId    Int
+//   lesseeId  Int
+//   Item      Item     @relation(fields: [itemId], references: [id])
+//   Lessee    Lessee   @relation(fields: [lesseeId], references: [id])
+//   // @@unique(fields: [id, ownerId], name: "itemReview")
+// }
 
-model WishList {
-  id            Int             @id @default(autoincrement())
-  userId        Int             @unique
-  totalPrice    Float
-  User          User            @relation(fields: [userId], references: [id])
-  WishListItems WishListItems[]
-}
+// model Transaction {
+//   id            Int               @id @default(autoincrement())
+//   startDate     String
+//   endDate       String
+//   status        TransactionStatus
+//   updatedAt     DateTime          @updatedAt
+//   createdAt     DateTime          @default(now())
+//   ownerId       Int
+//   itemId        Int
+//   salePrice     Float
+//   paymentMethod String
+//   lesseeId      Int
+//   Item          Item              @relation(fields: [itemId], references: [id])
+//   Owner         Owner             @relation(fields: [ownerId], references: [id])
+//   Lessee        Lessee            @relation(fields: [lesseeId], references: [id])
 
-model WishListItems {
-  id         Int      @id @default(autoincrement())
-  wishListId Int
-  itemId     Int
-  WishList   WishList @relation(fields: [wishListId], references: [id])
-  Item       Item     @relation(fields: [itemId], references: [id])
-}
+//   @@unique(fields: [itemId, lesseeId], name: "lesseeTransaction")
+//   @@unique(fields: [itemId, ownerId, lesseeId], name: "reviewTransaction")
+// }
 
-model VerificationTable {
-  id                 Int                @id @default(autoincrement())
-  verified           VerificationStatus
-  updatedAt          DateTime           @updatedAt
-  verificationDataId Int
-  userId             Int                @unique
-  User               User               @relation(fields: [userId], references: [id])
-  VerificationData   VerificationData   @relation(fields: [verificationDataId], references: [id])
-}
+// model WishList {
+//   id            Int             @id @default(autoincrement())
+//   userId        Int             @unique
+//   totalPrice    Float
+//   User          User            @relation(fields: [userId], references: [id])
+//   WishListItems WishListItems[]
+// }
 
-model VerificationData {
-  id                Int                 @id @default(autoincrement())
-  userIdImageUrl    String
-  VerificationTable VerificationTable[]
-}
+// model WishListItems {
+//   id         Int      @id @default(autoincrement())
+//   wishListId Int
+//   itemId     Int
+//   WishList   WishList @relation(fields: [wishListId], references: [id])
+//   Item       Item     @relation(fields: [itemId], references: [id])
+// }
 
-model ProductOwnerReview {
-  id             Int      @id @default(autoincrement())
-  rating         Float
-  comment        String
-  updatedAt      DateTime @updatedAt
-  createdAt      DateTime @default(now())
-  lesseeId       Int
-  productOwnerId Int
-  Lessee         Lessee   @relation(fields: [lesseeId], references: [id])
-  ProductOwner   Owner    @relation(fields: [productOwnerId], references: [id])
-}
+// model VerificationTable {
+//   id                 Int                @id @default(autoincrement())
+//   verified           VerificationStatus
+//   updatedAt          DateTime           @updatedAt
+//   verificationDataId Int
+//   userId             Int                @unique
+//   User               User               @relation(fields: [userId], references: [id])
+//   VerificationData   VerificationData   @relation(fields: [verificationDataId], references: [id])
+// }
 
-model LesseeReview {
-  id             Int      @id @default(autoincrement())
-  rating         Float
-  comment        String
-  updatedAt      DateTime @updatedAt
-  createdAt      DateTime @default(now())
-  lesseeId       Int
-  productOwnerId Int
-  Lessee         Lessee   @relation(fields: [lesseeId], references: [id])
-  ProductOwner   Owner    @relation(fields: [productOwnerId], references: [id])
-  @@unique(fields: [id, productOwnerId], name: "lesseeOwnerReview")
-}
+// model VerificationData {
+//   id                Int                 @id @default(autoincrement())
+//   userIdImageUrl    String
+//   VerificationTable VerificationTable[]
+// }
 
-model Paypal {
-  id           Int            @id @default(autoincrement())
-  paypalToken  String
-  PaypalLessee PaypalLessee[]
-  PaypalOwner  PaypalOwner[]
-}
+// model ProductOwnerReview {
+//   id             Int      @id @default(autoincrement())
+//   rating         Float
+//   comment        String
+//   updatedAt      DateTime @updatedAt
+//   createdAt      DateTime @default(now())
+//   lesseeId       Int
+//   productOwnerId Int
+//   Lessee         Lessee   @relation(fields: [lesseeId], references: [id])
+//   ProductOwner   Owner    @relation(fields: [productOwnerId], references: [id])
+// }
 
-model PaypalOwner {
-  id       Int                @id @default(autoincrement())
-  verified VerificationStatus
-  paypalId Int
-  ownerId  Int
-  Owner    Owner              @relation(fields: [ownerId], references: [id])
-  Paypal   Paypal             @relation(fields: [paypalId], references: [id])
-}
+// model LesseeReview {
+//   id             Int      @id @default(autoincrement())
+//   rating         Float
+//   comment        String
+//   updatedAt      DateTime @updatedAt
+//   createdAt      DateTime @default(now())
+//   lesseeId       Int
+//   productOwnerId Int
+//   Lessee         Lessee   @relation(fields: [lesseeId], references: [id])
+//   ProductOwner   Owner    @relation(fields: [productOwnerId], references: [id])
+//   @@unique(fields: [id, productOwnerId], name: "lesseeOwnerReview")
+// }
 
-model PaypalLessee {
-  id       Int                @id @default(autoincrement())
-  verified VerificationStatus
-  paypalId Int
-  lesseeId Int
-  Lessee   Lessee             @relation(fields: [lesseeId], references: [id])
-  Paypal   Paypal             @relation(fields: [paypalId], references: [id])
-}
+// model Paypal {
+//   id           Int            @id @default(autoincrement())
+//   paypalToken  String
+//   PaypalLessee PaypalLessee[]
+//   PaypalOwner  PaypalOwner[]
+// }
 
-model Stripe {
-  id           Int            @id @default(autoincrement())
-  stripeToken  String
-  StripeLessee StripeLessee[]
-  StripeOwner  StripeOwner[]
-}
+// model PaypalOwner {
+//   id       Int                @id @default(autoincrement())
+//   verified VerificationStatus
+//   paypalId Int
+//   ownerId  Int
+//   Owner    Owner              @relation(fields: [ownerId], references: [id])
+//   Paypal   Paypal             @relation(fields: [paypalId], references: [id])
+// }
 
-model StripeOwner {
-  id       Int                @id @default(autoincrement())
-  verified VerificationStatus
-  stripeId Int
-  ownerId  Int
-  Owner    Owner              @relation(fields: [ownerId], references: [id])
-  Stripe   Stripe             @relation(fields: [stripeId], references: [id])
-}
+// model PaypalLessee {
+//   id       Int                @id @default(autoincrement())
+//   verified VerificationStatus
+//   paypalId Int
+//   lesseeId Int
+//   Lessee   Lessee             @relation(fields: [lesseeId], references: [id])
+//   Paypal   Paypal             @relation(fields: [paypalId], references: [id])
+// }
 
-model StripeLessee {
-  id       Int                @id @default(autoincrement())
-  verified VerificationStatus
-  stripeId Int
-  lesseeId Int
-  Lessee   Lessee             @relation(fields: [lesseeId], references: [id])
-  Stripe   Stripe             @relation(fields: [stripeId], references: [id])
-}
+// model Stripe {
+//   id           Int            @id @default(autoincrement())
+//   stripeToken  String
+//   StripeLessee StripeLessee[]
+//   StripeOwner  StripeOwner[]
+// }
 
-model Message {
-  id      Int    @id @default(autoincrement())
-  message String
-  chatId  Int
-  userId  Int    @unique
-  Chat    Chat   @relation(fields: [chatId], references: [id])
-  User    User   @relation(fields: [userId], references: [id])
-}
+// model StripeOwner {
+//   id       Int                @id @default(autoincrement())
+//   verified VerificationStatus
+//   stripeId Int
+//   ownerId  Int
+//   Owner    Owner              @relation(fields: [ownerId], references: [id])
+//   Stripe   Stripe             @relation(fields: [stripeId], references: [id])
+// }
 
-model Chat {
-  id           Int       @id @default(autoincrement())
-  user1Id      Int
-  user2Id      Int
-  messageCount Int
-  User1        User      @relation(name: "user1", fields: [user1Id], references: [id])
-  User2        User      @relation(name: "user2", fields: [user2Id], references: [id])
-  Message      Message[]
-}
+// model StripeLessee {
+//   id       Int                @id @default(autoincrement())
+//   verified VerificationStatus
+//   stripeId Int
+//   lesseeId Int
+//   Lessee   Lessee             @relation(fields: [lesseeId], references: [id])
+//   Stripe   Stripe             @relation(fields: [stripeId], references: [id])
+// }
+
+// model Message {
+//   id      Int    @id @default(autoincrement())
+//   message String
+//   chatId  Int
+//   userId  Int    @unique
+//   Chat    Chat   @relation(fields: [chatId], references: [id])
+//   User    User   @relation(fields: [userId], references: [id])
+// }
+
+// model Chat {
+//   id           Int       @id @default(autoincrement())
+//   user1Id      Int
+//   user2Id      Int
+//   messageCount Int
+//   User1        User      @relation(name: "user1", fields: [user1Id], references: [id])
+//   User2        User      @relation(name: "user2", fields: [user2Id], references: [id])
+//   Message      Message[]
+// }
 
 enum VerificationStatus {
   PENDING
-  VERIFIED
-  UNVERIFIED
-}
-
-enum TransactionStatus {
-  PENDING
-  APPROVED
-  REJECTED
-  ACTIVE
+  STARTED
   COMPLETED
 }
+
+// enum TransactionStatus {
+//   PENDING
+//   APPROVED
+//   REJECTED
+//   ACTIVE
+//   COMPLETED
+// }
 
 // enum CartStatus {
 //   ACTIVE
