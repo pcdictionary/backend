@@ -14,15 +14,38 @@ model User {
   lastName  String
   userName  String
   password  String
+  elo Elo?
   games     Game[] @relation("UserGame")
   games2    Game[] @relation("UserGame2")
 }
 
 model Game {
-  id     Int                @id @default(autoincrement())
-  score  VerificationStatus @default(PENDING)
-  users  User[]             @relation("UserGame")
-  users2 User[]             @relation("UserGame2")
+  id       Int                @id @default(autoincrement())
+  status   VerificationStatus @default(PENDING)
+  users    User[]             @relation("UserGame")
+  users2   User[]             @relation("UserGame2")
+  score1   Int?
+  score2   Int?
+  GameType GameType?
+}
+
+model Elo {
+  id       Int                @id @default(autoincrement())
+  Handball   Int? @default(1200)
+  Basketball Int? @default(1200)
+  Soccer     Int? @default(1200)
+  Tennis     Int? @default(1200)
+  PingPong   Int? @default(1200)
+  user    User   @relation(fields: [userId], references: [id])
+  userId  Int
+}
+
+enum GameType {
+  Handball
+  Basketball
+  Soccer
+  Tennis
+  PingPong
 }
 
 // model Team {
