@@ -6,6 +6,9 @@ import { makeExecutableSchema } from "@graphql-tools/schema";
 import pkg from "@prisma/client";
 import cors from "cors";
 import getUserId from "./utils/getUserId.js";
+import http from "http";
+import { Server } from "socket.io";
+import { v4 as uuidv4 } from 'uuid'
 
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
@@ -16,6 +19,7 @@ export const schema = makeExecutableSchema({
 });
 
 const app = express();
+
 app.use(
   cors({
     origin: "http://localhost:3000",
@@ -37,9 +41,34 @@ app.use(
       context: {
         prisma,
         request,
-        verifiedUserId: userIds ? userIds.userId : null,
+        verifiedUserId: userIds ? userIds.userId : null
       },
     };
   })
 );
-app.listen(4000, () => [console.log("Server is running")]);
+
+const server = http.createServer(app);
+const serverio = new Server(server, {
+  cors: {
+    origin: "http://localhost:3000",
+    methods: ["GET", "POST"],
+    allowedHeaders: ["Allow-Cors"],
+    credentials: true,
+  },
+});
+let rooms = {}
+serverio.on("connection", async (socket) => {
+  const userIds = await getUserId(socket.handshake);
+  console.log(userIds,"USERIDS SOCKETS")
+  socket.on("createRoom",()=>{
+    let room = uuidv4()
+    socket.join(room);
+    io.to(room).emit(room)
+  })
+  socket.on("test", () => {
+    console.log("THIS IS FIRST SOCKET CONNECTION");
+  });
+  console.log("a user connected");
+});
+
+server.listen(4000, () => [console.log("Server is running")]);

@@ -6,6 +6,8 @@ const typeDefs = gql`
         GameType: GameType
         score1: Int
         score2: Int
+        users1: [User]
+        users2: [User]
     }
 `;
 

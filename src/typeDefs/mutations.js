@@ -4,7 +4,7 @@ const typeDefs = gql`
     login(data: LoginUserInput): AuthPayload!
     createUser(data: CreateUserInput): AuthPayload!
     updateUser(data: UpdateUserInput): ReturnUser!
-    deleteUser: ReturnUser!    
+    deleteUser: ReturnUser!
   }
 `;
 

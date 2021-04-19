@@ -41,11 +41,11 @@ model Elo {
 }
 
 enum GameType {
-  Handball
-  Basketball
-  Soccer
-  Tennis
-  PingPong
+  HANDBALL
+  BASKETBALL
+  SOCCER
+  TENNIS
+  PINGPONG
 }
 
 enum VerificationStatus {
