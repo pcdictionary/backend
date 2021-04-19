@@ -33,7 +33,9 @@ export async function seed(
       seedData.userList[i].password = await hashPassword(
         seedData.userList[i].password
       );
-      let user = await client.user.create({ data: seedData.userList[i] });
+      let user = await client.user.create({
+        data: { ...seedData.userList[i], elo: { create: {} } },
+      });
       validUserIds.push(user.id);
     } catch (error) {
       console.log("Seed User Error on user:\n");
@@ -45,7 +47,7 @@ export async function seed(
   if (test) userLength = 10;
   for (let i = 0; i < seedData.categoryList.length; i++) {
     try {
-      const gameId = await client.game.create({
+      await client.game.create({
         data: {
           users: {
             connect: [

@@ -5,7 +5,7 @@ import { graphqlHTTP } from "express-graphql";
 import { makeExecutableSchema } from "@graphql-tools/schema";
 import pkg from "@prisma/client";
 import cors from "cors";
-import getUserId from "./utils/getUserId.js"
+import getUserId from "./utils/getUserId.js";
 
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
@@ -28,15 +28,17 @@ app.use(
   graphqlHTTP(async (request, response, graphQLParams) => {
     // console.log("app.user headers", request.headers);
     // console.log("params", graphQLParams);
-    const userIds = await getUserId(request)
-    console.log(userIds)
+    const userIds = await getUserId(request);
+    console.log(userIds);
     return {
       schema,
       graphiql: true,
       isAdmin: true,
-      context: { prisma, request, verifiedUserId: userIds ? userIds.userId : null,
-      verifiedOwnerId: userIds ? userIds.ownerId: null,
-      verifiedLesseeId: userIds ? userIds.lesseeId: null, },
+      context: {
+        prisma,
+        request,
+        verifiedUserId: userIds ? userIds.userId : null,
+      },
     };
   })
 );
