@@ -21,15 +21,7 @@ const typeDefs = gql`
         firstName: String!
         lastName: String!
         userName: String!
-        owner: Owner
-        lessee: Lessee
-        Message: [Message!]!
-        VerificationTable: [VerificationTable!]!
-        Question: [Question!]!
-        QuestionVotes: [QuestionVotes!]!
-        ReplyVotes: [ReplyVotes!]!
-        OwnerMessages: [Chat]
-        RequestMessages: [Chat]
+        elo: Elo
       }
     type User {
         id: Int!
@@ -38,15 +30,7 @@ const typeDefs = gql`
         lastName: String!
         password: String!
         userName: String!
-        owner: Owner
-        lessee: Lessee
-        Message: [Message!]!
-        VerificationTable: [VerificationTable!]!
-        Question: [Question!]!
-        QuestionVotes: [QuestionVotes!]!
-        ReplyVotes: [ReplyVotes!]!
-        OwnerMessages: [Chat]
-        RequestMessages: [Chat]
+        elo: Elo
     }
 `
 
