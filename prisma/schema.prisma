@@ -14,9 +14,10 @@ model User {
   lastName  String
   userName  String
   password  String
-  elo Elo?
+  elo       Elo?
   games     Game[] @relation("UserGame")
   games2    Game[] @relation("UserGame2")
+  allGames  Game[] @relation("AllUserGames")
 }
 
 model Game {
@@ -27,17 +28,26 @@ model Game {
   score1   Int?
   score2   Int?
   GameType GameType?
+  userId   Int?
+  User     User[]             @relation("AllUserGames", fields: [userId], references: [id])
+
+  @@unique(fields: [GameType, id], name: "idGameType")
 }
 
 model Elo {
-  id       Int                @id @default(autoincrement())
-  Handball   Int? @default(1200)
-  Basketball Int? @default(1200)
-  Soccer     Int? @default(1200)
-  Tennis     Int? @default(1200)
-  PingPong   Int? @default(1200)
-  user    User   @relation(fields: [userId], references: [id])
-  userId  Int
+  id                Int   @id @default(autoincrement())
+  Handball          Int?  @default(1200)
+  HandballHistory   Int[]
+  Basketball        Int?  @default(1200)
+  BasketballHistory Int[]
+  Soccer            Int?  @default(1200)
+  SoccerHistory     Int[]
+  Tennis            Int?  @default(1200)
+  TennisHistory     Int[]
+  PingPong          Int?  @default(1200)
+  PingPongHistory   Int[]
+  user              User  @relation(fields: [userId], references: [id])
+  userId            Int
 }
 
 enum GameType {

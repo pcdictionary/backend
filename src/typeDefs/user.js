@@ -18,13 +18,13 @@ const typeDefs = gql`
   type ReturnUser {
     id: Int!
     email: String!
-    firstName: String!
-    lastName: String!
-    userName: String!
+    firstName:  String!
+    lastName:   String!
+    userName:   String!
     elo:        Elo
     games:      [Game]
     games2:     [Game]
-
+    allGames:   [Game]
   }
   type User {
     id:         Int!
