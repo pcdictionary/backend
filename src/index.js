@@ -22,7 +22,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "exp://192.168.0.110:19000",
     credentials: true,
   })
 );
@@ -50,7 +50,7 @@ app.use(
 const server = http.createServer(app);
 const serverio = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "exp://192.168.0.110:19000",
     methods: ["GET", "POST"],
     allowedHeaders: ["Allow-Cors"],
     credentials: true,
@@ -70,5 +70,5 @@ serverio.on("connection", async (socket) => {
   });
   console.log("a user connected");
 });
-
-server.listen(4000, () => [console.log("Server is running")]);
+const hostname = "192.168.0.110"
+server.listen(4000, hostname, () => [console.log("Server is running")]);
