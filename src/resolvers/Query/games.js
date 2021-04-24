@@ -35,6 +35,10 @@ const games = {
             orderBy: {
               id: "desc",
             },
+            include:{
+              users: true,
+              users2: true
+            }
           },
         },
       });
