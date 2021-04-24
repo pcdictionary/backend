@@ -22,7 +22,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "http://localhost:3000",
+    origin: "http://localhost:19002",
     credentials: true,
   })
 );
@@ -32,8 +32,8 @@ app.use(
   graphqlHTTP(async (request, response, graphQLParams) => {
     // console.log("app.user headers", request.headers);
     // console.log("params", graphQLParams);
-    const userIds = await getUserId(request);
-    console.log(userIds);
+    // const userIds = await getUserId(request);
+    // console.log(userIds);
     return {
       schema,
       graphiql: true,
@@ -41,7 +41,7 @@ app.use(
       context: {
         prisma,
         request,
-        verifiedUserId: userIds ? userIds.userId : null
+        // verifiedUserId: userIds ? userIds.userId : null
       },
     };
   })
@@ -50,7 +50,7 @@ app.use(
 const server = http.createServer(app);
 const serverio = new Server(server, {
   cors: {
-    origin: "http://localhost:3000",
+    origin: "http://localhost:19002",
     methods: ["GET", "POST"],
     allowedHeaders: ["Allow-Cors"],
     credentials: true,
@@ -70,5 +70,5 @@ serverio.on("connection", async (socket) => {
   });
   console.log("a user connected");
 });
-
-server.listen(4000, () => [console.log("Server is running")]);
+const hostname = "192.168.0.110"
+server.listen(4000, hostname, () => [console.log("Server is running")]);

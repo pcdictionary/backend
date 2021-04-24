@@ -5,7 +5,8 @@ import { default as User } from "./user.js";
 import { default as Enum } from "./enum.js";
 import { default as Elo } from "./elo.js";
 import { default as Game } from "./game.js";
+import { default as EloHistory } from "./eloHistory.js";
 
-const typeDefs = [Auth, Mutations, Queries, User, Elo, Game, Enum];
+const typeDefs = [Auth, Mutations, Queries, User, Elo, Game, Enum, EloHistory];
 
 export default typeDefs;

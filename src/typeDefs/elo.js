@@ -1,6 +1,8 @@
 import gql from "graphql-tag";
 
 const typeDefs = gql`
+
+
     type Elo {
         Handball:   Int
         Basketball: Int
@@ -9,6 +11,7 @@ const typeDefs = gql`
         PingPong:   Int
         user:       User
         userId:     Int
+        eloHistory: [EloHistory]!
     }
 `;
 

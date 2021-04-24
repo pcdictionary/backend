@@ -8,8 +8,7 @@ function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-
-const GAMETYPES = ["HANDBALL", "BASKETBALL", "SOCCER", "TENNIS", "PINGPONG"]
+const GAMETYPES = ["HANDBALL", "BASKETBALL", "SOCCER", "TENNIS", "PINGPONG"];
 
 export async function seed(
   client,
@@ -47,6 +46,23 @@ export async function seed(
       process.exit(1);
     }
   }
+  for (let i = 0; i < 2000; i++) {
+    try {
+      let user = await client.eloHistory.create({
+        data: 
+          {
+            eloId: getRndInteger(1,99),
+            eloHistory: getRndInteger(100, 1500),
+            GameType: GAMETYPES[getRndInteger(0, 5)],
+          },
+      });
+    } catch (error) {
+      console.log("Seed User Error on user:\n");
+      console.log(seedData.userList[i]);
+      console.log(error);
+      process.exit(1);
+    }
+  }
   if (test) userLength = 10;
   for (let i = 0; i < seedData.categoryList.length; i++) {
     try {
@@ -63,25 +79,23 @@ export async function seed(
           users2: {
             connect: [{ id: arr[3] }, { id: arr[4] }, { id: arr[5] }],
           },
-          GameType: GAMETYPES[getRndInteger(0,5)]
+          GameType: GAMETYPES[getRndInteger(0, 5)],
         },
       });
-      for (let x = 0; x < arr.length; x++){
+      for (let x = 0; x < arr.length; x++) {
         await client.user.update({
-          where:{
-            id: arr[x]
+          where: {
+            id: arr[x],
           },
-          data:{
-            allGames:{
+          data: {
+            allGames: {
               connect: {
-                id: game.id
-              }
-            }
+                id: game.id,
+              },
+            },
           },
-
-        })
+        });
       }
-
     } catch (error) {
       console.log("Seed Category Error on entry:\n");
       console.log(seedData.categoryList[i], source, "index: ", i);
