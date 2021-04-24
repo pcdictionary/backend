@@ -35,19 +35,23 @@ model Game {
 }
 
 model Elo {
-  id                Int   @id @default(autoincrement())
-  Handball          Int?  @default(1200)
-  HandballHistory   Int[]
-  Basketball        Int?  @default(1200)
-  BasketballHistory Int[]
-  Soccer            Int?  @default(1200)
-  SoccerHistory     Int[]
-  Tennis            Int?  @default(1200)
-  TennisHistory     Int[]
-  PingPong          Int?  @default(1200)
-  PingPongHistory   Int[]
-  user              User  @relation(fields: [userId], references: [id])
-  userId            Int
+  id         Int          @id @default(autoincrement())
+  Handball   Int?         @default(1200)
+  Basketball Int?         @default(1200)
+  Soccer     Int?         @default(1200)
+  Tennis     Int?         @default(1200)
+  PingPong   Int?         @default(1200)
+  user       User         @relation(fields: [userId], references: [id])
+  userId     Int          @unique
+  eloHistory EloHistory[]
+}
+
+model EloHistory {
+  id       Int            @id @default(autoincrement())
+  History  Elo       @relation(fields: [eloId], references: [id])
+  eloId    Int
+  eloHistory      Int
+  GameType GameType?
 }
 
 enum GameType {
