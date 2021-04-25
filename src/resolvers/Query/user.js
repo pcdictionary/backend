@@ -17,6 +17,9 @@ const user = {
         where: {
           ...query
         },
+        include:{
+          elo: true
+        }
       })
       return foundUser ? foundUser : new Error("No such user found.")
     } catch (error) {
@@ -26,7 +29,6 @@ const user = {
   async getUserSummary(parent, args, { prisma }, info) {
     try {
       let query = {}
-      console.log("THIS IS HIt")
       if(args.id) query = {id:args.id}
       else if(args.userName) query = {userName:args.userName}
       else return new Error("Invalid search parameters")
