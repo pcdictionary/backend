@@ -61,13 +61,21 @@ serverio.on("connection", async (socket) => {
   const userIds = await getUserId(socket.handshake);
   console.log(userIds, "USERIDS SOCKETS");
   socket.on("createRoom", () => {
-    console.log(socket.rooms);
-    if (socket.rooms.size < 2) {
+
+    if (!rooms[socket.id]) {
       let room = uuidv4();
+      console.log(room)
+      rooms[socket.id] = room
       socket.join(room);
       serverio.to(room).emit("createdRoom", room);
     }
   });
+
+  socket.on("leaveRoom",()=>{
+    socket.leave(rooms[socket.id])
+    delete rooms[socket.id]
+  })
+
   socket.on("test", () => {
     console.log("THIS IS FIRST SOCKET CONNECTION");
   });
