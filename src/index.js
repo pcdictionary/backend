@@ -47,6 +47,17 @@ app.use(
   })
 );
 
+function Player(userInfo) {
+  this.userId = userInfo.id;
+  this.socketId = userInfo.socketId;
+}
+
+function Teams(socketid, player) {
+  this.team1 = {};
+  this.team1[socketid] = player;
+  this.team2 = {};
+}
+
 const server = http.createServer(app);
 const serverio = new Server(server, {
   cors: {
@@ -57,24 +68,40 @@ const serverio = new Server(server, {
   },
 });
 let rooms = {};
+let activeUsers = {};
 serverio.on("connection", async (socket) => {
-  const userIds = await getUserId(socket.handshake);
-  console.log(userIds, "USERIDS SOCKETS");
+  // const userIds = await getUserId(socket.handshake);
+  const id = 1;
+  // console.log(userIds, "USERIDS SOCKETS");
   socket.on("createRoom", () => {
-
-    if (!rooms[socket.id]) {
+    if (!activeUsers[socket.id]) {
+      let player = new Player({ id, socketId: socket.id });
       let room = uuidv4();
-      console.log(room)
-      rooms[socket.id] = room
+      activeUsers[socket.id] = room;
+      rooms[room] = new Teams(socket.id, player);
       socket.join(room);
+      console.log(rooms);
       serverio.to(room).emit("createdRoom", room);
     }
   });
 
-  socket.on("leaveRoom",()=>{
-    socket.leave(rooms[socket.id])
-    delete rooms[socket.id]
-  })
+  socket.on("joinRoom", (room) => {
+    if (!activeUsers[socket.id]) {
+      let player = new Player({ id, socketId: socket.id });
+      rooms[room].team2[socket.id] = player;
+      console.log(rooms);
+      activeUsers[socket.id] = room;
+      socket.join(room);
+    }
+  });
+
+  socket.on("leaveRoom", () => {
+    socket.leave(activeUsers[socket.id]);
+
+    delete rooms[activeUsers[socket.id]].team1[socket.id];
+    delete rooms[activeUsers[socket.id]].team2[socket.id];
+    delete activeUsers[socket.id]
+  });
 
   socket.on("test", () => {
     console.log("THIS IS FIRST SOCKET CONNECTION");
