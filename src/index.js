@@ -112,8 +112,9 @@ serverio.on("connection", async (socket) => {
 
     delete rooms[activeUsers[socket.id]].team1[socket.id];
     delete rooms[activeUsers[socket.id]].team2[socket.id];
+    serverio.to(activeUsers[socket.id]).emit("updateLobby", rooms[activeUsers[socket.id]]);
     delete activeUsers[socket.id];
-    serverio.to(room).emit("updateLobby", rooms[activeUsers[socket.id]]);
+
   });
 
   socket.on("test", () => {
