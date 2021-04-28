@@ -50,6 +50,7 @@ app.use(
 function Player(userInfo) {
   this.userId = userInfo.id;
   this.socketId = userInfo.socketId;
+  this.status = false
 }
 
 function Teams(socketid, player) {
@@ -107,6 +108,15 @@ serverio.on("connection", async (socket) => {
     }
   });
 
+  socket.on("switchStatus", ()=>{
+    if(rooms[activeUsers[socket.id]].team1[socket.id]){
+      rooms[activeUsers[socket.id]].team1[socket.id].status = !rooms[activeUsers[socket.id]].team1[socket.id].status
+    }else{
+      rooms[activeUsers[socket.id]].team2[socket.id].status = !rooms[activeUsers[socket.id]].team2[socket.id].status
+    }
+    serverio.to(activeUsers[socket.id]).emit("updateLobby", rooms[activeUsers[socket.id]]);
+  })
+
   socket.on("leaveRoom", () => {
     socket.leave(activeUsers[socket.id]);
 
@@ -117,9 +127,6 @@ serverio.on("connection", async (socket) => {
 
   });
 
-  socket.on("test", () => {
-    console.log("THIS IS FIRST SOCKET CONNECTION");
-  });
   console.log("a user connected");
 });
 const hostname = "192.168.0.110";
