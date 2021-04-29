@@ -108,6 +108,17 @@ serverio.on("connection", async (socket) => {
       }
       serverio.to(room).emit("updateLobby", rooms[activeUsers[socket.id]]);
     }
+    serverio.to(activeUsers[socket.id]).emit("updateLobby", rooms[activeUsers[socket.id]])
+  })
+
+  socket.on("leaveRoom", () => {
+    socket.leave(activeUsers[socket.id]);
+
+    delete rooms[activeUsers[socket.id]].team1[socket.id];
+    delete rooms[activeUsers[socket.id]].team2[socket.id];
+    serverio.to(activeUsers[socket.id]).emit("updateLobby", rooms[activeUsers[socket.id]]);
+    delete activeUsers[socket.id];
+
   });
 
   socket.on("switchStatus", () => {
