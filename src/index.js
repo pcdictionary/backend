@@ -50,13 +50,14 @@ app.use(
 function Player(userInfo) {
   this.userId = userInfo.id;
   this.socketId = userInfo.socketId;
-  this.status = false
+  this.status = false;
 }
 
 function Teams(socketid, player) {
   this.team1 = {};
   this.team1[socketid.toString()] = player;
   this.team2 = {};
+  this.approved = {};
 }
 
 const server = http.createServer(app);
@@ -90,7 +91,8 @@ serverio.on("connection", async (socket) => {
   socket.on("joinRoom", (room) => {
     if (!activeUsers[socket.id]) {
       if (
-        Object.keys(rooms[room].team2).length < Object.keys(rooms[room].team1).length
+        Object.keys(rooms[room].team2).length <
+        Object.keys(rooms[room].team1).length
       ) {
         let player = new Player({ id, socketId: socket.id.toString() });
         rooms[room].team2[socket.id.toString()] = player;
@@ -108,26 +110,69 @@ serverio.on("connection", async (socket) => {
     }
   });
 
-  socket.on("switchStatus", ()=>{
-    if(rooms[activeUsers[socket.id]].team1[socket.id]){
-      rooms[activeUsers[socket.id]].team1[socket.id].status = !rooms[activeUsers[socket.id]].team1[socket.id].status
-    }else{
-      rooms[activeUsers[socket.id]].team2[socket.id].status = !rooms[activeUsers[socket.id]].team2[socket.id].status
+  socket.on("switchStatus", () => {
+    if (rooms[activeUsers[socket.id]].team1[socket.id]) {
+      rooms[activeUsers[socket.id]].team1[socket.id].status = !rooms[
+        activeUsers[socket.id]
+      ].team1[socket.id].status;
+    } else {
+      rooms[activeUsers[socket.id]].team2[socket.id].status = !rooms[
+        activeUsers[socket.id]
+      ].team2[socket.id].status;
     }
-    serverio.to(activeUsers[socket.id]).emit("updateLobby", rooms[activeUsers[socket.id]]);
-  })
+    serverio
+      .to(activeUsers[socket.id])
+      .emit("updateLobby", rooms[activeUsers[socket.id]]);
+  });
+
+  socket.on("startMatch", () => {
+    if (
+      Object.keys(rooms[room].team2).length ===
+      Object.keys(rooms[room].team1).length
+    ) {
+      serverio.to(activeUsers[socket.id]).emit("startedMatch");
+    }
+  });
+
+  socket.on("approveScore", () => {
+    rooms[activeUsers[socket.id]].approved[socket.id] = true;
+    if (
+      Object.keys(rooms[activeUsers[socket.id]].approved).length >=
+      (Object.keys(rooms[activeUsers[socket.id]].team1).length +
+        Object.keys(rooms[activeUsers[socket.id]].team2).length) *
+        0.75
+    ) {
+      //update db
+      serverio
+        .to(activeUsers[socket.id])
+        .emit("approvedScore", {
+          team1Score: rooms[activeUsers[socket.id]].team1.score,
+          team2Score: rooms[activeUsers[socket.id]].team2.score,
+        });
+    }
+  });
+
+  socket.on("finalScore", (team1Score, team2Score) => {
+    rooms[activeUsers[socket.id]].team1.score = team1Score;
+    rooms[activeUsers[socket.id]].team2.score = team2Score;
+    rooms[activeUsers[socket.id]].approved[socket.id] = true;
+    serverio
+      .to(activeUsers[socket.id])
+      .emit("finalizedScore", { team1Score, team2Score });
+  });
 
   socket.on("leaveRoom", () => {
     socket.leave(activeUsers[socket.id]);
 
     delete rooms[activeUsers[socket.id]].team1[socket.id];
     delete rooms[activeUsers[socket.id]].team2[socket.id];
-    serverio.to(activeUsers[socket.id]).emit("updateLobby", rooms[activeUsers[socket.id]]);
+    serverio
+      .to(activeUsers[socket.id])
+      .emit("updateLobby", rooms[activeUsers[socket.id]]);
     delete activeUsers[socket.id];
-
   });
 
-  console.log("a user connected");
+  console.log("a user connected", socket.id);
 });
 const hostname = "192.168.0.110";
 server.listen(4000, hostname, () => [console.log("Server is running")]);
