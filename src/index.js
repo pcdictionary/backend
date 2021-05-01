@@ -30,10 +30,9 @@ app.use(
 app.use(
   "/graphql",
   graphqlHTTP(async (request, response, graphQLParams) => {
-    // console.log("app.user headers", request.headers);
-    // console.log("params", graphQLParams);
+    // console.log(request,"THIS IS REQUEST")
     const userIds = await getUserId(request);
-    // console.log(userIds);
+    console.log(userIds,"THIS IS USERID");
     return {
       schema,
       graphiql: true,
@@ -77,10 +76,10 @@ const serverio = new Server(server, {
 let rooms = {};
 var activeUsers = {};
 serverio.on("connection", async (socket) => {
-  console.log(socket, "THIS IS SOCKET")
+  // console.log(socket, "THIS IS SOCKET")
   const id = await getUserId(socket.handshake);
 
-  console.log(id, "USERIDS SOCKETS");
+  // console.log(id, "USERIDS SOCKETS");
   socket.on("reconnect", () => {
     if (activeUsers[id]) {
       let roomId = activeUsers[id].socketId;
@@ -190,7 +189,7 @@ serverio.on("connection", async (socket) => {
       .emit("finalizedScore", { team1Score, team2Score });
   });
 
-  console.log("a user connected", socket.id);
+  // console.log("a user connected", socket.id);
 });
-const hostname = "192.168.0.110";
+const hostname = "192.168.0.112";
 server.listen(4000, hostname, () => [console.log("Server is running")]);
