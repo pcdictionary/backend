@@ -34,6 +34,7 @@ const user = {
       if (!isMatch) {
         throw new Error("Unable to login.");
       }
+      console.log(user,"THIS IS USER")
       return {
         user,
         token: generateAuthToken(user.id),
