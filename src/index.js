@@ -53,9 +53,10 @@ function Player(userInfo) {
 }
 
 function Teams(socketid, player) {
-  this.team1 = { score: 0 };
-  this.team1[socketid.toString()] = player;
-  this.team2 = { score: 0 };
+  this.team1 = { score: 0, readyCount: 0 };
+  this.team1.members = { [socketid.toString()]: player };
+  this.team2 = { score: 0, readyCount: 0 };
+  this.team2.members = {};
   this.approved = { team1: false, team2: false };
   this.timer = 0;
 }
@@ -77,9 +78,8 @@ const serverio = new Server(server, {
 let rooms = {};
 var activeUsers = {};
 serverio.on("connection", async (socket) => {
-  console.log(socket, "THIS IS SOCKET")
-  const id = await getUserId(socket.handshake);
-  console.log(id,"THIS IS ID")
+  const id = await getUserId(socket.handshake).userId;
+  console.log(id, "THIS IS ID");
   socket.on("reconnect", () => {
     if (activeUsers[id]) {
       let roomId = activeUsers[id].socketId;
@@ -87,7 +87,8 @@ serverio.on("connection", async (socket) => {
       console.log(oldSocketId);
       delete activeUsers[id];
       activeUsers[id] = { [socket.id]: roomId };
-      rooms[activeUsers[id][socket.id]].team1;
+
+      // rooms[activeUsers[id][socket.id]].team1;
     }
   });
 
@@ -104,30 +105,30 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("joinRoom", (room) => {
-      if (
-        Object.keys(rooms[room].team2).length <
-        Object.keys(rooms[room].team1).length
-      ) {
-        let player = new Player({ id, socketId: socket.id.toString() });
-        rooms[room].team2[socket.id.toString()] = player;
-        activeUsers[id] = new User({ socketId: socket.id, room });
-        socket.join(room);
-      } else {
-        let player = new Player({ id, socketId: socket.id.toString() });
-        rooms[room].team1[socket.id.toString()] = player;
-        activeUsers[id] = new User({ socketId: socket.id, room });
-        socket.join(room);
-      }
-
-      serverio.to(room).emit("updateLobby", rooms[activeUsers[id].roomId]);
+    if (
+      Object.keys(rooms[room].team2.members).length <
+      Object.keys(rooms[room].team1.members).length
+    ) {
+      let player = new Player({ id, socketId: socket.id.toString() });
+      rooms[room].team2.members[socket.id.toString()] = player;
+      activeUsers[id] = new User({ socketId: socket.id, room });
+      socket.join(room);
+    } else {
+      let player = new Player({ id, socketId: socket.id.toString() });
+      rooms[room].team1.members[socket.id.toString()] = player;
+      activeUsers[id] = new User({ socketId: socket.id, room });
+      socket.join(room);
+    }
+    console.log(rooms);
+    serverio.to(room).emit("updateLobby", rooms[activeUsers[id].roomId]);
   });
 
   socket.on("leaveRoom", () => {
-    console.log(activeUsers)
+    console.log(activeUsers);
     socket.leave(activeUsers[id].roomId);
 
-    delete rooms[activeUsers[id].roomId].team1[socket.id];
-    delete rooms[activeUsers[id].roomId].team2[socket.id];
+    delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+    delete rooms[activeUsers[id].roomId].team2.members[socket.id];
     serverio
       .to(activeUsers[id].roomId)
       .emit("updateLobby", rooms[activeUsers[id].roomId]);
@@ -135,16 +136,16 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("switchTeam", () => {
-    if (rooms[activeUsers[id].roomId].team1[socket.id]) {
-      rooms[activeUsers[id].roomId].team2[socket.id] = {
-        ...rooms[activeUsers[id].roomId].team1[socket.id],
+    if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+      rooms[activeUsers[id].roomId].team2.members[socket.id] = {
+        ...rooms[activeUsers[id].roomId].team1.members[socket.id],
       };
-      delete rooms[activeUsers[id].roomId].team1[socket.id];
+      delete rooms[activeUsers[id].roomId].team1.members[socket.id];
     } else {
-      rooms[activeUsers[id].roomId].team1[socket.id] = {
-        ...rooms[activeUsers[id].roomId].team2[socket.id],
+      rooms[activeUsers[id].roomId].team1.members[socket.id] = {
+        ...rooms[activeUsers[id].roomId].team2.members[socket.id],
       };
-      delete rooms[activeUsers[id].roomId].team2[socket.id];
+      delete rooms[activeUsers[id].roomId].team2.members[socket.id];
     }
     serverio
       .to(activeUsers[id].roomId)
@@ -152,14 +153,26 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("switchStatus", () => {
-    if (rooms[activeUsers[id].roomId].team1[socket.id]) {
-      rooms[activeUsers[id].roomId].team1[socket.id].status = !rooms[
+    if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+      if (rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
+        rooms[activeUsers[id].roomId].team1.readyCount -= 1;
+      } else {
+        rooms[activeUsers[id].roomId].team1.readyCount += 1;
+      }
+
+      rooms[activeUsers[id].roomId].team1.members[socket.id].status = !rooms[
         activeUsers[id].roomId
-      ].team1[socket.id].status;
+      ].team1.members[socket.id].status;
     } else {
-      rooms[activeUsers[id].roomId].team2[socket.id].status = !rooms[
+      if (rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
+        rooms[activeUsers[id].roomId].team2.readyCount -= 1;
+      } else {
+        rooms[activeUsers[id].roomId].team2.readyCount += 1;
+      }
+
+      rooms[activeUsers[id].roomId].team2.members[socket.id].status = !rooms[
         activeUsers[id].roomId
-      ].team2[socket.id].status;
+      ].team2.members[socket.id].status;
     }
     serverio
       .to(activeUsers[id].roomId)
@@ -168,8 +181,12 @@ serverio.on("connection", async (socket) => {
 
   socket.on("startMatch", () => {
     if (
-      Object.keys(rooms[activeUsers[id].roomId].team2).length ===
-      Object.keys(rooms[activeUsers[id].roomId].team1).length
+      Object.keys(rooms[activeUsers[id].roomId].team2.members).length ===
+        Object.keys(rooms[activeUsers[id].roomId].team1.members).length &&
+      Object.keys(rooms[activeUsers[id].roomId].team2.members).length ===
+        rooms[activeUsers[id].roomId].team2.readyCount &&
+      Object.keys(rooms[activeUsers[id].roomId].team1.members).length ===
+        rooms[activeUsers[id].roomId].team1.readyCount
     ) {
       //add timer
       serverio.to(activeUsers[id].roomId).emit("startedMatch");
@@ -180,8 +197,8 @@ serverio.on("connection", async (socket) => {
     rooms[activeUsers[id][socket.id]].approved[socket.id] = true;
     if (
       Object.keys(rooms[activeUsers[id].roomId].approved).length >=
-      (Object.keys(rooms[activeUsers[id].roomId].team1).length +
-        Object.keys(rooms[activeUsers[id].roomId].team2).length) *
+      (Object.keys(rooms[activeUsers[id].roomId].team1.members).length +
+        Object.keys(rooms[activeUsers[id].roomId].team2.members).length) *
         0.75
     ) {
       //update db
