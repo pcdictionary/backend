@@ -57,7 +57,7 @@ function Teams(socketid, player) {
   this.team1.members = { [socketid.toString()]: player };
   this.team2 = { score: 0, readyCount: 0 };
   this.team2.members = {};
-  this.approved = { team1: false, team2: false };
+  this.approved = {count: 0, total: 0};
   this.timer = 0;
 }
 
@@ -193,31 +193,39 @@ serverio.on("connection", async (socket) => {
     }
   });
 
-  socket.on("approveScore", () => {
-    rooms[activeUsers[id][socket.id]].approved[socket.id] = true;
-    if (
-      Object.keys(rooms[activeUsers[id].roomId].approved).length >=
-      (Object.keys(rooms[activeUsers[id].roomId].team1.members).length +
-        Object.keys(rooms[activeUsers[id].roomId].team2.members).length) *
-        0.75
-    ) {
+  socket.on("approveScore", (answer) => {
+    if(answer && !rooms[activeUsers[id].roomId].approved[socket.id]){
+      rooms[activeUsers[id].roomId].approved[socket.id] = true;
+      rooms[activeUsers[id].roomId].approved.count ++
+      rooms[activeUsers[id].roomId].approved.total ++
+      var clients = serverio.sockets.adapter.rooms
+      console.log(clients,"THIS IS SOCKETS")
+      if(rooms[activeUsers[id].roomId].approved.count/rooms[activeUsers[id].roomId].approved.total > .65){
       //update db
-      serverio.to(activeUsers[id].roomId).emit("approvedScore", {
-        team1Score: rooms[activeUsers[id].roomId].team1.score,
-        team2Score: rooms[activeUsers[id].roomId].team2.score,
-      });
+        //start a new room
+      }
     }
+
+    serverio.to(activeUsers[id].roomId).emit("approvedScore");
   });
 
   socket.on("finalScore", ({ team1Score, team2Score }) => {
     rooms[activeUsers[id].roomId].team1.score = team1Score;
     rooms[activeUsers[id].roomId].team2.score = team2Score;
     rooms[activeUsers[id].roomId].approved[socket.id] = true;
+    rooms[activeUsers[id].roomId].approved.count ++
+    rooms[activeUsers[id].roomId].approved.total ++
     serverio
       .to(activeUsers[id].roomId)
       .emit("finalizedScore", { team1Score, team2Score });
   });
-
+  socket.on("test",()=>{
+    var clients = serverio.sockets.adapter.rooms
+    console.log(clients,"THIS IS SOCKETS")
+  })
+  socket.on("disconnect",()=>{
+    console.log("bye")
+  })
   // console.log("a user connected", socket.id);
 });
 const hostname = "192.168.0.112";
