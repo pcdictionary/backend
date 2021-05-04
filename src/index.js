@@ -57,7 +57,7 @@ function Teams(socketid, player) {
   this.team1.members = { [socketid.toString()]: player };
   this.team2 = { score: 0, readyCount: 0 };
   this.team2.members = {};
-  this.approved = { count: 0, total: 0, reject: 0, sockets: {}};
+  this.approved = { count: 0, total: 0, reject: 0, sockets: {} };
   this.timer = 0;
 }
 
@@ -196,9 +196,11 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("approveScore", (answer) => {
-    console.log("HIT",socket.id)
-    console.log(rooms[activeUsers[id].roomId].approved.sockets)
-    if (rooms[activeUsers[id].roomId].approved.sockets[socket.id] === undefined) {
+    console.log("HIT", socket.id);
+    console.log(rooms[activeUsers[id].roomId].approved.sockets);
+    if (
+      rooms[activeUsers[id].roomId].approved.sockets[socket.id] === undefined
+    ) {
       if (answer) {
         rooms[activeUsers[id].roomId].approved.sockets[socket.id] = true;
         rooms[activeUsers[id].roomId].approved.count++;
@@ -208,7 +210,23 @@ serverio.on("connection", async (socket) => {
           0.65
         ) {
           //update db
+          let currentMembersTeam1 = {};
+          let currentMembersTeam2 = {};
+          var clients = serverio.sockets.adapter.rooms[activeUsers[id].roomId];
+          clients.forEach((cur) => {
+            if (rooms[activeUsers[id].roomId].team1.members[cur]) {
+              currentMembersTeam1[cur] = {
+                ...rooms[activeUsers[id].roomId].team1.members[cur],
+              };
+            }
+            if (rooms[activeUsers[id].roomId].team2.members[cur]) {
+              currentMembersTeam2[cur] = {
+                ...rooms[activeUsers[id].roomId].team2.members[cur],
+              };
+            }
+          });
           //start a new room
+          serverio.to(activeUsers[id].roomId).emit("completedMatch");
         }
       } else {
         rooms[activeUsers[id].roomId].approved.sockets[socket.id] = false;
@@ -219,10 +237,9 @@ serverio.on("connection", async (socket) => {
         ) {
           serverio.to(activeUsers[id].roomId).emit("redoScore");
           //redo vote
-          rooms[activeUsers[id].roomId].approved.sockets = {}
-          rooms[activeUsers[id].roomId].approved.count = 0
-          rooms[activeUsers[id].roomId].approved.reject = 0
-          console.log(rooms[activeUsers[id].roomId].approved)
+          rooms[activeUsers[id].roomId].approved.sockets = {};
+          rooms[activeUsers[id].roomId].approved.count = 0;
+          rooms[activeUsers[id].roomId].approved.reject = 0;
         }
       }
       serverio.to(activeUsers[id].roomId).emit("approvedScore", {
