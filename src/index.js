@@ -58,7 +58,7 @@ function Teams(socketid, player) {
   this.team2 = { score: 0, readyCount: 0 };
   this.team2.members = {};
   this.approved = { count: 0, total: 0, reject: 0, sockets: {} };
-  this.timer = 0;
+  this.startTime;
 }
 
 function User(info) {
@@ -82,13 +82,27 @@ serverio.on("connection", async (socket) => {
   console.log(id, "THIS IS ID");
   socket.on("reconnect", () => {
     if (activeUsers[id]) {
-      let roomId = activeUsers[id].socketId;
-      let oldSocketId = Object.keys(rooms[activeUsers[id].roomId].team1)[0];
-      console.log(oldSocketId);
-      delete activeUsers[id];
-      activeUsers[id] = { [socket.id]: roomId };
 
-      // rooms[activeUsers[id][socket.id]].team1;
+      let oldSocket = activeUsers[id].socketId;
+
+
+      if (socket.id !== oldSocket) {
+        console.log(socket.id, "NEW ID");
+        console.log(oldSocket, "OLDID");
+        rooms[activeUsers[id].roomId].team1.members[socket.id] = {
+          ...rooms[activeUsers[id].roomId].team1.members[oldSocket],
+        };
+        console.log(
+          rooms[activeUsers[id].roomId].team1.members[socket.id],
+          "members"
+        );
+        delete rooms[activeUsers[id].roomId].team1.members[oldSocket];
+        activeUsers[id].socketId = socket.id;
+
+      }
+      serverio
+      .to(activeUsers[id].roomId)
+      .emit("updateLobby", rooms[activeUsers[id].roomId]);
     }
   });
 
@@ -191,13 +205,14 @@ serverio.on("connection", async (socket) => {
     ) {
       rooms[activeUsers[id].roomId].approved.total = team1Count * 2;
       //add timer
+      rooms[activeUsers[id].roomId].startTime = new Date();
       serverio.to(activeUsers[id].roomId).emit("startedMatch");
     }
   });
 
   socket.on("approveScore", (answer) => {
     console.log("HIT", socket.id);
-    console.log(rooms[activeUsers[id].roomId].approved.sockets);
+
     if (
       rooms[activeUsers[id].roomId].approved.sockets[socket.id] === undefined
     ) {
@@ -212,20 +227,40 @@ serverio.on("connection", async (socket) => {
           //update db
           let currentMembersTeam1 = {};
           let currentMembersTeam2 = {};
-          var clients = serverio.sockets.adapter.rooms[activeUsers[id].roomId];
-          clients.forEach((cur) => {
+          var clients = serverio.sockets.adapter.rooms;
+          console.log(clients.get(activeUsers[id].roomId));
+          let activeClients = clients.get(activeUsers[id].roomId);
+          let activeClientsValues = activeClients.values();
+          for (let x = 0; x < activeClients.size; x++) {
+            let cur = activeClientsValues.next().value;
+            console.log(cur, "this is cur");
             if (rooms[activeUsers[id].roomId].team1.members[cur]) {
               currentMembersTeam1[cur] = {
                 ...rooms[activeUsers[id].roomId].team1.members[cur],
+                status: false,
               };
             }
             if (rooms[activeUsers[id].roomId].team2.members[cur]) {
               currentMembersTeam2[cur] = {
                 ...rooms[activeUsers[id].roomId].team2.members[cur],
+                status: false,
               };
             }
-          });
+          }
+          rooms[activeUsers[id].roomId].team1.members = currentMembersTeam1;
+          rooms[activeUsers[id].roomId].team2.members = currentMembersTeam2;
+          rooms[activeUsers[id].roomId].approved = {
+            count: 0,
+            total: 0,
+            reject: 0,
+            sockets: {},
+          };
+
           //start a new room
+          console.log(rooms[activeUsers[id].roomId]);
+          serverio
+            .to(activeUsers[id].roomId)
+            .emit("updateLobby", rooms[activeUsers[id].roomId]);
           serverio.to(activeUsers[id].roomId).emit("completedMatch");
         }
       } else {
@@ -244,8 +279,7 @@ serverio.on("connection", async (socket) => {
       }
       serverio.to(activeUsers[id].roomId).emit("approvedScore", {
         count: rooms[activeUsers[id].roomId].approved.count,
-        total:
-          Object.keys(rooms[activeUsers[id].roomId].team1.members).length * 2,
+        total: rooms[activeUsers[id].roomId].approved.total,
       });
     }
   });
@@ -265,6 +299,17 @@ serverio.on("connection", async (socket) => {
     console.log(clients, "THIS IS SOCKETS");
   });
   socket.on("disconnect", () => {
+
+    if (!rooms[activeUsers[id].roomId].startTime) {
+      console.log("DISCONNECT HIT");
+      console.log(rooms[activeUsers[id].roomId].startTime)
+      delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+      delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+      serverio
+        .to(activeUsers[id].roomId)
+        .emit("updateLobby", rooms[activeUsers[id].roomId]);
+      delete activeUsers[id];
+    }
     console.log("bye");
   });
   // console.log("a user connected", socket.id);
