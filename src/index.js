@@ -49,7 +49,7 @@ app.use(
 function Player(userInfo) {
   this.userId = userInfo.id;
   this.socketId = userInfo.socketId;
-  this.status = false;
+  this.status = userInfo.status;
 }
 
 function Teams(socketid, player) {
@@ -82,27 +82,41 @@ serverio.on("connection", async (socket) => {
   console.log(id, "THIS IS ID");
   socket.on("reconnect", () => {
     if (activeUsers[id]) {
-
       let oldSocket = activeUsers[id].socketId;
 
+      console.log(socket.id, oldSocket, "SOCKETID and OLD SOCKET");
 
       if (socket.id !== oldSocket) {
         console.log(socket.id, "NEW ID");
         console.log(oldSocket, "OLDID");
-        rooms[activeUsers[id].roomId].team1.members[socket.id] = {
-          ...rooms[activeUsers[id].roomId].team1.members[oldSocket],
-        };
-        console.log(
-          rooms[activeUsers[id].roomId].team1.members[socket.id],
-          "members"
-        );
-        delete rooms[activeUsers[id].roomId].team1.members[oldSocket];
-        activeUsers[id].socketId = socket.id;
+        if (rooms[activeUsers[id].roomId].team1.members[oldSocket]) {
+          rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
+            id,
+            socketId: socket.id,
+            status:
+              rooms[activeUsers[id].roomId].team1.members[oldSocket].status,
+          });
+          delete rooms[activeUsers[id].roomId].team1.members[oldSocket];
+        }
+        if (rooms[activeUsers[id].roomId].team2.members[oldSocket]) {
+          rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player({
+            id,
+            socketId: socket.id,
+            status:
+              rooms[activeUsers[id].roomId].team2.members[oldSocket].status,
+          });
+          delete rooms[activeUsers[id].roomId].team2.members[oldSocket];
+        }
 
+        activeUsers[id].socketId = socket.id;
       }
-      serverio
-      .to(activeUsers[id].roomId)
-      .emit("updateLobby", rooms[activeUsers[id].roomId]);
+      console.log(rooms[activeUsers[id].roomId], "ROOMIDDDDDDDDDDDDD");
+      serverio.to(socket.id).emit("reconnectedRoom", activeUsers[id].roomId);
+
+      if(rooms[activeUsers[id].roomId].startTime){
+        serverio.to(socket.id).emit("startedMatch")
+      }
+      serverio.to(socket.id).emit("updateLobby", rooms[activeUsers[id].roomId]);
     }
   });
 
@@ -110,7 +124,7 @@ serverio.on("connection", async (socket) => {
     // if (!activeUsers[id]) {
     let room = uuidv4().toString();
     activeUsers[id] = new User({ socketId: socket.id, room });
-    let player = new Player({ id, socketId: socket.id.toString() });
+    let player = new Player({ id, socketId: socket.id.toString(), status: false });
     rooms[room] = new Teams(socket.id, player);
     socket.join(room);
     serverio.to(room).emit("createdRoom", room);
@@ -123,7 +137,7 @@ serverio.on("connection", async (socket) => {
       Object.keys(rooms[room].team2.members).length <
       Object.keys(rooms[room].team1.members).length
     ) {
-      let player = new Player({ id, socketId: socket.id.toString() });
+      let player = new Player({ id, socketId: socket.id.toString(), status: false });
       rooms[room].team2.members[socket.id.toString()] = player;
       activeUsers[id] = new User({ socketId: socket.id, room });
       socket.join(room);
@@ -206,6 +220,7 @@ serverio.on("connection", async (socket) => {
       rooms[activeUsers[id].roomId].approved.total = team1Count * 2;
       //add timer
       rooms[activeUsers[id].roomId].startTime = new Date();
+      console.log(rooms[activeUsers[id].roomId].startTime, "THIS IS STARTTIME");
       serverio.to(activeUsers[id].roomId).emit("startedMatch");
     }
   });
@@ -299,10 +314,9 @@ serverio.on("connection", async (socket) => {
     console.log(clients, "THIS IS SOCKETS");
   });
   socket.on("disconnect", () => {
-
     if (!rooms[activeUsers[id].roomId].startTime) {
       console.log("DISCONNECT HIT");
-      console.log(rooms[activeUsers[id].roomId].startTime)
+      console.log(rooms[activeUsers[id].roomId].startTime);
       delete rooms[activeUsers[id].roomId].team1.members[socket.id];
       delete rooms[activeUsers[id].roomId].team2.members[socket.id];
       serverio
