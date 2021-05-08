@@ -109,46 +109,69 @@ serverio.on("connection", async (socket) => {
         }
 
         activeUsers[id].socketId = socket.id;
+        socket.join(activeUsers[id].roomId);
       }
       console.log(rooms[activeUsers[id].roomId], "ROOMIDDDDDDDDDDDDD");
       serverio.to(socket.id).emit("reconnectedRoom", activeUsers[id].roomId);
 
-      if(rooms[activeUsers[id].roomId].startTime){
-        serverio.to(socket.id).emit("startedMatch")
+      if (rooms[activeUsers[id].roomId].startTime) {
+        serverio.to(socket.id).emit("startedMatch");
       }
       serverio.to(socket.id).emit("updateLobby", rooms[activeUsers[id].roomId]);
     }
   });
 
   socket.on("createRoom", () => {
-    // if (!activeUsers[id]) {
-    let room = uuidv4().toString();
-    activeUsers[id] = new User({ socketId: socket.id, room });
-    let player = new Player({ id, socketId: socket.id.toString(), status: false });
-    rooms[room] = new Teams(socket.id, player);
-    socket.join(room);
-    serverio.to(room).emit("createdRoom", room);
-    serverio.to(room).emit("updateLobby", rooms[room]);
-    // }
+    if (!activeUsers[id]) {
+      let room = uuidv4().toString();
+      activeUsers[id] = new User({ socketId: socket.id, room });
+      let player = new Player({
+        id,
+        socketId: socket.id.toString(),
+        status: false,
+      });
+      rooms[room] = new Teams(socket.id, player);
+      socket.join(room);
+      serverio.to(room).emit("createdRoom", room);
+      serverio.to(room).emit("updateLobby", rooms[room]);
+    } else {
+      serverio.to(socket.id).emit("redirectReconnect");
+    }
   });
 
   socket.on("joinRoom", (room) => {
-    if (
-      Object.keys(rooms[room].team2.members).length <
-      Object.keys(rooms[room].team1.members).length
-    ) {
-      let player = new Player({ id, socketId: socket.id.toString(), status: false });
-      rooms[room].team2.members[socket.id.toString()] = player;
-      activeUsers[id] = new User({ socketId: socket.id, room });
-      socket.join(room);
+    if (!activeUsers[id]) {
+      if (
+        Object.keys(rooms[room].team2.members).length <
+        Object.keys(rooms[room].team1.members).length
+      ) {
+        let player = new Player({
+          id,
+          socketId: socket.id.toString(),
+          status: false,
+        });
+        rooms[room].team2.members[socket.id.toString()] = player;
+        activeUsers[id] = new User({ socketId: socket.id, room });
+        socket.join(room);
+      } else {
+        let player = new Player({ id, socketId: socket.id.toString() });
+        rooms[room].team1.members[socket.id.toString()] = player;
+        activeUsers[id] = new User({ socketId: socket.id, room });
+        socket.join(room);
+      }
+      console.log(rooms);
+      serverio.to(room).emit("updateLobby", rooms[activeUsers[id].roomId]);
     } else {
-      let player = new Player({ id, socketId: socket.id.toString() });
-      rooms[room].team1.members[socket.id.toString()] = player;
-      activeUsers[id] = new User({ socketId: socket.id, room });
-      socket.join(room);
+      serverio.to(socket.id).emit("redirectReconnect");
     }
-    console.log(rooms);
-    serverio.to(room).emit("updateLobby", rooms[activeUsers[id].roomId]);
+  });
+
+  socket.on("joinOptions", () => {
+    if (!activeUsers[id]) {
+      serverio.to(socket.id).emit("redirectQRCode");
+    } else {
+      serverio.to(socket.id).emit("redirectReconnect");
+    }
   });
 
   socket.on("leaveRoom", () => {
@@ -314,17 +337,19 @@ serverio.on("connection", async (socket) => {
     console.log(clients, "THIS IS SOCKETS");
   });
   socket.on("disconnect", () => {
-    if (!rooms[activeUsers[id].roomId].startTime) {
-      console.log("DISCONNECT HIT");
-      console.log(rooms[activeUsers[id].roomId].startTime);
-      delete rooms[activeUsers[id].roomId].team1.members[socket.id];
-      delete rooms[activeUsers[id].roomId].team2.members[socket.id];
-      serverio
-        .to(activeUsers[id].roomId)
-        .emit("updateLobby", rooms[activeUsers[id].roomId]);
-      delete activeUsers[id];
+    if (activeUsers[id]) {
+      if (!rooms[activeUsers[id].roomId].startTime) {
+        console.log("DISCONNECT HIT");
+        console.log(rooms[activeUsers[id].roomId].startTime);
+        delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+        delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+        serverio
+          .to(activeUsers[id].roomId)
+          .emit("updateLobby", rooms[activeUsers[id].roomId]);
+        delete activeUsers[id];
+      }
+      console.log("bye");
     }
-    console.log("bye");
   });
   // console.log("a user connected", socket.id);
 });
