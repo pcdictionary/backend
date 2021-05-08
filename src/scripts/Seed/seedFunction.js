@@ -80,6 +80,7 @@ export async function seed(
             connect: [{ id: arr[3] }, { id: arr[4] }, { id: arr[5] }],
           },
           GameType: GAMETYPES[getRndInteger(0, 5)],
+          createdAt: new Date
         },
       });
       for (let x = 0; x < arr.length; x++) {

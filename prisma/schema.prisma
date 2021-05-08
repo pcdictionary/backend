@@ -30,7 +30,8 @@ model Game {
   GameType GameType?
   userId   Int?
   User     User[]             @relation("AllUserGames", fields: [userId], references: [id])
-
+  createdAt DateTime?
+  endedAt DateTime?
   @@unique(fields: [GameType, id], name: "idGameType")
 }
 

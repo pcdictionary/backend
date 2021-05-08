@@ -9,6 +9,7 @@ import getUserId from "./utils/getUserId.js";
 import http from "http";
 import { Server } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
+import { status } from "./utils/constants.js";
 
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
@@ -52,13 +53,15 @@ function Player(userInfo) {
   this.status = userInfo.status;
 }
 
-function Teams(socketid, player) {
+function Teams(socketid, player, gameType) {
   this.team1 = { score: 0, readyCount: 0 };
   this.team1.members = { [socketid.toString()]: player };
   this.team2 = { score: 0, readyCount: 0 };
   this.team2.members = {};
   this.approved = { count: 0, total: 0, reject: 0, sockets: {} };
   this.startTime;
+  this.endTime;
+  this.gameType = gameType;
 }
 
 function User(info) {
@@ -121,7 +124,7 @@ serverio.on("connection", async (socket) => {
     }
   });
 
-  socket.on("createRoom", () => {
+  socket.on("createRoom", (gameType) => {
     if (!activeUsers[id]) {
       let room = uuidv4().toString();
       activeUsers[id] = new User({ socketId: socket.id, room });
@@ -130,7 +133,7 @@ serverio.on("connection", async (socket) => {
         socketId: socket.id.toString(),
         status: false,
       });
-      rooms[room] = new Teams(socket.id, player);
+      rooms[room] = new Teams(socket.id, player, gameType.toUpperCase());
       socket.join(room);
       serverio.to(room).emit("createdRoom", room);
       serverio.to(room).emit("updateLobby", rooms[room]);
@@ -188,14 +191,20 @@ serverio.on("connection", async (socket) => {
 
   socket.on("switchTeam", () => {
     if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-      rooms[activeUsers[id].roomId].team2.members[socket.id] = {
-        ...rooms[activeUsers[id].roomId].team1.members[socket.id],
-      };
+      rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player({
+        userId: rooms[activeUsers[id].roomId].team1.members[socket.id].userId,
+        socketId:
+          rooms[activeUsers[id].roomId].team1.members[socket.id].socketId,
+        status: rooms[activeUsers[id].roomId].team1.members[socket.id].status,
+      });
       delete rooms[activeUsers[id].roomId].team1.members[socket.id];
     } else {
-      rooms[activeUsers[id].roomId].team1.members[socket.id] = {
-        ...rooms[activeUsers[id].roomId].team2.members[socket.id],
-      };
+      rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
+        userId: rooms[activeUsers[id].roomId].team2.members[socket.id].userId,
+        socketId:
+          rooms[activeUsers[id].roomId].team2.members[socket.id].socketId,
+        status: rooms[activeUsers[id].roomId].team2.members[socket.id].status,
+      });
       delete rooms[activeUsers[id].roomId].team2.members[socket.id];
     }
     serverio
@@ -230,25 +239,49 @@ serverio.on("connection", async (socket) => {
       .emit("updateLobby", rooms[activeUsers[id].roomId]);
   });
 
-  socket.on("startMatch", () => {
-    let team1Count = Object.keys(rooms[activeUsers[id].roomId].team1.members)
-      .length;
-    let team2Count = Object.keys(rooms[activeUsers[id].roomId].team2.members)
-      .length;
+  socket.on("startMatch", async () => {
+    console.log(rooms[activeUsers[id].roomId].team1.members, "TEAM 1");
+    console.log(rooms[activeUsers[id].roomId].team2.members, "THEAM 2");
+    let team1Count = Object.values(rooms[activeUsers[id].roomId].team1.members);
+    let team2Count = Object.values(rooms[activeUsers[id].roomId].team2.members);
     if (
-      team1Count === team2Count &&
-      team2Count === rooms[activeUsers[id].roomId].team2.readyCount &&
-      team1Count === rooms[activeUsers[id].roomId].team1.readyCount
+      team1Count.length === team2Count.length &&
+      team2Count.length === rooms[activeUsers[id].roomId].team2.readyCount &&
+      team1Count.length === rooms[activeUsers[id].roomId].team1.readyCount
     ) {
-      rooms[activeUsers[id].roomId].approved.total = team1Count * 2;
+      rooms[activeUsers[id].roomId].approved.total =
+        team1Count.length + team2Count.length;
       //add timer
+
+      let team1Users = [];
+      let team2Users = [];
+      console.log(team1Count[0].userId,"TEHAM1XCOUNT")
+      for (let x = 0; x < team1Count.length; x++) {
+        team1Users.push({ id: team1Count[x].userId });
+        team2Users.push({ id: team2Count[x].userId });
+      }
+
       rooms[activeUsers[id].roomId].startTime = new Date();
+      console.log(team1Users, "TEAM1USERS")
+      const gameId = await prisma.game.create({
+        data: {
+          users: {
+            connect: team1Users,
+          },
+          users2: {
+            connect: team2Users,
+          },
+          status: status.STARTED,
+          GameType: rooms[activeUsers[id].roomId].gameType,
+          createdAt: rooms[activeUsers[id].roomId].startTime,
+        },
+      });
       console.log(rooms[activeUsers[id].roomId].startTime, "THIS IS STARTTIME");
-      serverio.to(activeUsers[id].roomId).emit("startedMatch");
+      serverio.to(activeUsers[id].roomId).emit("startedMatch", gameId.id);
     }
   });
 
-  socket.on("approveScore", (answer) => {
+  socket.on("approveScore", async ({answer, gameId}) => {
     console.log("HIT", socket.id);
 
     if (
@@ -262,6 +295,19 @@ serverio.on("connection", async (socket) => {
             rooms[activeUsers[id].roomId].approved.total >
           0.65
         ) {
+          rooms[activeUsers[id].roomId].endTime = new Date();
+          await prisma.game.update({
+            where: {
+              id: gameId,
+            },
+            data: {
+              score1: parseInt(rooms[activeUsers[id].roomId].team1.score),
+              score2: parseInt(rooms[activeUsers[id].roomId].team2.score),
+              endedAt: rooms[activeUsers[id].roomId].endTime,
+              status: status.COMPLETED
+            },
+          });
+
           //update db
           let currentMembersTeam1 = {};
           let currentMembersTeam2 = {};
@@ -287,12 +333,18 @@ serverio.on("connection", async (socket) => {
           }
           rooms[activeUsers[id].roomId].team1.members = currentMembersTeam1;
           rooms[activeUsers[id].roomId].team2.members = currentMembersTeam2;
+          rooms[activeUsers[id].roomId].team1.score = 0;
+          rooms[activeUsers[id].roomId].team2.score = 0;
+          rooms[activeUsers[id].roomId].team1.readyCount = 0;
+          rooms[activeUsers[id].roomId].team2.readyCount = 0;
           rooms[activeUsers[id].roomId].approved = {
             count: 0,
             total: 0,
             reject: 0,
             sockets: {},
           };
+          rooms[activeUsers[id].roomId].startTime = null;
+          rooms[activeUsers[id].roomId].endTime = null;
 
           //start a new room
           console.log(rooms[activeUsers[id].roomId]);
@@ -336,6 +388,7 @@ serverio.on("connection", async (socket) => {
     var clients = serverio.sockets.adapter.rooms;
     console.log(clients, "THIS IS SOCKETS");
   });
+
   socket.on("disconnect", () => {
     if (activeUsers[id]) {
       if (!rooms[activeUsers[id].roomId].startTime) {
