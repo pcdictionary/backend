@@ -4,7 +4,7 @@ export const probability = (rating1, rating2) => {
   );
 };
 
-export const EloRating = (Ra, Rb, K, d) => {
+export const EloRating = (Ra, Rb, K = 30, d = 1) => {
   const Pb = probability(Ra, Rb);
 
   const Pa = probability(Rb, Ra);
