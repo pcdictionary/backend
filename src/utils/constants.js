@@ -3,3 +3,7 @@ export const status = {
     COMPLETED: "COMPLETED",
     PENDING: "PENDING"
 }
+
+export const lowerWinner ={
+    
+}
