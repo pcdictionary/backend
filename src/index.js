@@ -445,7 +445,15 @@ serverio.on("connection", async (socket) => {
     console.log(clients, "THIS IS SOCKETS");
   });
 
-  socket.on("updateElo", () => {
+  socket.on("updateElo", async () => {
+    let currentElo = await prisma.user.findUnique({
+      where: {
+        id: id,
+      },
+      include: {
+        elo: true,
+      },
+    });
     let newElo;
     let oldElo;
     let teamAvgElo;
@@ -495,6 +503,20 @@ serverio.on("connection", async (socket) => {
 
     newElo = EloRating(oldElo, teamAvgElo, 30, d);
     console.log(newElo, "THIS IS NEW ELO", oldElo, teamAvgElo);
+    await prisma.elo.update({
+      where:{
+        userId: id
+      },
+      data:{
+        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+        eloHistory:{
+          create:{
+            eloHistory: oldElo,
+            GameType: rooms[activeUsers[id].roomId].gameType.toUpperCase()
+          }
+        }
+      }
+    })
     serverio.to(socket.id).emit("updatedElo", { oldElo, newElo: newElo.Ra });
   });
 
