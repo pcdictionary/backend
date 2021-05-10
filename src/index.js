@@ -11,6 +11,7 @@ import { Server } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
 import { lowerWinner, status } from "./utils/constants.js";
 import { EloRating, probability } from "./utils/elo.js";
+import redis from 'redis';
 
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
@@ -18,6 +19,11 @@ const prisma = new PrismaClient();
 export const schema = makeExecutableSchema({
   resolvers,
   typeDefs,
+});
+const locationStore = redis.createClient(6379);
+
+locationStore.on("error", (error) => {
+  console.error(error);
 });
 
 const app = express();
@@ -43,6 +49,7 @@ app.use(
         prisma,
         request,
         verifiedUserId: userIds ? userIds.userId : null,
+        locationStore
       },
     };
   })
@@ -265,9 +272,8 @@ serverio.on("connection", async (socket) => {
         rooms[activeUsers[id].roomId].team1.readyCount += 1;
       }
 
-      rooms[activeUsers[id].roomId].team1.members[socket.id].status = !rooms[
-        activeUsers[id].roomId
-      ].team1.members[socket.id].status;
+      rooms[activeUsers[id].roomId].team1.members[socket.id].status =
+        !rooms[activeUsers[id].roomId].team1.members[socket.id].status;
     } else {
       if (rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
         rooms[activeUsers[id].roomId].team2.readyCount -= 1;
@@ -275,9 +281,8 @@ serverio.on("connection", async (socket) => {
         rooms[activeUsers[id].roomId].team2.readyCount += 1;
       }
 
-      rooms[activeUsers[id].roomId].team2.members[socket.id].status = !rooms[
-        activeUsers[id].roomId
-      ].team2.members[socket.id].status;
+      rooms[activeUsers[id].roomId].team2.members[socket.id].status =
+        !rooms[activeUsers[id].roomId].team2.members[socket.id].status;
     }
     serverio
       .to(activeUsers[id].roomId)
@@ -317,9 +322,8 @@ serverio.on("connection", async (socket) => {
 
       rooms[activeUsers[id].roomId].startTime = new Date();
       console.log(team1Users, "TEAM1USERS");
-      const selectedGameType = rooms[
-        activeUsers[id].roomId
-      ].gameType.toUpperCase();
+      const selectedGameType =
+        rooms[activeUsers[id].roomId].gameType.toUpperCase();
       const gameId = await prisma.game.create({
         data: {
           users: {
