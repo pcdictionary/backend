@@ -5,17 +5,15 @@ export const probability = (rating1, rating2) => {
 };
 
 export const EloRating = (Ra, Rb, K = 30, d = 1) => {
-  const Pb = probability(Ra, Rb);
-
   const Pa = probability(Rb, Ra);
 
-  if (d == 1) {
+  if (d === 1) {
     Ra = Ra + K * (1 - Pa);
-    Rb = Rb + K * (0 - Pb);
-  } else {
+  } else if (d === -1) {
     Ra = Ra + K * (0 - Pa);
-    Rb = Rb + K * (1 - Pb);
+  } else if (d === 0) {
+    return { Ra: Ra };
   }
 
-  return { Ra: Math.floor(Ra, 6), Rb: Math.floor(Rb, 6) };
+  return { Ra: Math.floor(Ra, 6) };
 };

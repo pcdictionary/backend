@@ -9,7 +9,7 @@ import getUserId from "./utils/getUserId.js";
 import http from "http";
 import { Server } from "socket.io";
 import { v4 as uuidv4 } from "uuid";
-import { status } from "./utils/constants.js";
+import { lowerWinner, status } from "./utils/constants.js";
 import { EloRating, probability } from "./utils/elo.js";
 
 const { PrismaClient } = pkg;
@@ -168,7 +168,7 @@ serverio.on("connection", async (socket) => {
         },
       });
 
-      console.log(rooms[room],"LOOK FOR GAME TYPE")
+      console.log(rooms[room], "LOOK FOR GAME TYPE");
       if (
         Object.keys(rooms[room].team2.members).length <
         Object.keys(rooms[room].team1.members).length
@@ -177,14 +177,18 @@ serverio.on("connection", async (socket) => {
           id,
           socketId: socket.id.toString(),
           status: false,
-          elo: currentElo.elo[rooms[room].gameType]
+          elo: currentElo.elo[rooms[room].gameType],
         });
         rooms[room].team2.members[socket.id.toString()] = player;
         activeUsers[id] = new User({ socketId: socket.id, room });
         socket.join(room);
       } else {
-        let player = new Player({ id, socketId: socket.id.toString(), status: false,
-          elo: currentElo.elo[rooms[room].gameType] });
+        let player = new Player({
+          id,
+          socketId: socket.id.toString(),
+          status: false,
+          elo: currentElo.elo[rooms[room].gameType],
+        });
         rooms[room].team1.members[socket.id.toString()] = player;
         activeUsers[id] = new User({ socketId: socket.id, room });
         socket.join(room);
@@ -226,23 +230,27 @@ serverio.on("connection", async (socket) => {
       },
     });
     if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-      rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player({
-        userId: rooms[activeUsers[id].roomId].team1.members[socket.id].userId,
-        socketId:
-          rooms[activeUsers[id].roomId].team1.members[socket.id].socketId,
-        status: rooms[activeUsers[id].roomId].team1.members[socket.id].status,
-        elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType]
-      });
-      delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+      if (!rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
+        rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player({
+          id: id,
+          socketId:
+            rooms[activeUsers[id].roomId].team1.members[socket.id].socketId,
+          status: rooms[activeUsers[id].roomId].team1.members[socket.id].status,
+          elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
+        });
+        delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+      }
     } else {
-      rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
-        userId: rooms[activeUsers[id].roomId].team2.members[socket.id].userId,
-        socketId:
-          rooms[activeUsers[id].roomId].team2.members[socket.id].socketId,
-        status: rooms[activeUsers[id].roomId].team2.members[socket.id].status,
-        elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType]
-      });
-      delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+      if (!rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
+        rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
+          id: id,
+          socketId:
+            rooms[activeUsers[id].roomId].team2.members[socket.id].socketId,
+          status: rooms[activeUsers[id].roomId].team2.members[socket.id].status,
+          elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
+        });
+        delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+      }
     }
     serverio
       .to(activeUsers[id].roomId)
@@ -309,7 +317,9 @@ serverio.on("connection", async (socket) => {
 
       rooms[activeUsers[id].roomId].startTime = new Date();
       console.log(team1Users, "TEAM1USERS");
-      const selectedGameType= rooms[activeUsers[id].roomId].gameType.toUpperCase()
+      const selectedGameType = rooms[
+        activeUsers[id].roomId
+      ].gameType.toUpperCase();
       const gameId = await prisma.game.create({
         data: {
           users: {
@@ -381,12 +391,8 @@ serverio.on("connection", async (socket) => {
           }
           rooms[activeUsers[id].roomId].team1.members = currentMembersTeam1;
           rooms[activeUsers[id].roomId].team2.members = currentMembersTeam2;
-          rooms[activeUsers[id].roomId].team1.score = 0;
-          rooms[activeUsers[id].roomId].team2.score = 0;
           rooms[activeUsers[id].roomId].team1.readyCount = 0;
           rooms[activeUsers[id].roomId].team2.readyCount = 0;
-          rooms[activeUsers[id].roomId].team1.averageElo = 0;
-          rooms[activeUsers[id].roomId].team2.averageElo = 0;
           rooms[activeUsers[id].roomId].approved = {
             count: 0,
             total: 0,
@@ -399,9 +405,7 @@ serverio.on("connection", async (socket) => {
 
           //start a new room
           console.log(rooms[activeUsers[id].roomId]);
-          serverio
-            .to(activeUsers[id].roomId)
-            .emit("updateLobby", rooms[activeUsers[id].roomId]);
+
           serverio.to(activeUsers[id].roomId).emit("completedMatch");
         }
       } else {
@@ -443,21 +447,79 @@ serverio.on("connection", async (socket) => {
     console.log(clients, "THIS IS SOCKETS");
   });
 
-  socket.on("updateElo", () => {
+  socket.on("updateElo", async () => {
     let newElo;
     let oldElo;
     let teamAvgElo;
+    let d;
+    if (!lowerWinner[rooms[activeUsers[id].roomId].gameType]) {
+      if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+        oldElo = rooms[activeUsers[id].roomId].team1.members[socket.id].elo;
+        teamAvgElo = rooms[activeUsers[id].roomId].team2.averageElo;
+        if (
+          rooms[activeUsers[id].roomId].team1.score >
+          rooms[activeUsers[id].roomId].team2.score
+        ) {
+          d = 1;
+        } else if (
+          rooms[activeUsers[id].roomId].team1.score <
+          rooms[activeUsers[id].roomId].team2.score
+        ) {
+          d = -1;
+        } else if (
+          rooms[activeUsers[id].roomId].team1.score ===
+          rooms[activeUsers[id].roomId].team2.score
+        ) {
+          d = 0;
+        }
+      }
+      if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
+        oldElo = rooms[activeUsers[id].roomId].team2.members[socket.id].elo;
+        teamAvgElo = rooms[activeUsers[id].roomId].team1.averageElo;
+        if (
+          rooms[activeUsers[id].roomId].team2.score >
+          rooms[activeUsers[id].roomId].team1.score
+        ) {
+          d = 1;
+        } else if (
+          rooms[activeUsers[id].roomId].team2.score <
+          rooms[activeUsers[id].roomId].team1.score
+        ) {
+          d = -1;
+        } else if (
+          rooms[activeUsers[id].roomId].team2.score ===
+          rooms[activeUsers[id].roomId].team1.score
+        ) {
+          d = 0;
+        }
+      }
+    }
+
+    newElo = EloRating(oldElo, teamAvgElo, 30, d);
+    console.log(newElo, "THIS IS NEW ELO", oldElo, teamAvgElo);
+    await prisma.elo.update({
+      where: {
+        userId: id,
+      },
+      data: {
+        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+        eloHistory: {
+          create: {
+            eloHistory: oldElo,
+            GameType: rooms[activeUsers[id].roomId].gameType.toUpperCase(),
+          },
+        },
+      },
+    });
     if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-      oldElo = rooms[activeUsers[id].roomId].team1.members[socket.id].elo;
-      teamAvgElo = rooms[activeUsers[id].roomId].team2.averageElo;
+      rooms[activeUsers[id].roomId].team1.members[socket.id].elo = newElo.Ra;
+    } else {
+      rooms[activeUsers[id].roomId].team2.members[socket.id].elo = newElo.Ra;
     }
-    if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
-      oldElo = rooms[activeUsers[id].roomId].team2.members[socket.id].elo;
-      teamAvgElo = rooms[activeUsers[id].roomId].team1.averageElo;
-    }
-    newElo = EloRating(oldElo, teamAvgElo);
-    console.log(newElo, "THIS IS NEW ELO", oldElo, teamAvgElo)
     serverio.to(socket.id).emit("updatedElo", { oldElo, newElo: newElo.Ra });
+    serverio
+      .to(activeUsers[id].roomId)
+      .emit("updateLobby", rooms[activeUsers[id].roomId]);
   });
 
   socket.on("disconnect", () => {
