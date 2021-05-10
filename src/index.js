@@ -230,23 +230,27 @@ serverio.on("connection", async (socket) => {
       },
     });
     if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-      rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player({
-        userId: rooms[activeUsers[id].roomId].team1.members[socket.id].userId,
-        socketId:
-          rooms[activeUsers[id].roomId].team1.members[socket.id].socketId,
-        status: rooms[activeUsers[id].roomId].team1.members[socket.id].status,
-        elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
-      });
-      delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+      if (!rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
+        rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player({
+          id: id,
+          socketId:
+            rooms[activeUsers[id].roomId].team1.members[socket.id].socketId,
+          status: rooms[activeUsers[id].roomId].team1.members[socket.id].status,
+          elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
+        });
+        delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+      }
     } else {
-      rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
-        userId: rooms[activeUsers[id].roomId].team2.members[socket.id].userId,
-        socketId:
-          rooms[activeUsers[id].roomId].team2.members[socket.id].socketId,
-        status: rooms[activeUsers[id].roomId].team2.members[socket.id].status,
-        elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
-      });
-      delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+      if (!rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
+        rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
+          id: id,
+          socketId:
+            rooms[activeUsers[id].roomId].team2.members[socket.id].socketId,
+          status: rooms[activeUsers[id].roomId].team2.members[socket.id].status,
+          elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
+        });
+        delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+      }
     }
     serverio
       .to(activeUsers[id].roomId)
@@ -401,9 +405,7 @@ serverio.on("connection", async (socket) => {
 
           //start a new room
           console.log(rooms[activeUsers[id].roomId]);
-          serverio
-            .to(activeUsers[id].roomId)
-            .emit("updateLobby", rooms[activeUsers[id].roomId]);
+
           serverio.to(activeUsers[id].roomId).emit("completedMatch");
         }
       } else {
@@ -446,14 +448,6 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("updateElo", async () => {
-    let currentElo = await prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-      include: {
-        elo: true,
-      },
-    });
     let newElo;
     let oldElo;
     let teamAvgElo;
@@ -504,20 +498,28 @@ serverio.on("connection", async (socket) => {
     newElo = EloRating(oldElo, teamAvgElo, 30, d);
     console.log(newElo, "THIS IS NEW ELO", oldElo, teamAvgElo);
     await prisma.elo.update({
-      where:{
-        userId: id
+      where: {
+        userId: id,
       },
-      data:{
+      data: {
         [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
-        eloHistory:{
-          create:{
+        eloHistory: {
+          create: {
             eloHistory: oldElo,
-            GameType: rooms[activeUsers[id].roomId].gameType.toUpperCase()
-          }
-        }
-      }
-    })
+            GameType: rooms[activeUsers[id].roomId].gameType.toUpperCase(),
+          },
+        },
+      },
+    });
+    if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+      rooms[activeUsers[id].roomId].team1.members[socket.id].elo = newElo.Ra;
+    } else {
+      rooms[activeUsers[id].roomId].team2.members[socket.id].elo = newElo.Ra;
+    }
     serverio.to(socket.id).emit("updatedElo", { oldElo, newElo: newElo.Ra });
+    serverio
+      .to(activeUsers[id].roomId)
+      .emit("updateLobby", rooms[activeUsers[id].roomId]);
   });
 
   socket.on("disconnect", () => {
