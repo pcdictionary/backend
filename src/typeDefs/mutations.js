@@ -5,7 +5,7 @@ const typeDefs = gql`
     createUser(data: CreateUserInput): AuthPayload!
     updateUser(data: UpdateUserInput): ReturnUser!
     deleteUser: ReturnUser!
-    set: String
+    setCheckin(location: String, sport: String): String!
   }
 `;
 
