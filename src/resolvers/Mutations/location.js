@@ -1,22 +1,29 @@
-const location = {
-  async setCheckin(parent, args, { locationStore, verifiedUserId }, info) {
+import { locationStore } from "../../index.js";
+
+export const location = {
+  async setCheckin(parent, args, { verifiedUserId }, info) {
     try {
+      console.log("mutation also hit");
       //create park
       const value = await locationStore.get(args.location);
       if (value == undefined) {
         // handle miss!
-        await locationStore.set(args.location, {verifiedUserId: args.sport}, 0)
+        console.log("value doesnt exist");
+        await locationStore.set(
+          args.location,
+          { [verifiedUserId]: args.sport },
+          3600
+        );
+      } else {
+        console.log("value exists");
+        value[verifiedUserId] = args.sport;
+        await locationStore.set(args.location, value, 3600);
       }
-      else{
-        value[verifiedUserId] = args.sport
-        await locationStore.set(args.location, value, 0)
-      }
-      await locationStore.set(verifiedUserId, args.location, 3600)
-      return "works";
+
+      const test = await locationStore.set(verifiedUserId, args.location, 3600);
+      return { values: "yolo" };
     } catch (error) {
       return error;
     }
   },
 };
-
-export default location;

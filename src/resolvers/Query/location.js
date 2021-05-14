@@ -1,17 +1,17 @@
-function ParkUser(userInfo) {
-  this.sport = userInfo.sport;
-}
-
-const location = {
-  async getParksData(parent, args, { locationStore, verifiedUserId }, info) {
+import { locationStore } from "../../index.js";
+export const location = {
+  async getParksData(parent, args, { verifiedUserId }, info) {
     try {
-        const value = await locationStore.mget( args.locations );
+      console.log("THIS IS HIT", args.locations);
+      const mykeys = await locationStore.keys();
 
-      return JSON.stringify(value);
+      console.log(mykeys);
+      const value = await locationStore.mget(args.locations);
+      const strValue = JSON.stringify(value);
+      console.log(strValue, "THIS IS TRVALUE");
+      return { values: strValue };
     } catch (error) {
       return error;
     }
   },
 };
-
-export default location;

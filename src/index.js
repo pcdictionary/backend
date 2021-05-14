@@ -20,7 +20,8 @@ export const schema = makeExecutableSchema({
   resolvers,
   typeDefs,
 });
-const locationStore = new NodeCache();
+
+export const locationStore = new NodeCache();
 
 locationStore.on("expired", async (key, value) => {
   const currentPark = await locationStore.get(value);
@@ -59,7 +60,6 @@ app.use(
         prisma,
         request,
         verifiedUserId: userIds ? userIds.userId : null,
-        locationStore,
       },
     };
   })

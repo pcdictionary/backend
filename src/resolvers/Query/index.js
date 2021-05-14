@@ -1,4 +1,4 @@
-import location from "../Query/location.js";
+import { location } from "./location.js";
 import elo from "./elo.js";
 import games from "./games.js";
 import user from "./user.js";
