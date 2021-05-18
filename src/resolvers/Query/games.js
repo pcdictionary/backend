@@ -20,7 +20,7 @@ const games = {
   async getAllMatches(parent, args, { prisma }, info) {
     try {
       let query = {};
-      if (args.data.id) query = { id: args.data.id };
+      if (args.data.username) query = { userName: args.data.username };
       else return new Error("Invalid search parameters");
       const foundMatches = await prisma.user.findUnique({
         where: {

@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 const typeDefs = gql`
     input GetEloHistoryInput{
-        id: Int!
+        username: String!
         GameType: GameType!
     }
     type EloHistory {

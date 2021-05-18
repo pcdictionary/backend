@@ -11,13 +11,14 @@ export const location = {
         console.log("value doesnt exist");
         await locationStore.set(
           args.location,
-          { [verifiedUserId]: args.sport },
-          3600
+          { [verifiedUserId]: args.sport, count: 1 },
+          0
         );
       } else {
         console.log("value exists");
         value[verifiedUserId] = args.sport;
-        await locationStore.set(args.location, value, 3600);
+        value.count = value.count + 1
+        await locationStore.set(args.location, value, 0);
       }
 
       const test = await locationStore.set(verifiedUserId, args.location, 3600);

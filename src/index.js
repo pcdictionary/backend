@@ -26,6 +26,7 @@ export const locationStore = new NodeCache();
 locationStore.on("expired", async (key, value) => {
   const currentPark = await locationStore.get(value);
   delete currentPark[value][key];
+  currentPark[value].count = currentPark[value].count - 1
   if (Object.keys(currentPark).length === 0) {
     await locationStore.del(value);
   } else {
