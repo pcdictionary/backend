@@ -5,7 +5,7 @@ const elo = {
     
           const foundElo = await prisma.elo.findUnique({
             where: {
-              userId: args.data.id,
+              username: args.data.username,
             },
             include:{
                 eloHistory:{

@@ -2,7 +2,7 @@ import gql from "graphql-tag";
 
 const typeDefs = gql`
   input GetAllMatchesInput {
-    id: Int!
+    username: String!
     GameType: GameType!
   }
   type Game {

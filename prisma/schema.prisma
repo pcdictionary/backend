@@ -12,7 +12,7 @@ model User {
   email     String @unique
   firstName String
   lastName  String
-  userName  String
+  userName  String @unique
   password  String
   elo       Elo?
   games     Game[] @relation("UserGame")
@@ -42,8 +42,8 @@ model Elo {
   Soccer     Int?         @default(1200)
   Tennis     Int?         @default(1200)
   PingPong   Int?         @default(1200)
-  user       User         @relation(fields: [userId], references: [id])
-  userId     Int          @unique
+  user       User         @relation(fields: [username], references: [userName])
+  username   String       @unique
   eloHistory EloHistory[]
 }
 
