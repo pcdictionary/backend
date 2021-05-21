@@ -26,7 +26,7 @@ export const locationStore = new NodeCache();
 locationStore.on("expired", async (key, value) => {
   const currentPark = await locationStore.get(value);
   delete currentPark[value][key];
-  currentPark[value].count = currentPark[value].count - 1
+  currentPark[value].count = currentPark[value].count - 1;
   if (Object.keys(currentPark).length === 0) {
     await locationStore.del(value);
   } else {
@@ -71,6 +71,7 @@ function Player(userInfo) {
   this.socketId = userInfo.socketId;
   this.status = userInfo.status;
   this.elo = userInfo.elo;
+  this.username = userInfo.username;
 }
 
 function Teams(socketid, player, gameType) {
@@ -88,6 +89,7 @@ function Teams(socketid, player, gameType) {
 function User(info) {
   this.socketId = info.socketId;
   this.roomId = info.room;
+  this.username = info.username;
 }
 
 const server = http.createServer(app);
@@ -111,8 +113,6 @@ serverio.on("connection", async (socket) => {
       console.log(socket.id, oldSocket, "SOCKETID and OLD SOCKET");
 
       if (socket.id !== oldSocket) {
-        console.log(socket.id, "NEW ID");
-        console.log(oldSocket, "OLDID");
         if (rooms[activeUsers[id].roomId].team1.members[oldSocket]) {
           rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
             id,
@@ -120,6 +120,8 @@ serverio.on("connection", async (socket) => {
             status:
               rooms[activeUsers[id].roomId].team1.members[oldSocket].status,
             elo: rooms[activeUsers[id].roomId].team1.members[oldSocket].elo,
+            username:
+              rooms[activeUsers[id].roomId].team1.members[oldSocket].username,
           });
           delete rooms[activeUsers[id].roomId].team1.members[oldSocket];
         }
@@ -130,6 +132,8 @@ serverio.on("connection", async (socket) => {
             status:
               rooms[activeUsers[id].roomId].team2.members[oldSocket].status,
             elo: rooms[activeUsers[id].roomId].team2.members[oldSocket].elo,
+            username:
+              rooms[activeUsers[id].roomId].team2.members[oldSocket].username,
           });
           delete rooms[activeUsers[id].roomId].team2.members[oldSocket];
         }
@@ -157,14 +161,18 @@ serverio.on("connection", async (socket) => {
           elo: true,
         },
       });
-      console.log(currentElo.elo[gameType]);
       let room = uuidv4().toString();
-      activeUsers[id] = new User({ socketId: socket.id, room });
+      activeUsers[id] = new User({
+        socketId: socket.id,
+        room,
+        username: currentElo.userName,
+      });
       let player = new Player({
         id,
         socketId: socket.id.toString(),
         status: false,
         elo: currentElo.elo[gameType],
+        username: currentElo.userName,
       });
       rooms[room] = new Teams(socket.id, player, gameType);
       socket.join(room);
@@ -186,7 +194,6 @@ serverio.on("connection", async (socket) => {
         },
       });
 
-      console.log(rooms[room], "LOOK FOR GAME TYPE");
       if (
         Object.keys(rooms[room].team2.members).length <
         Object.keys(rooms[room].team1.members).length
@@ -196,9 +203,14 @@ serverio.on("connection", async (socket) => {
           socketId: socket.id.toString(),
           status: false,
           elo: currentElo.elo[rooms[room].gameType],
+          username: currentElo.userName,
         });
         rooms[room].team2.members[socket.id.toString()] = player;
-        activeUsers[id] = new User({ socketId: socket.id, room });
+        activeUsers[id] = new User({
+          socketId: socket.id,
+          room,
+          username: currentElo.userName,
+        });
         socket.join(room);
       } else {
         let player = new Player({
@@ -206,9 +218,14 @@ serverio.on("connection", async (socket) => {
           socketId: socket.id.toString(),
           status: false,
           elo: currentElo.elo[rooms[room].gameType],
+          username: currentElo.userName,
         });
         rooms[room].team1.members[socket.id.toString()] = player;
-        activeUsers[id] = new User({ socketId: socket.id, room });
+        activeUsers[id] = new User({
+          socketId: socket.id,
+          room,
+          username: currentElo.userName,
+        });
         socket.join(room);
       }
       console.log(rooms);
@@ -255,6 +272,7 @@ serverio.on("connection", async (socket) => {
             rooms[activeUsers[id].roomId].team1.members[socket.id].socketId,
           status: rooms[activeUsers[id].roomId].team1.members[socket.id].status,
           elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
+          username: currentElo.userName,
         });
         delete rooms[activeUsers[id].roomId].team1.members[socket.id];
       }
@@ -266,6 +284,7 @@ serverio.on("connection", async (socket) => {
             rooms[activeUsers[id].roomId].team2.members[socket.id].socketId,
           status: rooms[activeUsers[id].roomId].team2.members[socket.id].status,
           elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
+          username: currentElo.userName,
         });
         delete rooms[activeUsers[id].roomId].team2.members[socket.id];
       }
@@ -316,13 +335,15 @@ serverio.on("connection", async (socket) => {
 
       let team1Users = [];
       let team2Users = [];
+      let allTeamIds = [];
       let team1EloSum = 0;
       let team2EloSum = 0;
       console.log(team1Count[0].userId, "TEHAM1XCOUNT");
       for (let x = 0; x < team1Count.length; x++) {
         team1Users.push({ id: team1Count[x].userId });
         team2Users.push({ id: team2Count[x].userId });
-
+        allTeamIds.push(team2Count[x].userId);
+        allTeamIds.push(team1Count[x].userId);
         team1EloSum += team1Count[x].elo;
         team2EloSum += team2Count[x].elo;
       }
@@ -348,6 +369,21 @@ serverio.on("connection", async (socket) => {
           createdAt: rooms[activeUsers[id].roomId].startTime,
         },
       });
+      for (let x = 0; x < allTeamIds.length; x++) {
+        await prisma.user.update({
+          where: {
+            id: allTeamIds[x],
+          },
+          data: {
+            allGames: {
+              connect: {
+                id: gameId.id,
+              },
+            },
+          },
+        });
+      }
+
       rooms[activeUsers[id].roomId].gameId = gameId.id;
       console.log(rooms[activeUsers[id].roomId].startTime, "THIS IS STARTTIME");
       serverio.to(activeUsers[id].roomId).emit("startedMatch");
@@ -355,8 +391,6 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("approveScore", async ({ answer }) => {
-    console.log("HIT", socket.id);
-
     if (
       rooms[activeUsers[id].roomId].approved.sockets[socket.id] === undefined
     ) {
@@ -385,12 +419,10 @@ serverio.on("connection", async (socket) => {
           let currentMembersTeam1 = {};
           let currentMembersTeam2 = {};
           var clients = serverio.sockets.adapter.rooms;
-          console.log(clients.get(activeUsers[id].roomId));
           let activeClients = clients.get(activeUsers[id].roomId);
           let activeClientsValues = activeClients.values();
           for (let x = 0; x < activeClients.size; x++) {
             let cur = activeClientsValues.next().value;
-            console.log(cur, "this is cur");
             if (rooms[activeUsers[id].roomId].team1.members[cur]) {
               currentMembersTeam1[cur] = {
                 ...rooms[activeUsers[id].roomId].team1.members[cur],
@@ -419,7 +451,6 @@ serverio.on("connection", async (socket) => {
           rooms[activeUsers[id].roomId].endTime = null;
 
           //start a new room
-          console.log(rooms[activeUsers[id].roomId]);
 
           serverio.to(activeUsers[id].roomId).emit("completedMatch");
         }
@@ -459,7 +490,6 @@ serverio.on("connection", async (socket) => {
   });
   socket.on("test", () => {
     var clients = serverio.sockets.adapter.rooms;
-    console.log(clients, "THIS IS SOCKETS");
   });
 
   socket.on("updateElo", async () => {
@@ -511,10 +541,10 @@ serverio.on("connection", async (socket) => {
     }
 
     newElo = EloRating(oldElo, teamAvgElo, 30, d);
-    console.log(newElo, "THIS IS NEW ELO", oldElo, teamAvgElo);
+    console.log(activeUsers[id].username, "USERNAME");
     await prisma.elo.update({
       where: {
-        userId: id,
+        username: activeUsers[id].username,
       },
       data: {
         [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
