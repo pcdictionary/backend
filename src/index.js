@@ -484,10 +484,12 @@ serverio.on("connection", async (socket) => {
       rooms[activeUsers[id].roomId].endTime -
       rooms[activeUsers[id].roomId].startTime;
 
-    serverio
+    socket
       .to(activeUsers[id].roomId)
       .emit("finalizedScore", { team1Score, team2Score, timer });
+    serverio.to(activeUsers[id].socketId).emit("finalizedScoreUser", { team1Score, team2Score, timer })
   });
+
   socket.on("test", () => {
     var clients = serverio.sockets.adapter.rooms;
   });
@@ -584,5 +586,5 @@ serverio.on("connection", async (socket) => {
   });
   // console.log("a user connected", socket.id);
 });
-const hostname = "192.168.0.112";
+const hostname = "192.168.0.109";
 server.listen(4000, hostname, () => [console.log("Server is running")]);

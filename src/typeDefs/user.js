@@ -14,6 +14,7 @@ const typeDefs = gql`
     email:      String
     password:   String
     userName:   String
+    phoneNumber: String
   }
   type ReturnUser {
     id: Int!

@@ -25,6 +25,9 @@ const user = {
         where: {
           email: args.data.email,
         },
+        include: {
+          elo: true,
+        },
       });
 
       if (!user) {
@@ -34,7 +37,7 @@ const user = {
       if (!isMatch) {
         throw new Error("Unable to login.");
       }
-      console.log(user,"THIS IS USER")
+      console.log(user, "THIS IS USER");
       return {
         user,
         token: generateAuthToken(user.id),
