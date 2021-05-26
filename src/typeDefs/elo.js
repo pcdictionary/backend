@@ -8,7 +8,7 @@ const typeDefs = gql`
         Basketball: Int
         Soccer:     Int
         Tennis:     Int
-        PingPong:   Int
+        Pingpong:   Int
         user:       User
         userId:     Int
         eloHistory: [EloHistory]!

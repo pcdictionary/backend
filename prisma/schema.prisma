@@ -41,7 +41,7 @@ model Elo {
   Basketball Int?         @default(1200)
   Soccer     Int?         @default(1200)
   Tennis     Int?         @default(1200)
-  PingPong   Int?         @default(1200)
+  Pingpong   Int?         @default(1200)
   user       User         @relation(fields: [username], references: [userName])
   username   String       @unique
   eloHistory EloHistory[]

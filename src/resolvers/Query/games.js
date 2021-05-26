@@ -1,5 +1,7 @@
 // import { Game } from '@prisma/client'
 
+// import { GAMETYPES } from "../../utils/constants";
+
 const games = {
   async getMatch(parent, args, { prisma }, info) {
     try {
@@ -35,14 +37,48 @@ const games = {
             orderBy: {
               id: "desc",
             },
-            include:{
+            include: {
               users: true,
-              users2: true
-            }
+              users2: true,
+            },
           },
         },
       });
-      return foundMatches.allGames ? foundMatches.allGames : new Error("This User has no recorded games");
+      return foundMatches.allGames
+        ? foundMatches.allGames
+        : new Error("This User has no recorded games");
+    } catch (error) {
+      return error;
+    }
+  },
+  async getMatchesCount(parent, args, { prisma, verifiedUserId }, info) {
+    try {
+      const GAMETYPES = ["HANDBALL", "BASKETBALL", "SOCCER", "TENNIS", "PINGPONG"]
+      let allGames = []
+      console.log("ME HIT")
+      const {userName} = await prisma.user.findUnique({
+        where: {
+          id: verifiedUserId,
+        },
+      });
+      console.log({userName})
+      for (let x = 0; x < GAMETYPES.length; x++){
+        const sport = await prisma.elo.findUnique({
+          where: {
+            username: userName,
+          },
+          include: {
+            eloHistory: {
+              where: {
+                GameType: GAMETYPES[x],
+              },
+            },
+          },
+        });
+        allGames.push(sport)
+      }
+      console.log(allGames,"THIS IS ALL GAMES")
+      return allGames;
     } catch (error) {
       return error;
     }

@@ -7,3 +7,5 @@ export const status = {
 export const lowerWinner ={
     
 }
+
+export const GAMETYPES = ["HANDBALL", "BASKETBALL", "SOCCER", "TENNIS", "PINGPONG"]

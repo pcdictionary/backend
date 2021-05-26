@@ -9,6 +9,7 @@ const typeDefs = gql`
     getAllMatches(data: GetAllMatchesInput): [Game]!
     getEloHistory(data: GetEloHistoryInput): Elo
     getParksData(locations: [String]): Location
+    getMatchesCount: [Elo]!
   }
 `;
 

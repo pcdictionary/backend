@@ -4,6 +4,7 @@ const typeDefs = gql`
     input GetEloHistoryInput{
         username: String!
         GameType: GameType!
+        datapoints: Int!
     }
     type EloHistory {
         id: Int
