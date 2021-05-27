@@ -37,6 +37,8 @@ const typeDefs = gql`
     lastName:   String!
     password:   String!
     userName:   String!
+    phoneNumber: String
+    status: AccountStatus
     elo:        Elo
     games:      [Game]
     games2:     [Game]

@@ -16,34 +16,38 @@ const user = {
           elo: true,
         },
       });
+      console.log(args.data.phoneNumber, "PHONeNUMBER");
       const data = await clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verifications.create({
           to: `+${args.data.phoneNumber}`,
           channel: "sms",
         });
-      console.log(data);
+      console.log(data, "DATA");
       return { user, token: generateAuthToken(user.id) };
     } catch (error) {
       return error;
     }
   },
   async newCode(parent, args, { prisma, clientTwilio, verifiedUserId }, info) {
-    console.log(verifiedUserId, "VERIFIEDUSERID");
-    const user = await prisma.user.findUnique({
-      where: {
-        id: verifiedUserId,
-      },
-    });
-    await clientTwilio.verify
-      .services(process.env.TWILIO_SERVICE_ID)
-      .verifications.create({
-        to: `+${args.phoneNumber}`,
-        code: "sms",
+    try {
+      const user = await prisma.user.findUnique({
+        where: {
+          id: verifiedUserId,
+        },
       });
-    return user;
+      // console.log(args.phoneNumber, "PHONE NYUBER");
+      clientTwilio.verify
+        .services(process.env.TWILIO_SERVICE_ID)
+        .verifications.create({
+          to: `+${args.phoneNumber}`,
+          channel: "sms",
+        });
+      return user;
+    } catch (error) {
+      return error;
+    }
   },
-
   async verifyUser(
     parent,
     args,
@@ -51,33 +55,39 @@ const user = {
     info
   ) {
     try {
-      let user;
-      user = await prisma.user.findUnique({
+      let user = await prisma.user.findUnique({
         where: {
           id: verifiedUserId,
         },
+        include: {
+          elo: true,
+        },
       });
-      console.log(user, args.code);
-      const { status } = await clientTwilio.verify
+      console.log(user);
+
+      const test = clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verificationChecks.create({
-          to: `+${user.phoneNumber}`,
+          to: `+${args.phoneNumber}`,
           code: args.code,
+        })
+        .then(async (verification) => {
+          console.log("verification hit", verification);
+          if (verification.status === "approved") {
+            console.log("APPROVED HIT");
+            user = await prisma.user.update({
+              where: {
+                id: verifiedUserId,
+              },
+              data: {
+                status: "CONFIRMED",
+              },
+              include: {
+                elo: true,
+              },
+            });
+          }
         });
-      console.log(status, "STATUS");
-      if (status === "approved") {
-        user = await prisma.user.update({
-          where: {
-            id: verifiedUserId,
-          },
-          data: {
-            status: "CONFIRMED",
-          },
-        });
-      }
-      if (!user) {
-        throw new Error("Unable to verify.");
-      }
       return user;
     } catch (error) {
       return error;
