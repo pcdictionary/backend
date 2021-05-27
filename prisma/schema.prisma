@@ -8,30 +8,33 @@ datasource db {
 }
 
 model User {
-  id        Int    @id @default(autoincrement())
-  email     String @unique
-  firstName String
-  lastName  String
-  userName  String @unique
-  password  String
-  elo       Elo?
-  games     Game[] @relation("UserGame")
-  games2    Game[] @relation("UserGame2")
-  allGames  Game[] @relation("AllUserGames")
+  id          Int    @id @default(autoincrement())
+  email       String @unique
+  firstName   String
+  lastName    String
+  userName    String @unique
+  password    String
+  phoneNumber String? @unique
+  status      AccountStatus @default(INCOMPLETE)
+  elo         Elo?
+  games       Game[] @relation("UserGame")
+  games2      Game[] @relation("UserGame2")
+  allGames    Game[] @relation("AllUserGames")
 }
 
 model Game {
-  id       Int                @id @default(autoincrement())
-  status   VerificationStatus @default(PENDING)
-  users    User[]             @relation("UserGame")
-  users2   User[]             @relation("UserGame2")
-  score1   Int?
-  score2   Int?
-  GameType GameType?
-  userId   Int?
-  User     User[]             @relation("AllUserGames", fields: [userId], references: [id])
+  id        Int                @id @default(autoincrement())
+  status    VerificationStatus @default(PENDING)
+  users     User[]             @relation("UserGame")
+  users2    User[]             @relation("UserGame2")
+  score1    Int?
+  score2    Int?
+  GameType  GameType?
+  userId    Int?
+  User      User[]             @relation("AllUserGames", fields: [userId], references: [id])
   createdAt DateTime?
-  endedAt DateTime?
+  endedAt   DateTime?
+
   @@unique(fields: [GameType, id], name: "idGameType")
 }
 
@@ -48,11 +51,11 @@ model Elo {
 }
 
 model EloHistory {
-  id       Int            @id @default(autoincrement())
-  History  Elo       @relation(fields: [eloId], references: [id])
-  eloId    Int
-  eloHistory      Int
-  GameType GameType?
+  id         Int       @id @default(autoincrement())
+  History    Elo       @relation(fields: [eloId], references: [id])
+  eloId      Int
+  eloHistory Int
+  GameType   GameType?
 }
 
 enum GameType {
@@ -67,4 +70,10 @@ enum VerificationStatus {
   PENDING
   STARTED
   COMPLETED
+}
+
+enum AccountStatus {
+  INCOMPLETE
+  CONFIRMED
+  BANNED
 }

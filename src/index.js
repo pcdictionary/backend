@@ -12,6 +12,11 @@ import { v4 as uuidv4 } from "uuid";
 import { lowerWinner, status } from "./utils/constants.js";
 import { EloRating } from "./utils/elo.js";
 import NodeCache from "node-cache";
+import dotenv from "dotenv"
+import twilio from "twilio"
+dotenv.config()
+
+const clientTwilio = twilio(process.env.TWILIO_ACCOUNT_SID, process.env.TWILIO_AUTH_TOKEN)
 
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
@@ -61,6 +66,7 @@ app.use(
         prisma,
         request,
         verifiedUserId: userIds ? userIds.userId : null,
+        clientTwilio
       },
     };
   })
@@ -491,7 +497,6 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("test", () => {
-    var clients = serverio.sockets.adapter.rooms;
   });
 
   socket.on("updateElo", async () => {
