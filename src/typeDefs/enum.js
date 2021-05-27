@@ -12,6 +12,11 @@ const typeDefs = gql`
     STARTED
     COMPLETED
   }
+  enum AccountStatus{
+    INCOMPLETE
+    CONFIRMED
+    BANNED
+  }
 `;
 
 export default typeDefs;
