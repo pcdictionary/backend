@@ -7,6 +7,7 @@ const typeDefs = gql`
     getUserSummary(id: Int, userName: String): ReturnUser!
     getMatch(id: Int): Game!
     getAllMatches(data: GetAllMatchesInput): [Game]!
+    getAllMatchesPagination(data: GetAllMatchesPaginationInput): [Game]!
     getEloHistory(data: GetEloHistoryInput): Elo
     getParksData(locations: [String]): Location
     getMatchesCount: [Elo]!

@@ -5,7 +5,13 @@ const typeDefs = gql`
     username: String!
     GameType: GameType!
   }
+  input GetAllMatchesPaginationInput{
+    username: String!
+    GameType: GameType!
+    page: Int!
+  }
   type Game {
+    id: Int!
     status: VerificationStatus
     GameType: GameType
     score1: Int

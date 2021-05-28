@@ -44,6 +44,45 @@ const games = {
           },
         },
       });
+
+      return foundMatches.allGames
+        ? foundMatches.allGames
+        : new Error("This User has no recorded games");
+    } catch (error) {
+      return error;
+    }
+  },
+
+  async getAllMatchesPagination(parent, args, { prisma }, info) {
+    try {
+      let query = {};
+      if (args.data.username) query = { userName: args.data.username };
+      else return new Error("Invalid search parameters");
+      const foundMatches = await prisma.user.findUnique({
+        where: {
+          ...query,
+        },
+        include: {
+          allGames: {
+            take: 5,
+            skip:1,
+            cursor:{
+              id: args.data.page
+            },
+            where: {
+              GameType: args.data.GameType,
+            },
+            orderBy: {
+              id: "desc",
+            },
+            include: {
+              users: true,
+              users2: true,
+            },
+          },
+        },
+      });
+
       return foundMatches.allGames
         ? foundMatches.allGames
         : new Error("This User has no recorded games");
