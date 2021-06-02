@@ -30,7 +30,7 @@ const games = {
         },
         include: {
           allGames: {
-            take: 3,
+            take: 5,
             where: {
               GameType: args.data.GameType,
             },
@@ -94,7 +94,6 @@ const games = {
     try {
       const GAMETYPES = ["HANDBALL", "BASKETBALL", "SOCCER", "TENNIS", "PINGPONG"]
       let allGames = []
-      console.log("ME HIT")
       const {userName} = await prisma.user.findUnique({
         where: {
           id: verifiedUserId,
@@ -116,7 +115,6 @@ const games = {
         });
         allGames.push(sport)
       }
-      console.log(allGames,"THIS IS ALL GAMES")
       return allGames;
     } catch (error) {
       return error;

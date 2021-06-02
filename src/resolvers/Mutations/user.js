@@ -16,14 +16,12 @@ const user = {
           elo: true,
         },
       });
-      console.log(args.data.phoneNumber, "PHONeNUMBER");
       const data = await clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verifications.create({
           to: `+${args.data.phoneNumber}`,
           channel: "sms",
         });
-      console.log(data, "DATA");
       return { user, token: generateAuthToken(user.id) };
     } catch (error) {
       return error;
@@ -55,26 +53,23 @@ const user = {
     info
   ) {
     try {
-      let user = await prisma.user.findUnique({
-        where: {
-          id: verifiedUserId,
-        },
-        include: {
-          elo: true,
-        },
-      });
-      console.log(user);
-
-      const test = clientTwilio.verify
+      return clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verificationChecks.create({
           to: `+${args.phoneNumber}`,
           code: args.code,
         })
         .then(async (verification) => {
-          console.log("verification hit", verification);
+          let user = await prisma.user.findUnique({
+            where: {
+              id: verifiedUserId,
+            },
+            include: {
+              elo: true,
+            },
+          });
+
           if (verification.status === "approved") {
-            console.log("APPROVED HIT");
             user = await prisma.user.update({
               where: {
                 id: verifiedUserId,
@@ -87,8 +82,8 @@ const user = {
               },
             });
           }
+          return user
         });
-      return user;
     } catch (error) {
       return error;
     }
@@ -111,7 +106,7 @@ const user = {
       if (!isMatch) {
         throw new Error("Unable to login.");
       }
-      console.log(user, "THIS IS USER");
+
       return {
         user,
         token: generateAuthToken(user.id),

@@ -38,7 +38,6 @@ const elo = {
         },
       });
     }
-      console.log("THIS IS HIT FOR TESTING", foundElo)
       return foundElo;
     } catch (error) {
       return error;
