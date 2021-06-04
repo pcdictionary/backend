@@ -104,6 +104,7 @@ function User(info) {
   this.socketId = info.socketId;
   this.roomId = info.room;
   this.username = info.username;
+  this.reconnected = false;
 }
 
 const server = http.createServer(app);
@@ -120,85 +121,69 @@ var activeUsers = {};
 serverio.on("connection", async (socket) => {
   const id = await getUserId(socket.handshake).userId;
   console.log(id, "THIS IS ID");
+
   socket.on("reconnect", async () => {
+    console.log(id, socket.id);
+
     if (activeUsers[id]) {
+      //active player identified
+      let oldSocket = activeUsers[id].socketId;
+      if (socket.id !== oldSocket) {
+        if (rooms[activeUsers[id].roomId].team1.members[oldSocket]) {
+          rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
+            id,
+            socketId: socket.id,
+            status:
+              rooms[activeUsers[id].roomId].team1.members[oldSocket].status,
+            elo: rooms[activeUsers[id].roomId].team1.members[oldSocket].elo,
+            username:
+              rooms[activeUsers[id].roomId].team1.members[oldSocket].username,
+          });
+          delete rooms[activeUsers[id].roomId].team1.members[oldSocket];
+        }
+        if (rooms[activeUsers[id].roomId].team2.members[oldSocket]) {
+          rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player({
+            id,
+            socketId: socket.id,
+            status:
+              rooms[activeUsers[id].roomId].team2.members[oldSocket].status,
+            elo: rooms[activeUsers[id].roomId].team2.members[oldSocket].elo,
+            username:
+              rooms[activeUsers[id].roomId].team2.members[oldSocket].username,
+          });
+          delete rooms[activeUsers[id].roomId].team2.members[oldSocket];
+        }
+      }
+      activeUsers[id].socketId = socket.id;
+
+      socket.join(activeUsers[id].roomId);
+
       const gameFound = await prisma.game.findUnique({
         where: {
           id: rooms[activeUsers[id].roomId].gameId,
         },
       });
-      console.log(gameFound, "THIS IS GAMEFOUND");
       if (gameFound) {
         if (gameFound.status !== "COMPLETED") {
-          let oldSocket = activeUsers[id].socketId;
-          console.log(socket.id, oldSocket, "SOCKETID and OLD SOCKET");
-          if (socket.id !== oldSocket) {
-            if (rooms[activeUsers[id].roomId].team1.members[oldSocket]) {
-              rooms[activeUsers[id].roomId].team1.members[socket.id] =
-                new Player({
-                  id,
-                  socketId: socket.id,
-                  status:
-                    rooms[activeUsers[id].roomId].team1.members[oldSocket]
-                      .status,
-                  elo: rooms[activeUsers[id].roomId].team1.members[oldSocket]
-                    .elo,
-                  username:
-                    rooms[activeUsers[id].roomId].team1.members[oldSocket]
-                      .username,
-                });
-              delete rooms[activeUsers[id].roomId].team1.members[oldSocket];
-            }
-            if (rooms[activeUsers[id].roomId].team2.members[oldSocket]) {
-              rooms[activeUsers[id].roomId].team2.members[socket.id] =
-                new Player({
-                  id,
-                  socketId: socket.id,
-                  status:
-                    rooms[activeUsers[id].roomId].team2.members[oldSocket]
-                      .status,
-                  elo: rooms[activeUsers[id].roomId].team2.members[oldSocket]
-                    .elo,
-                  username:
-                    rooms[activeUsers[id].roomId].team2.members[oldSocket]
-                      .username,
-                });
-              delete rooms[activeUsers[id].roomId].team2.members[oldSocket];
-            }
-
-            activeUsers[id].socketId = socket.id;
-            console.log(activeUsers[id].roomId, "RECONNECT ROOMID");
-            serverio
-              .to(socket.id)
-              .emit("reconnectedRoom", activeUsers[id].roomId);
-          }
-        }
-      } else {
-        var myVar = setInterval(reconnecting, 1000);
-        let reconnectCount = 0;
-        function reconnecting() {
-          if (reconnectCount < 30) {
-            reconnectCount ++
-            if (!activeUsers[id]) {
-              serverio.to(socket.id).emit("redirectQRCode");
-            }
-          }
-          else{
-            clearInterval(myVar);
-          }
-        }
-      }
-
-      socket.join(activeUsers[id].roomId);
-
-      if (gameFound) {
-        if (gameFound.status !== "COMPLETED") {
+          //game in progress
           serverio.to(socket.id).emit("startedMatch");
-          serverio
-            .to(socket.id)
-            .emit("updateLobby", rooms[activeUsers[id].roomId]);
+          serverio.to(socket.id).emit("updateReconnect", {
+            score: {
+              team1Score: rooms[activeUsers[id].roomId].team1.score,
+              team2Score: rooms[activeUsers[id].roomId].team2.score,
+              timer: rooms[activeUsers[id].roomId].startTime,
+            },
+          });
+          serverio.to(socket.id).emit("startedMatch");
         }
       }
+
+      serverio
+        .to(activeUsers[id].roomId)
+        .emit("updateLobby", rooms[activeUsers[id].roomId]);
+    } else {
+      //player is not in a room so sent back to game home screen
+      serverio.to(socket.id).emit("noMatch");
     }
   });
 
@@ -229,71 +214,85 @@ serverio.on("connection", async (socket) => {
       rooms[room] = new Teams(socket.id, player, gameType);
       socket.join(room);
       serverio.to(room).emit("createdRoom", room);
-      serverio.to(room).emit("updateLobby", rooms[room]);
+      // serverio.to(room).emit("updateLobby", rooms[room]);
     } else {
-      serverio.to(socket.id).emit("redirectReconnect");
+      activeUsers[id].reconnected = true;
+      serverio.to(socket.id).emit("createdRoom", activeUsers[id].roomId);
+      // serverio.to(socket.id).emit("redirectReconnect");
+      // serverio.to(socket.id).emit("reconnectedRoom", activeUsers[id].roomId);
+      // serverio.to(socket.id).emit("redirectReconnect");
     }
   });
 
   socket.on("joinRoom", async (room) => {
     if (!activeUsers[id]) {
-      if (rooms[room].gameId === -1) {
-        let currentElo = await prisma.user.findUnique({
-          where: {
-            id: id,
-          },
-          include: {
-            elo: true,
-          },
-        });
+      if (rooms[room]) {
+        if (rooms[room].gameId === -1) {
+          let currentElo = await prisma.user.findUnique({
+            where: {
+              id: id,
+            },
+            include: {
+              elo: true,
+            },
+          });
 
-        if (
-          Object.keys(rooms[room].team2.members).length <
-          Object.keys(rooms[room].team1.members).length
-        ) {
-          let player = new Player({
-            id,
-            socketId: socket.id.toString(),
-            status: false,
-            elo: currentElo.elo[rooms[room].gameType],
-            username: currentElo.userName,
-          });
-          rooms[room].team2.members[socket.id.toString()] = player;
-          activeUsers[id] = new User({
-            socketId: socket.id,
-            room,
-            username: currentElo.userName,
-          });
-          socket.join(room);
-        } else {
-          let player = new Player({
-            id,
-            socketId: socket.id.toString(),
-            status: false,
-            elo: currentElo.elo[rooms[room].gameType],
-            username: currentElo.userName,
-          });
-          rooms[room].team1.members[socket.id.toString()] = player;
-          activeUsers[id] = new User({
-            socketId: socket.id,
-            room,
-            username: currentElo.userName,
-          });
-          socket.join(room);
+          if (
+            Object.keys(rooms[room].team2.members).length <
+            Object.keys(rooms[room].team1.members).length
+          ) {
+            let player = new Player({
+              id,
+              socketId: socket.id.toString(),
+              status: false,
+              elo: currentElo.elo[rooms[room].gameType],
+              username: currentElo.userName,
+            });
+            rooms[room].team2.members[socket.id.toString()] = player;
+            activeUsers[id] = new User({
+              socketId: socket.id,
+              room,
+              username: currentElo.userName,
+            });
+            socket.join(room);
+          } else {
+            let player = new Player({
+              id,
+              socketId: socket.id.toString(),
+              status: false,
+              elo: currentElo.elo[rooms[room].gameType],
+              username: currentElo.userName,
+            });
+            rooms[room].team1.members[socket.id.toString()] = player;
+            activeUsers[id] = new User({
+              socketId: socket.id,
+              room,
+              username: currentElo.userName,
+            });
+            socket.join(room);
+          }
+          console.log(rooms);
+          serverio.to(socket.id).emit("joinSuccess", room);
+          // serverio.to(room).emit("updateLobby", rooms[activeUsers[id].roomId]);
         }
-        console.log(rooms);
-        serverio.to(room).emit("updateLobby", rooms[activeUsers[id].roomId]);
+      } else {
+        serverio.to(socket.id).emit("joinError");
       }
     } else {
-      serverio.to(socket.id).emit("redirectReconnect");
+      // serverio.to(socket.id).emit("redirectReconnect");
+      // serverio.to(socket.id).emit("reconnectedRoom", activeUsers[id].roomId);
+      // serverio.to(room).emit("updateLobby", rooms[activeUsers[id].roomId]);
     }
   });
 
-  socket.on("joinOptions", () => {
+  socket.on("joinOptions", async () => {
     if (!activeUsers[id]) {
       serverio.to(socket.id).emit("redirectQRCode");
     } else {
-      serverio.to(socket.id).emit("redirectReconnect");
+      activeUsers[id].reconnected = true;
+      serverio
+        .to(socket.id)
+        .emit("reconnectedRoom", { roomId: activeUsers[id].roomId });
     }
   });
 
@@ -302,15 +301,23 @@ serverio.on("connection", async (socket) => {
     socket.leave(activeUsers[id].roomId);
 
     if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+      if (
+        rooms[activeUsers[id].roomId].team1.members[socket.id].status === true
+      ) {
+        rooms[activeUsers[id].roomId].team1.readyCount =
+          rooms[activeUsers[id].roomId].team1.readyCount - 1;
+      }
       delete rooms[activeUsers[id].roomId].team1.members[socket.id];
-      rooms[activeUsers[id].roomId].team1.readyCount =
-        rooms[activeUsers[id].roomId].team1.readyCount - 1;
     }
 
     if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
+      if (
+        rooms[activeUsers[id].roomId].team2.members[socket.id].status === true
+      ) {
+        rooms[activeUsers[id].roomId].team2.readyCount =
+          rooms[activeUsers[id].roomId].team2.readyCount - 1;
+      }
       delete rooms[activeUsers[id].roomId].team2.members[socket.id];
-      rooms[activeUsers[id].roomId].team2.readyCount =
-        rooms[activeUsers[id].roomId].team2.readyCount - 1;
     }
 
     serverio
@@ -447,7 +454,7 @@ serverio.on("connection", async (socket) => {
           },
         });
       }
-
+      rooms[activeUsers[id].roomId].toggle = true;
       rooms[activeUsers[id].roomId].gameId = gameId.id;
       console.log(rooms[activeUsers[id].roomId].startTime, "THIS IS STARTTIME");
       serverio.to(activeUsers[id].roomId).emit("startedMatch");
@@ -547,7 +554,6 @@ serverio.on("connection", async (socket) => {
     const timer =
       rooms[activeUsers[id].roomId].endTime -
       rooms[activeUsers[id].roomId].startTime;
-
     socket
       .to(activeUsers[id].roomId)
       .emit("finalizedScore", { team1Score, team2Score, timer });
@@ -607,7 +613,6 @@ serverio.on("connection", async (socket) => {
     }
 
     newElo = EloRating(oldElo, teamAvgElo, 30, d);
-    console.log(activeUsers[id].username, "USERNAME");
     await prisma.elo.update({
       where: {
         username: activeUsers[id].username,
@@ -633,46 +638,67 @@ serverio.on("connection", async (socket) => {
       .emit("updateLobby", rooms[activeUsers[id].roomId]);
   });
 
-  socket.on("disconnect", async () => {
-    console.log("DISCCONCTED MANUALLY");
-
+  socket.on("activeGameCheck", async () => {
     if (activeUsers[id]) {
+      console.log(activeUsers[id].socketId, "SOCKETID");
       const gameFound = await prisma.game.findUnique({
         where: {
           id: rooms[activeUsers[id].roomId].gameId,
         },
       });
-      console.log(gameFound, rooms[activeUsers[id].roomId].gameId);
-
-      if (rooms[activeUsers[id].roomId].startTime === null) {
-        console.log("found not found");
-
-        if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-          if (
-            rooms[activeUsers[id].roomId].team1.members[socket.id].status ===
-            true
-          ) {
-            rooms[activeUsers[id].roomId].team1.readyCount =
-              rooms[activeUsers[id].roomId].team1.readyCount - 1;
-          }
-          delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+      if (gameFound) {
+        if (gameFound.status !== "COMPLETED") {
+          serverio.to(activeUsers[id].socketId).emit("activeGameChecked", true);
         }
+      } else {
+        serverio.to(activeUsers[id].socketId).emit("activeGameChecked", false);
+      }
+    }
+  });
 
-        if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
-          if (
-            rooms[activeUsers[id].roomId].team2.members[socket.id].status ===
-            true
-          ) {
-            rooms[activeUsers[id].roomId].team2.readyCount =
-              rooms[activeUsers[id].roomId].team2.readyCount - 1;
+  socket.on("disconnect", async () => {
+    console.log("DISCCONCTED MANUALLY");
+    console.log(socket.id);
+    if (activeUsers[id]) {
+      if (activeUsers[id].reconnected) {
+        activeUsers[id].reconnected = false;
+      } else {
+        const gameFound = await prisma.game.findUnique({
+          where: {
+            id: rooms[activeUsers[id].roomId].gameId,
+          },
+        });
+        console.log(gameFound, rooms[activeUsers[id].roomId].gameId);
+
+        if (rooms[activeUsers[id].roomId].startTime === null) {
+          console.log("found not found");
+          if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+            if (
+              rooms[activeUsers[id].roomId].team1.members[socket.id].status ===
+              true
+            ) {
+              rooms[activeUsers[id].roomId].team1.readyCount =
+                rooms[activeUsers[id].roomId].team1.readyCount - 1;
+            }
+            delete rooms[activeUsers[id].roomId].team1.members[socket.id];
           }
 
-          delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+          if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
+            if (
+              rooms[activeUsers[id].roomId].team2.members[socket.id].status ===
+              true
+            ) {
+              rooms[activeUsers[id].roomId].team2.readyCount =
+                rooms[activeUsers[id].roomId].team2.readyCount - 1;
+            }
+
+            delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+          }
+          serverio
+            .to(activeUsers[id].roomId)
+            .emit("updateLobby", rooms[activeUsers[id].roomId]);
+          delete activeUsers[id];
         }
-        serverio
-          .to(activeUsers[id].roomId)
-          .emit("updateLobby", rooms[activeUsers[id].roomId]);
-        delete activeUsers[id];
       }
     }
     console.log("bye");
