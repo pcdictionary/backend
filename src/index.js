@@ -299,172 +299,222 @@ serverio.on("connection", async (socket) => {
     }
   });
 
-  socket.on("leaveRoom", () => {
+  socket.on("leaveRoom", async () => {
     console.log("LEAVEROOM HIT");
-    socket.leave(activeUsers[id].roomId);
+    if (activeUsers[id]) {
+      const gameFound = await prisma.game.findUnique({
+        where: {
+          id: rooms[activeUsers[id].roomId].gameId,
+        },
+      });
+      if (!gameFound) {
+        socket.leave(activeUsers[id].roomId);
 
-    if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-      if (
-        rooms[activeUsers[id].roomId].team1.members[socket.id].status === true
-      ) {
-        rooms[activeUsers[id].roomId].team1.readyCount =
-          rooms[activeUsers[id].roomId].team1.readyCount - 1;
+        if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+          if (
+            rooms[activeUsers[id].roomId].team1.members[socket.id].status ===
+            true
+          ) {
+            rooms[activeUsers[id].roomId].team1.readyCount =
+              rooms[activeUsers[id].roomId].team1.readyCount - 1;
+          }
+          delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+        }
+
+        if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
+          if (
+            rooms[activeUsers[id].roomId].team2.members[socket.id].status ===
+            true
+          ) {
+            rooms[activeUsers[id].roomId].team2.readyCount =
+              rooms[activeUsers[id].roomId].team2.readyCount - 1;
+          }
+          delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+        }
+
+        serverio
+          .to(activeUsers[id].roomId)
+          .emit("updateLobby", rooms[activeUsers[id].roomId]);
+        delete activeUsers[id];
       }
-      delete rooms[activeUsers[id].roomId].team1.members[socket.id];
     }
-
-    if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
-      if (
-        rooms[activeUsers[id].roomId].team2.members[socket.id].status === true
-      ) {
-        rooms[activeUsers[id].roomId].team2.readyCount =
-          rooms[activeUsers[id].roomId].team2.readyCount - 1;
-      }
-      delete rooms[activeUsers[id].roomId].team2.members[socket.id];
-    }
-
-    serverio
-      .to(activeUsers[id].roomId)
-      .emit("updateLobby", rooms[activeUsers[id].roomId]);
-    delete activeUsers[id];
   });
 
   socket.on("switchTeam", async () => {
     if (activeUsers[id]) {
-    let currentElo = await prisma.user.findUnique({
-      where: {
-        id: id,
-      },
-      include: {
-        elo: true,
-      },
-    });
-    if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-      if (!rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
-        rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player({
+      let currentElo = await prisma.user.findUnique({
+        where: {
           id: id,
-          socketId:
-            rooms[activeUsers[id].roomId].team1.members[socket.id].socketId,
-          status: rooms[activeUsers[id].roomId].team1.members[socket.id].status,
-          elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
-          username: currentElo.userName,
-        });
-        delete rooms[activeUsers[id].roomId].team1.members[socket.id];
-      }
-    } else {
-      if (!rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
-        rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
-          id: id,
-          socketId:
-            rooms[activeUsers[id].roomId].team2.members[socket.id].socketId,
-          status: rooms[activeUsers[id].roomId].team2.members[socket.id].status,
-          elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
-          username: currentElo.userName,
-        });
-        delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+        },
+        include: {
+          elo: true,
+        },
+      });
+      const gameFound = await prisma.game.findUnique({
+        where: {
+          id: rooms[activeUsers[id].roomId].gameId,
+        },
+      });
+      if (!gameFound) {
+        if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+          if (!rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
+            rooms[activeUsers[id].roomId].team2.members[socket.id] = new Player(
+              {
+                id: id,
+                socketId:
+                  rooms[activeUsers[id].roomId].team1.members[socket.id]
+                    .socketId,
+                status:
+                  rooms[activeUsers[id].roomId].team1.members[socket.id].status,
+                elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
+                username: currentElo.userName,
+              }
+            );
+            delete rooms[activeUsers[id].roomId].team1.members[socket.id];
+          }
+        } else {
+          if (!rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
+            rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player(
+              {
+                id: id,
+                socketId:
+                  rooms[activeUsers[id].roomId].team2.members[socket.id]
+                    .socketId,
+                status:
+                  rooms[activeUsers[id].roomId].team2.members[socket.id].status,
+                elo: currentElo.elo[rooms[activeUsers[id].roomId].gameType],
+                username: currentElo.userName,
+              }
+            );
+            delete rooms[activeUsers[id].roomId].team2.members[socket.id];
+          }
+        }
+        serverio
+          .to(activeUsers[id].roomId)
+          .emit("updateLobby", rooms[activeUsers[id].roomId]);
       }
     }
-    serverio
-      .to(activeUsers[id].roomId)
-      .emit("updateLobby", rooms[activeUsers[id].roomId]);
-  }
   });
 
-  socket.on("switchStatus", () => {
+  socket.on("switchStatus", async () => {
     if (activeUsers[id]) {
-      if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-        if (rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
-          rooms[activeUsers[id].roomId].team1.readyCount -= 1;
-        } else {
-          rooms[activeUsers[id].roomId].team1.readyCount += 1;
-        }
+      const gameFound = await prisma.game.findUnique({
+        where: {
+          id: rooms[activeUsers[id].roomId].gameId,
+        },
+      });
+      if (!gameFound) {
+        if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+          if (rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
+            rooms[activeUsers[id].roomId].team1.readyCount -= 1;
+          } else {
+            rooms[activeUsers[id].roomId].team1.readyCount += 1;
+          }
 
-        rooms[activeUsers[id].roomId].team1.members[socket.id].status =
-          !rooms[activeUsers[id].roomId].team1.members[socket.id].status;
-      } else {
-        if (rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
-          rooms[activeUsers[id].roomId].team2.readyCount -= 1;
+          rooms[activeUsers[id].roomId].team1.members[socket.id].status =
+            !rooms[activeUsers[id].roomId].team1.members[socket.id].status;
         } else {
-          rooms[activeUsers[id].roomId].team2.readyCount += 1;
-        }
+          if (rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
+            rooms[activeUsers[id].roomId].team2.readyCount -= 1;
+          } else {
+            rooms[activeUsers[id].roomId].team2.readyCount += 1;
+          }
 
-        rooms[activeUsers[id].roomId].team2.members[socket.id].status =
-          !rooms[activeUsers[id].roomId].team2.members[socket.id].status;
+          rooms[activeUsers[id].roomId].team2.members[socket.id].status =
+            !rooms[activeUsers[id].roomId].team2.members[socket.id].status;
+        }
+        serverio
+          .to(activeUsers[id].roomId)
+          .emit("updateLobby", rooms[activeUsers[id].roomId]);
       }
-      serverio
-        .to(activeUsers[id].roomId)
-        .emit("updateLobby", rooms[activeUsers[id].roomId]);
     }
   });
 
   socket.on("startMatch", async () => {
-    console.log(rooms[activeUsers[id].roomId].team1.members, "TEAM 1");
-    console.log(rooms[activeUsers[id].roomId].team2.members, "THEAM 2");
-    let team1Count = Object.values(rooms[activeUsers[id].roomId].team1.members);
-    let team2Count = Object.values(rooms[activeUsers[id].roomId].team2.members);
-    if (
-      team1Count.length === team2Count.length &&
-      team2Count.length === rooms[activeUsers[id].roomId].team2.readyCount &&
-      team1Count.length === rooms[activeUsers[id].roomId].team1.readyCount
-    ) {
-      rooms[activeUsers[id].roomId].approved.total =
-        team1Count.length + team2Count.length;
-      //add timer
-
-      let team1Users = [];
-      let team2Users = [];
-      let allTeamIds = [];
-      let team1EloSum = 0;
-      let team2EloSum = 0;
-      console.log(team1Count[0].userId, "TEHAM1XCOUNT");
-      for (let x = 0; x < team1Count.length; x++) {
-        team1Users.push({ id: team1Count[x].userId });
-        team2Users.push({ id: team2Count[x].userId });
-        allTeamIds.push(team2Count[x].userId);
-        allTeamIds.push(team1Count[x].userId);
-        team1EloSum += team1Count[x].elo;
-        team2EloSum += team2Count[x].elo;
-      }
-      rooms[activeUsers[id].roomId].team1.averageElo =
-        team1EloSum / team1Count.length;
-      rooms[activeUsers[id].roomId].team2.averageElo =
-        team2EloSum / team2Count.length;
-
-      rooms[activeUsers[id].roomId].startTime = new Date();
-      console.log(team1Users, "TEAM1USERS");
-      const selectedGameType =
-        rooms[activeUsers[id].roomId].gameType.toUpperCase();
-      const gameId = await prisma.game.create({
-        data: {
-          users: {
-            connect: team1Users,
-          },
-          users2: {
-            connect: team2Users,
-          },
-          status: status.STARTED,
-          GameType: selectedGameType,
-          createdAt: rooms[activeUsers[id].roomId].startTime,
+    if (activeUsers[id]) {
+      console.log(rooms[activeUsers[id].roomId].team1.members, "TEAM 1");
+      console.log(rooms[activeUsers[id].roomId].team2.members, "THEAM 2");
+      const gameFound = await prisma.game.findUnique({
+        where: {
+          id: rooms[activeUsers[id].roomId].gameId,
         },
       });
-      for (let x = 0; x < allTeamIds.length; x++) {
-        await prisma.user.update({
-          where: {
-            id: allTeamIds[x],
-          },
-          data: {
-            allGames: {
-              connect: {
-                id: gameId.id,
+      if (!gameFound) {
+        let team1Count = Object.values(
+          rooms[activeUsers[id].roomId].team1.members
+        );
+        let team2Count = Object.values(
+          rooms[activeUsers[id].roomId].team2.members
+        );
+        if (
+          team1Count.length === team2Count.length &&
+          team2Count.length ===
+            rooms[activeUsers[id].roomId].team2.readyCount &&
+          team1Count.length === rooms[activeUsers[id].roomId].team1.readyCount
+        ) {
+          rooms[activeUsers[id].roomId].approved.total =
+            team1Count.length + team2Count.length;
+          //add timer
+
+          let team1Users = [];
+          let team2Users = [];
+          let allTeamIds = [];
+          let team1EloSum = 0;
+          let team2EloSum = 0;
+          console.log(team1Count[0].userId, "TEHAM1XCOUNT");
+          for (let x = 0; x < team1Count.length; x++) {
+            team1Users.push({ id: team1Count[x].userId });
+            team2Users.push({ id: team2Count[x].userId });
+            allTeamIds.push(team2Count[x].userId);
+            allTeamIds.push(team1Count[x].userId);
+            team1EloSum += team1Count[x].elo;
+            team2EloSum += team2Count[x].elo;
+          }
+          rooms[activeUsers[id].roomId].team1.averageElo =
+            team1EloSum / team1Count.length;
+          rooms[activeUsers[id].roomId].team2.averageElo =
+            team2EloSum / team2Count.length;
+
+          rooms[activeUsers[id].roomId].startTime = new Date();
+          console.log(team1Users, "TEAM1USERS");
+          const selectedGameType =
+            rooms[activeUsers[id].roomId].gameType.toUpperCase();
+          const gameId = await prisma.game.create({
+            data: {
+              users: {
+                connect: team1Users,
               },
+              users2: {
+                connect: team2Users,
+              },
+              status: status.STARTED,
+              GameType: selectedGameType,
+              createdAt: rooms[activeUsers[id].roomId].startTime,
             },
-          },
-        });
+          });
+          for (let x = 0; x < allTeamIds.length; x++) {
+            await prisma.user.update({
+              where: {
+                id: allTeamIds[x],
+              },
+              data: {
+                allGames: {
+                  connect: {
+                    id: gameId.id,
+                  },
+                },
+              },
+            });
+          }
+          rooms[activeUsers[id].roomId].toggle = true;
+          rooms[activeUsers[id].roomId].gameId = gameId.id;
+          console.log(
+            rooms[activeUsers[id].roomId].startTime,
+            "THIS IS STARTTIME"
+          );
+          serverio.to(activeUsers[id].roomId).emit("startedMatch");
+        }
       }
-      rooms[activeUsers[id].roomId].toggle = true;
-      rooms[activeUsers[id].roomId].gameId = gameId.id;
-      console.log(rooms[activeUsers[id].roomId].startTime, "THIS IS STARTTIME");
-      serverio.to(activeUsers[id].roomId).emit("startedMatch");
     }
   });
 
