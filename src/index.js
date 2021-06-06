@@ -788,5 +788,8 @@ serverio.on("connection", async (socket) => {
   });
   console.log("a user connected", socket.id);
 });
-const hostname = "192.168.0.113";
-server.listen(4000, hostname, () => [console.log("Server is running")]);
+// const hostname = "192.168.0.113";
+// server.listen(4000, hostname, () => [console.log("Server is running")]);
+server.listen(process.env.PORT || 4000, ()=>{
+  console.log("SERVER IS RUNING")
+})
