@@ -1,1 +1,1 @@
-web: node src/scripts/Seed/seed.js
+web: rm -r prisma/migrations/* && npm run dump & prisma migrate dev --preview-feature && node src/index.js
