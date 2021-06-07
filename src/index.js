@@ -50,7 +50,7 @@ const app = express();
 
 app.use(
   cors({
-    origin: "exp://exp.host/@itizidon/frontend",
+    origin: "http://localhost:19002",
     credentials: true,
   })
 );
@@ -110,7 +110,7 @@ function User(info) {
 const server = http.createServer(app);
 const serverio = new Server(server, {
   cors: {
-    origin: "exp://exp.host/@itizidon/frontend",
+    origin: "http://localhost:19002",
     methods: ["GET", "POST"],
     allowedHeaders: ["Allow-Cors"],
     credentials: true,
