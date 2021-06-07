@@ -1,1 +1,3 @@
-web: rm -r prisma/migrations/* && npm run dump & prisma migrate dev --preview-feature && node src/index.js
+web: npm start
+
+release: npx prisma migrate deploy
