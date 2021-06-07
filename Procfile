@@ -1,3 +1,3 @@
 web: npm start
 
-release: npx prisma migrate dev --name init
+release: npx prisma db push --preview-feature
