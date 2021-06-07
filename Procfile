@@ -1,3 +1,3 @@
 web: npm start
 
-release: npx prisma db push --preview-feature
+release: npx prisma db push
