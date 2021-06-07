@@ -1,4 +1,3 @@
-
 /**
  * @jest-environment node
  */
@@ -6,11 +5,13 @@
 import jwt from "jsonwebtoken";
 
 const getUserId = (request) => {
-  const cookie = request.headers.cookie==="null" ? null: request.headers.cookie ;
+  const cookie =
+    request.headers.cookie === "null" ? null : request.headers.cookie;
   if (cookie) {
     const token = cookie.split("=");
-    const decoded = jwt.verify(token[1], process.env.JWT_SECRET);
-    return decoded
+    const secret = process.env.JWT_SECRET
+    const decoded = jwt.verify(token[1], secret);
+    return decoded;
   }
 
   return null;

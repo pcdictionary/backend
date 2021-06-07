@@ -5,6 +5,7 @@ import hashPassword from "../../utils/hashPassword.js";
 const user = {
   async createUser(parent, args, { prisma, clientTwilio }, info) {
     try {
+      console.log("THIS ISBEING HIT")
       const password = await hashPassword(args.data.password);
       const user = await prisma.user.create({
         data: {
