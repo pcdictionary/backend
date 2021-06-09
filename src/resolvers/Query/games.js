@@ -99,7 +99,6 @@ const games = {
           id: verifiedUserId,
         },
       });
-      console.log({userName})
       for (let x = 0; x < GAMETYPES.length; x++){
         const sport = await prisma.elo.findUnique({
           where: {

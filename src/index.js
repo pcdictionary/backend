@@ -29,38 +29,14 @@ export const schema = makeExecutableSchema({
   typeDefs,
 });
 
-export const locationStore = new NodeCache();
-
-locationStore.on("expired", async (key, value) => {
-  const currentPark = await locationStore.get(value);
-  delete currentPark[value][key];
-  currentPark[value].count = currentPark[value].count - 1;
-  if (Object.keys(currentPark).length === 0) {
-    await locationStore.del(value);
-  } else {
-    await locationStore.set(value, currentPark, 0);
-  }
-});
-
-locationStore.on("error", (error) => {
-  console.error(error);
-});
+export const locationStore = new NodeCache({ checkperiod: 10 });
 
 const app = express();
 
 app.use(
-  cors({
-    origin: "exp://exp.host/@itizidon/frontend",
-    credentials: true,
-  })
-);
-
-app.use(
   "/graphql",
   graphqlHTTP(async (request, response, graphQLParams) => {
-    // console.log(request,"THIS IS REQUEST")
     const userIds = await getUserId(request);
-    // console.log(userIds, "THIS IS USERID");
     return {
       schema,
       graphiql: true,
@@ -74,6 +50,22 @@ app.use(
     };
   })
 );
+
+locationStore.on("expired", async (key, value) => {
+  console.log(value, key);
+  const currentPark = await locationStore.get(value);
+  delete currentPark[key];
+  currentPark.count = currentPark.count - 1;
+  if (currentPark.count === 0) {
+    await locationStore.del(value);
+  } else {
+    await locationStore.set(value, currentPark, 0);
+  }
+});
+
+locationStore.on("error", (error) => {
+  console.error(error);
+});
 
 function Player(userInfo) {
   this.userId = userInfo.id;
@@ -110,7 +102,7 @@ function User(info) {
 const server = http.createServer(app);
 const serverio = new Server(server, {
   cors: {
-    origin: "exp://exp.host/@itizidon/frontend",
+    origin: origin,
     methods: ["GET", "POST"],
     allowedHeaders: ["Allow-Cors"],
     credentials: true,
@@ -120,14 +112,10 @@ let rooms = {};
 var activeUsers = {};
 serverio.on("connection", async (socket) => {
   const id = await getUserId(socket.handshake).userId;
-  console.log(id, "THIS IS ID");
 
   socket.on("reconnect", async () => {
-    console.log(id, socket.id);
-
     if (activeUsers[id]) {
-      //active player identified
-      console.log("ACTIGVEUSERS TRUE");
+      //active player identifie
       let oldSocket = activeUsers[id].socketId;
       if (socket.id !== oldSocket) {
         if (rooms[activeUsers[id].roomId].team1.members[oldSocket]) {
@@ -272,7 +260,6 @@ serverio.on("connection", async (socket) => {
             });
             socket.join(room);
           }
-          console.log(rooms);
           serverio.to(socket.id).emit("joinSuccess", room);
           // serverio.to(room).emit("updateLobby", rooms[activeUsers[id].roomId]);
         }
@@ -288,10 +275,8 @@ serverio.on("connection", async (socket) => {
 
   socket.on("joinOptions", async () => {
     if (!activeUsers[id]) {
-      console.log("WHY ISNT THIS HIT");
       serverio.to(socket.id).emit("redirectQRCode");
     } else {
-      console.log("THIS HIT?");
       activeUsers[id].reconnected = true;
       serverio
         .to(socket.id)
@@ -300,7 +285,6 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("leaveRoom", async () => {
-    console.log("LEAVEROOM HIT");
     if (activeUsers[id]) {
       const gameFound = await prisma.game.findUnique({
         where: {
@@ -432,8 +416,6 @@ serverio.on("connection", async (socket) => {
 
   socket.on("startMatch", async () => {
     if (activeUsers[id]) {
-      console.log(rooms[activeUsers[id].roomId].team1.members, "TEAM 1");
-      console.log(rooms[activeUsers[id].roomId].team2.members, "THEAM 2");
       const gameFound = await prisma.game.findUnique({
         where: {
           id: rooms[activeUsers[id].roomId].gameId,
@@ -461,7 +443,6 @@ serverio.on("connection", async (socket) => {
           let allTeamIds = [];
           let team1EloSum = 0;
           let team2EloSum = 0;
-          console.log(team1Count[0].userId, "TEHAM1XCOUNT");
           for (let x = 0; x < team1Count.length; x++) {
             team1Users.push({ id: team1Count[x].userId });
             team2Users.push({ id: team2Count[x].userId });
@@ -476,7 +457,6 @@ serverio.on("connection", async (socket) => {
             team2EloSum / team2Count.length;
 
           rooms[activeUsers[id].roomId].startTime = new Date();
-          console.log(team1Users, "TEAM1USERS");
           const selectedGameType =
             rooms[activeUsers[id].roomId].gameType.toUpperCase();
           const gameId = await prisma.game.create({
@@ -508,10 +488,6 @@ serverio.on("connection", async (socket) => {
           }
           rooms[activeUsers[id].roomId].toggle = true;
           rooms[activeUsers[id].roomId].gameId = gameId.id;
-          console.log(
-            rooms[activeUsers[id].roomId].startTime,
-            "THIS IS STARTTIME"
-          );
           serverio.to(activeUsers[id].roomId).emit("startedMatch");
         }
       }
@@ -520,7 +496,6 @@ serverio.on("connection", async (socket) => {
 
   socket.on("approveScore", async ({ answer }) => {
     if (activeUsers[id]) {
-      console.log(activeUsers[id].socketId, "SOCKETID");
       const gameFound = await prisma.game.findUnique({
         where: {
           id: rooms[activeUsers[id].roomId].gameId,
@@ -723,7 +698,6 @@ serverio.on("connection", async (socket) => {
 
   socket.on("activeGameCheck", async () => {
     if (activeUsers[id]) {
-      console.log(activeUsers[id].socketId, "SOCKETID");
       const gameFound = await prisma.game.findUnique({
         where: {
           id: rooms[activeUsers[id].roomId].gameId,
@@ -740,8 +714,6 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("disconnect", async () => {
-    console.log("DISCCONCTED MANUALLY");
-    console.log(socket.id);
     if (activeUsers[id]) {
       if (activeUsers[id].reconnected) {
         activeUsers[id].reconnected = false;
@@ -751,10 +723,8 @@ serverio.on("connection", async (socket) => {
             id: rooms[activeUsers[id].roomId].gameId,
           },
         });
-        console.log(gameFound, rooms[activeUsers[id].roomId].gameId);
 
         if (rooms[activeUsers[id].roomId].startTime === null) {
-          console.log("found not found");
           if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
             if (
               rooms[activeUsers[id].roomId].team1.members[socket.id].status ===
@@ -784,12 +754,17 @@ serverio.on("connection", async (socket) => {
         }
       }
     }
-    console.log("bye");
   });
-  console.log("a user connected", socket.id);
 });
-// const hostname = "192.168.0.113";
-// server.listen(4000, hostname, () => [console.log("Server is running")]);
-server.listen(process.env.PORT || 4000, ()=>{
-  console.log("SERVER IS RUNING")
-})
+const port = process.env.PORT || 4000;
+const hostname = "192.168.0.113";
+
+if(process.env.PORT){
+  server.listen(port, () => {
+    console.log(`SERVER IS RUNNING,${port}`);
+  });
+}else{
+  server.listen(port, hostname, () => {
+    console.log(`SERVER IS RUNNING,${port}`);
+  });
+}

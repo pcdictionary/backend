@@ -23,7 +23,6 @@ describe("Find User", ()=>{
         })
     it("Finds user by email", async ()=>{
         const data = await userQueries.getUser(undefined, {email:seedData.userList[5].email}, {prisma: prisma})
-        console.log(data)
         expect(data.firstName).toEqual(seedData.userList[5].firstName)
     })
     it("Finds user by id", async ()=>{

@@ -116,7 +116,6 @@
             let updatedOwner = await ownerMutations.updateOwner(undefined, {data:correctOwnerValues[i]}, 
                 {prisma:prisma, request:{verifiedUserId: userData.user.id, verifiedOwnerId: createdOwner.id}})
             let objectKey = Object.keys(correctOwnerValues[i])[0]
-            //console.log(123, updatedOwner)
             expect(updatedOwner[objectKey]).toEqual(correctOwnerValues[i][objectKey])
         }
     })

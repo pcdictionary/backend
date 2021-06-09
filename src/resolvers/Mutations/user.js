@@ -5,7 +5,7 @@ import hashPassword from "../../utils/hashPassword.js";
 const user = {
   async createUser(parent, args, { prisma, clientTwilio }, info) {
     try {
-      console.log("THIS ISBEING HIT")
+      console.log("YOLO")
       const password = await hashPassword(args.data.password);
       const user = await prisma.user.create({
         data: {
@@ -35,7 +35,6 @@ const user = {
           id: verifiedUserId,
         },
       });
-      // console.log(args.phoneNumber, "PHONE NYUBER");
       clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verifications.create({
@@ -134,7 +133,6 @@ const user = {
         },
         info
       );
-      //console.log(updatedUser)
       return updatedUser;
     } catch (error) {
       return error;
@@ -146,7 +144,6 @@ const user = {
       if (verifiedUserId) {
         return new Error("Login in to delete Account!");
       }
-      //console.log(789, deletedOwner)
       return await prisma.user.delete({ where: { id: verifiedUserId } });
     } catch (error) {
       return error;
