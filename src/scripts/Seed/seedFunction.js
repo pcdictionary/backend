@@ -126,15 +126,43 @@ export async function seed(
         const userId = getRndInteger(1, 5);
         const sport = GAMETYPES[getRndInteger(0, 5)];
         const value = await locationStore.get(park);
-        if (value == undefined) {
-          // handle miss!
-          console.log("value doesnt exist");
-          await locationStore.set(park, { [userId]: sport, count: 1 }, 600);
+        const otherUserLocation = await locationStore.get(userId);
+
+        if (!otherUserLocation) {
+          if (value == undefined) {
+            // handle miss!
+            await locationStore.set(park, { [userId]: sport, count: 1 }, 0);
+          } else {
+            if (value[userId]) {
+              value[userId] = sport;
+
+              await locationStore.set(park, value, 0);
+            } else {
+              value[userId] = sport;
+              value.count = value.count + 1;
+              await locationStore.set(park, value, 0);
+            }
+          }
         } else {
-          console.log("value exists");
-          value[userId] = sport;
-          value.count = value.count + 1;
-          await locationStore.set(park, value, 600);
+          const oldLocation = await locationStore.get(otherUserLocation);
+          oldLocation.count = oldLocation.count - 1;
+          delete oldLocation[userId];
+          locationStore.set(otherUserLocation, oldLocation, 0);
+
+          if (value == undefined) {
+            // handle miss!
+            await locationStore.set(park, { [userId]: sport, count: 1 }, 0);
+          } else {
+            if (value[userId]) {
+              value[userId] = sport;
+
+              await locationStore.set(park, value, 0);
+            } else {
+              value[userId] = sport;
+              value.count = value.count + 1;
+              await locationStore.set(park, value, 0);
+            }
+          }
         }
 
         const test = await locationStore.set(userId, park, 600);
