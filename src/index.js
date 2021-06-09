@@ -33,21 +33,6 @@ export const locationStore = new NodeCache({ checkperiod: 10 });
 
 const app = express();
 
-let origin;
-
-if (process.env.PORT) {
-  origin = "exp://exp.host/@itizidon/frontend";
-} else {
-  origin = "http://localhost";
-}
-
-// app.use(
-//   cors({
-//     origin: origin,
-//     credentials: true,
-//   })
-// );
-
 app.use(
   "/graphql",
   graphqlHTTP(async (request, response, graphQLParams) => {
@@ -773,6 +758,13 @@ serverio.on("connection", async (socket) => {
 });
 const port = process.env.PORT || 4000;
 const hostname = "192.168.0.113";
-server.listen(port, hostname, () => {
-  console.log(`SERVER IS RUNNING,${port}`);
-});
+
+if(process.env.PORT){
+  server.listen(port, () => {
+    console.log(`SERVER IS RUNNING,${port}`);
+  });
+}else{
+  server.listen(port, hostname, () => {
+    console.log(`SERVER IS RUNNING,${port}`);
+  });
+}
