@@ -102,7 +102,6 @@ function User(info) {
 const server = http.createServer(app);
 const serverio = new Server(server, {
   cors: {
-    origin: origin,
     methods: ["GET", "POST"],
     allowedHeaders: ["Allow-Cors"],
     credentials: true,
