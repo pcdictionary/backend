@@ -33,6 +33,7 @@ export const locationStore = new NodeCache();
 
 locationStore.on("expired", async (key, value) => {
   const currentPark = await locationStore.get(value);
+  console.log(currentPark)
   delete currentPark[value][key];
   currentPark[value].count = currentPark[value].count - 1;
   if (Object.keys(currentPark).length === 0) {
@@ -48,9 +49,17 @@ locationStore.on("error", (error) => {
 
 const app = express();
 
+let origin;
+
+if (process.env.PORT) {
+  origin = "exp://exp.host/@itizidon/frontend";
+} else {
+  origin = "http://localhost:19002";
+}
+
 app.use(
   cors({
-    origin: "exp://exp.host/@itizidon/frontend",
+    origin: origin,
     credentials: true,
   })
 );
@@ -108,7 +117,7 @@ function User(info) {
 const server = http.createServer(app);
 const serverio = new Server(server, {
   cors: {
-    origin: "exp://exp.host/@itizidon/frontend",
+    origin: origin,
     methods: ["GET", "POST"],
     allowedHeaders: ["Allow-Cors"],
     credentials: true,
@@ -120,7 +129,6 @@ serverio.on("connection", async (socket) => {
   const id = await getUserId(socket.handshake).userId;
 
   socket.on("reconnect", async () => {
-
     if (activeUsers[id]) {
       //active player identifie
       let oldSocket = activeUsers[id].socketId;
@@ -763,7 +771,14 @@ serverio.on("connection", async (socket) => {
     }
   });
 });
-
-server.listen(process.env.PORT || 4000, ()=>{
-  console.log("SERVER IS RUNNING")
-})
+const port = process.env.PORT || 4000;
+const hostname = "192.168.0.113";
+if (process.env.PORT) {
+  server.listen(port, () => {
+    console.log(`SERVER IS RUNNING,${port}`);
+  });
+} else {
+  server.listen(port, hostname, () => {
+    console.log(`SERVER IS RUNNING,${port}`);
+  });
+}

@@ -129,15 +129,15 @@ export async function seed(
         if (value == undefined) {
           // handle miss!
           console.log("value doesnt exist");
-          await locationStore.set(park, { [userId]: sport, count: 1 }, 3600);
+          await locationStore.set(park, { [userId]: sport, count: 1 }, 600);
         } else {
           console.log("value exists");
           value[userId] = sport;
           value.count = value.count + 1;
-          await locationStore.set(park, value, 3600);
+          await locationStore.set(park, value, 600);
         }
 
-        const test = await locationStore.set(userId, park, 3600);
+        const test = await locationStore.set(userId, park, 600);
       }
     } catch (error) {
       console.log("Seed Category Error on entry:\n");
