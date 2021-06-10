@@ -3,16 +3,31 @@ const typeDefs = gql`
   enum GameType {
     HANDBALL
     BASKETBALL
-    SOCCER
     TENNIS
     PINGPONG
+    AMERICANFOOTBALL
+    FOOTBALL
+    BASEBALL
+    VOLLEYBALL
+    BOXING
+    CRICKET
+    RUGBY
+    WRESTLING
+    HOCKEY
+    BADMINTON
+    DODGEBALL
+    RACQUETBALL
+    FENCING
+    FRISBY
+    LACROSSE
+    SQUASH
   }
   enum VerificationStatus {
     PENDING
     STARTED
     COMPLETED
   }
-  enum AccountStatus{
+  enum AccountStatus {
     INCOMPLETE
     CONFIRMED
     BANNED
