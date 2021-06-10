@@ -52,7 +52,6 @@ app.use(
 );
 
 locationStore.on("expired", async (key, value) => {
-  console.log(value, key);
   const currentPark = await locationStore.get(value);
   delete currentPark[key];
   currentPark.count = currentPark.count - 1;
@@ -154,15 +153,15 @@ serverio.on("connection", async (socket) => {
       if (gameFound) {
         if (gameFound.status !== "COMPLETED") {
           //game in progress
-          serverio.to(socket.id).emit("startedMatch");
+          const startedTime = rooms[activeUsers[id].roomId].startTime.getTime()
+          serverio.to(socket.id).emit("startedMatch", startedTime);
           serverio.to(socket.id).emit("updateReconnect", {
             score: {
               team1Score: rooms[activeUsers[id].roomId].team1.score,
               team2Score: rooms[activeUsers[id].roomId].team2.score,
-              timer: rooms[activeUsers[id].roomId].startTime,
+              timer: startedTime,
             },
           });
-          serverio.to(socket.id).emit("startedMatch");
         }
       }
 
@@ -455,7 +454,9 @@ serverio.on("connection", async (socket) => {
           rooms[activeUsers[id].roomId].team2.averageElo =
             team2EloSum / team2Count.length;
 
-          rooms[activeUsers[id].roomId].startTime = new Date();
+          const currentTime = new Date()
+
+          rooms[activeUsers[id].roomId].startTime = currentTime;
           const selectedGameType =
             rooms[activeUsers[id].roomId].gameType.toUpperCase();
           const gameId = await prisma.game.create({
@@ -487,7 +488,7 @@ serverio.on("connection", async (socket) => {
           }
           rooms[activeUsers[id].roomId].toggle = true;
           rooms[activeUsers[id].roomId].gameId = gameId.id;
-          serverio.to(activeUsers[id].roomId).emit("startedMatch");
+          serverio.to(activeUsers[id].roomId).emit("startedMatch", currentTime.getTime());
         }
       }
     }
