@@ -21,6 +21,7 @@ model User {
   games       Game[] @relation("UserGame")
   games2      Game[] @relation("UserGame2")
   allGames    Game[] @relation("AllUserGames")
+  @@unique(fields: [id, phoneNumber], name: "idphoneNumber")
 }
 
 model Game {

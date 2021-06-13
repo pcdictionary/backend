@@ -1,11 +1,18 @@
 import bcrypt from "bcryptjs";
 import generateAuthToken from "../../utils/generateAuthToken.js";
 import hashPassword from "../../utils/hashPassword.js";
+import { loginStore, updateUserStore } from "../../index.js";
 
 const user = {
   async createUser(parent, args, { prisma, clientTwilio }, info) {
     try {
       const password = await hashPassword(args.data.password);
+      const data = await clientTwilio.verify
+        .services(process.env.TWILIO_SERVICE_ID)
+        .verifications.create({
+          to: `+${args.data.phoneNumber}`,
+          channel: "sms",
+        });
       const user = await prisma.user.create({
         data: {
           ...args.data,
@@ -16,12 +23,7 @@ const user = {
           elo: true,
         },
       });
-      const data = await clientTwilio.verify
-        .services(process.env.TWILIO_SERVICE_ID)
-        .verifications.create({
-          to: `+${args.data.phoneNumber}`,
-          channel: "sms",
-        });
+
       return { user, token: generateAuthToken(user.id) };
     } catch (error) {
       return error;
@@ -61,7 +63,10 @@ const user = {
         .then(async (verification) => {
           let user = await prisma.user.findUnique({
             where: {
-              id: verifiedUserId,
+              idphoneNumber: {
+                id: verifiedUserId,
+                phoneNumber: `+${args.phoneNumber}`,
+              },
             },
             include: {
               elo: true,
@@ -72,6 +77,7 @@ const user = {
             user = await prisma.user.update({
               where: {
                 id: verifiedUserId,
+                phoneNumber: `+${args.phoneNumber}`,
               },
               data: {
                 status: "CONFIRMED",
@@ -81,7 +87,11 @@ const user = {
               },
             });
           }
-          return user
+          if (!user) {
+            throw new Error("Wrong Number");
+          }
+
+          return user;
         });
     } catch (error) {
       return error;
@@ -89,6 +99,17 @@ const user = {
   },
   async login(parent, args, { prisma }, info) {
     try {
+      const value = await loginStore.get(args.data.email);
+      if (value > 6) {
+        throw new Error("Too Many Attempts");
+      } else {
+        if (value) {
+          await loginStore.set(args.data.email, value + 1, 3600);
+        } else {
+          await loginStore.set(args.data.email, 1, 3600);
+        }
+      }
+
       const user = await prisma.user.findUnique({
         where: {
           email: args.data.email,
@@ -111,30 +132,110 @@ const user = {
         token: generateAuthToken(user.id),
       };
     } catch (error) {
-      return error;
+      console.log(error.message);
+      throw new Error(error.message);
     }
   },
 
-  async updateUser(parent, args, { prisma, request, verifiedUserId }, info) {
+  async allowChanges() {
     try {
-      // const userId = getUserId(request);
-      //const userId = verifiedUserId
-      let newPassword = undefined;
-      if (typeof args.data.password === "string") {
-        newPassword = await hashPassword(args.data.password);
-      }
-      const updatedUser = await prisma.user.update(
+      return clientTwilio.verify
+        .services(process.env.TWILIO_SERVICE_ID)
+        .verificationChecks.create({
+          to: `+${args.phoneNumber}`,
+          code: args.code,
+        })
+        .then(async (verification) => {
+          let user = await prisma.user.findUnique({
+            where: {
+              idphoneNumber: {
+                id: verifiedUserId,
+                phoneNumber: `+${args.phoneNumber}`,
+              },
+            },
+            include: {
+              elo: true,
+            },
+          });
+          updateUserStore.set(verifiedUserId, true, 1800);
+          return user;
+        });
+    } catch (error) {
+      return error;
+    }
+  },
+  async changePhoneNumber(
+    parent,
+    args,
+    { prisma, request, verifiedUserId },
+    info
+  ) {
+    try {
+      let updatedUser = await prisma.user.update(
         {
           where: {
             id: verifiedUserId,
           },
-          data: { ...args.data, password: newPassword },
+          data: { phoneNumber: args.phoneNumber },
+          include: {
+            elo: true,
+          },
         },
         info
       );
+      if(!updatedUser){
+        throw new Error("Access Denied")
+      }
       return updatedUser;
     } catch (error) {
-      return error;
+      throw new Error(error.message);
+    }
+  },
+  async updateUser(parent, args, { prisma, request, verifiedUserId }, info) {
+    try {
+      console.log(args.data);
+      let allowed = await updateUserStore.get(verifiedUserId);
+      let newPassword = undefined;
+      let updatedUser;
+      if (allowed) {
+        if (typeof args.data.password === "string") {
+          newPassword = await hashPassword(args.data.password);
+        }
+        if (newPassword) {
+          updatedUser = await prisma.user.update(
+            {
+              where: {
+                id: verifiedUserId,
+              },
+              data: { ...args.data, password: newPassword },
+              include: {
+                elo: true,
+              },
+            },
+            info
+          );
+        }
+        if (!newPassword) {
+          updatedUser = await prisma.user.update(
+            {
+              where: {
+                id: verifiedUserId,
+              },
+              data: { ...args.data },
+              include: {
+                elo: true,
+              },
+            },
+            info
+          );
+        }
+        updateUserStore.del(verifiedUserId)
+      }else{
+        throw new Error("Access denied")
+      }
+      return updatedUser;
+    } catch (error) {
+      throw new Error(error.message);
     }
   },
 
