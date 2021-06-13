@@ -43,9 +43,24 @@ model Elo {
   id         Int          @id @default(autoincrement())
   Handball   Int?         @default(1200)
   Basketball Int?         @default(1200)
-  Soccer     Int?         @default(1200)
   Tennis     Int?         @default(1200)
   Pingpong   Int?         @default(1200)
+  Americanfootball Int? @default(1200)
+  Football Int? @default(1200)
+  Baseball Int? @default(1200)
+  Volleyball Int? @default(1200)
+  Boxing Int? @default(1200)
+  Cricket Int? @default(1200)
+  Rugby Int? @default(1200)
+  Wrestling Int? @default(1200)
+  Hockey Int? @default(1200)
+  Badminton Int? @default(1200)
+  Dodgeball Int? @default(1200)
+  Racquetball Int? @default(1200)
+  Fencing Int? @default(1200)
+  Frisby Int? @default(1200)
+  Lacrosse Int? @default(1200)
+  Squash Int? @default(1200)
   user       User         @relation(fields: [username], references: [userName])
   username   String       @unique
   eloHistory EloHistory[]
@@ -62,9 +77,24 @@ model EloHistory {
 enum GameType {
   HANDBALL
   BASKETBALL
-  SOCCER
   TENNIS
   PINGPONG
+  AMERICANFOOTBALL
+  FOOTBALL
+  BASEBALL
+  VOLLEYBALL
+  BOXING
+  CRICKET
+  RUGBY
+  WRESTLING
+  HOCKEY
+  BADMINTON
+  DODGEBALL
+  RACQUETBALL
+  FENCING
+  FRISBY
+  LACROSSE
+  SQUASH
 }
 
 enum VerificationStatus {

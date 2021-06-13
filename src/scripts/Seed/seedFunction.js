@@ -9,7 +9,7 @@ function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-const GAMETYPES = ["HANDBALL", "BASKETBALL", "SOCCER", "TENNIS", "PINGPONG"];
+const GAMETYPES = ["HANDBALL", "BASKETBALL", "TENNIS", "PINGPONG", "FOOTBALL"];
 const PARKS = [
   "Seth Low Playground",
   "Dahill Triangle",

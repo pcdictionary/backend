@@ -65,9 +65,9 @@ const games = {
         include: {
           allGames: {
             take: 5,
-            skip:1,
-            cursor:{
-              id: args.data.page
+            skip: 1,
+            cursor: {
+              id: args.data.page,
             },
             where: {
               GameType: args.data.GameType,
@@ -92,14 +92,35 @@ const games = {
   },
   async getMatchesCount(parent, args, { prisma, verifiedUserId }, info) {
     try {
-      const GAMETYPES = ["HANDBALL", "BASKETBALL", "SOCCER", "TENNIS", "PINGPONG"]
-      let allGames = []
-      const {userName} = await prisma.user.findUnique({
+      const GAMETYPES = [
+        "HANDBALL",
+        "BASKETBALL",
+        "TENNIS",
+        "PINGPONG",
+        "AMERICANFOOTBALL",
+        "FOOTBALL",
+        "BASEBALL",
+        "VOLLEYBALL",
+        "BOXING",
+        "CRICKET",
+        "RUGBY",
+        "WRESTLING",
+        "HOCKEY",
+        "BADMINTON",
+        "DODGEBALL",
+        "RACQUETBALL",
+        "FENCING",
+        "FRISBY",
+        "LACROSSE",
+        "SQUASH",
+      ];
+      let allGames = [];
+      const { userName } = await prisma.user.findUnique({
         where: {
           id: verifiedUserId,
         },
       });
-      for (let x = 0; x < GAMETYPES.length; x++){
+      for (let x = 0; x < GAMETYPES.length; x++) {
         const sport = await prisma.elo.findUnique({
           where: {
             username: userName,
@@ -112,7 +133,7 @@ const games = {
             },
           },
         });
-        allGames.push(sport)
+        allGames.push(sport);
       }
       return allGames;
     } catch (error) {

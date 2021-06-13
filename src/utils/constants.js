@@ -8,4 +8,4 @@ export const lowerWinner ={
     
 }
 
-export const GAMETYPES = ["HANDBALL", "BASKETBALL", "SOCCER", "TENNIS", "PINGPONG"]
+export const GAMETYPES = ["HANDBALL", "BASKETBALL", "TENNIS", "PINGPONG", "FOOTBALL"]
