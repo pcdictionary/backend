@@ -29,10 +29,12 @@ export const schema = makeExecutableSchema({
   typeDefs,
 });
 
-export const locationStore = new NodeCache({ checkperiod: 10 });
+export const locationStore = new NodeCache();
+export const loginStore = new NodeCache({ checkperiod: 1800 });
+export const updateUserStore = new NodeCache({ checkperiod: 3600 });
 
 const app = express();
-
+loginStore.close();
 app.use(
   "/graphql",
   graphqlHTTP(async (request, response, graphQLParams) => {
@@ -153,7 +155,7 @@ serverio.on("connection", async (socket) => {
       if (gameFound) {
         if (gameFound.status !== "COMPLETED") {
           //game in progress
-          const startedTime = rooms[activeUsers[id].roomId].startTime.getTime()
+          const startedTime = rooms[activeUsers[id].roomId].startTime.getTime();
           serverio.to(socket.id).emit("startedMatch", startedTime);
           serverio.to(socket.id).emit("updateReconnect", {
             score: {
@@ -454,7 +456,7 @@ serverio.on("connection", async (socket) => {
           rooms[activeUsers[id].roomId].team2.averageElo =
             team2EloSum / team2Count.length;
 
-          const currentTime = new Date()
+          const currentTime = new Date();
 
           rooms[activeUsers[id].roomId].startTime = currentTime;
           const selectedGameType =
@@ -488,7 +490,9 @@ serverio.on("connection", async (socket) => {
           }
           rooms[activeUsers[id].roomId].toggle = true;
           rooms[activeUsers[id].roomId].gameId = gameId.id;
-          serverio.to(activeUsers[id].roomId).emit("startedMatch", currentTime.getTime());
+          serverio
+            .to(activeUsers[id].roomId)
+            .emit("startedMatch", currentTime.getTime());
         }
       }
     }
@@ -759,11 +763,11 @@ serverio.on("connection", async (socket) => {
 const port = process.env.PORT || 4000;
 const hostname = "192.168.0.113";
 
-if(process.env.PORT){
+if (process.env.PORT) {
   server.listen(port, () => {
     console.log(`SERVER IS RUNNING,${port}`);
   });
-}else{
+} else {
   server.listen(port, hostname, () => {
     console.log(`SERVER IS RUNNING,${port}`);
   });

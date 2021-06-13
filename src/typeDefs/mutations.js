@@ -7,7 +7,9 @@ const typeDefs = gql`
     verifyUser(code: String!, phoneNumber: String!): ReturnUser!
     newCode(phoneNumber: String!): ReturnUser!
     deleteUser: ReturnUser!
+    changePhoneNumber(phoneNumber: String!): ReturnUser!
     setCheckin(location: String, sport: String): Location
+    allowChanges(phoneNumber: String!): ReturnUser!
   }
 `;
 
