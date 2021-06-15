@@ -54,6 +54,14 @@ const user = {
     info
   ) {
     try {
+      let user = await prisma.user.findUnique({
+        where: {
+          id: verifiedUserId,
+        },
+        include: {
+          elo: true,
+        },
+      });
       return clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verificationChecks.create({
@@ -63,10 +71,7 @@ const user = {
         .then(async (verification) => {
           let user = await prisma.user.findUnique({
             where: {
-              idphoneNumber: {
-                id: verifiedUserId,
-                phoneNumber: `+${args.phoneNumber}`,
-              },
+              id: verifiedUserId,
             },
             include: {
               elo: true,
@@ -76,8 +81,10 @@ const user = {
           if (verification.status === "approved") {
             user = await prisma.user.update({
               where: {
-                id: verifiedUserId,
-                phoneNumber: `+${args.phoneNumber}`,
+                idphoneNumber: {
+                  id: verifiedUserId,
+                  phoneNumber: user.phoneNumber,
+                },
               },
               data: {
                 status: "CONFIRMED",
@@ -183,57 +190,64 @@ const user = {
         },
         info
       );
-      if(!updatedUser){
-        throw new Error("Access Denied")
+      if (!updatedUser) {
+        throw new Error("Access Denied");
       }
       return updatedUser;
     } catch (error) {
       throw new Error(error.message);
     }
   },
-  async updateUser(parent, args, { prisma, request, verifiedUserId }, info) {
+  async updateUser(parent, args, { prisma, request, verifiedUserId,clientTwilio }, info) {
     try {
-      console.log(args.data);
-      let allowed = await updateUserStore.get(verifiedUserId);
-      let newPassword = undefined;
-      let updatedUser;
-      if (allowed) {
-        if (typeof args.data.password === "string") {
-          newPassword = await hashPassword(args.data.password);
-        }
-        if (newPassword) {
-          updatedUser = await prisma.user.update(
-            {
-              where: {
-                id: verifiedUserId,
-              },
-              data: { ...args.data, password: newPassword },
-              include: {
-                elo: true,
-              },
-            },
-            info
-          );
-        }
-        if (!newPassword) {
-          updatedUser = await prisma.user.update(
-            {
-              where: {
-                id: verifiedUserId,
-              },
-              data: { ...args.data },
-              include: {
-                elo: true,
-              },
-            },
-            info
-          );
-        }
-        updateUserStore.del(verifiedUserId)
-      }else{
-        throw new Error("Access denied")
-      }
-      return updatedUser;
+      return clientTwilio.verify
+        .services(process.env.TWILIO_SERVICE_ID)
+        .verificationChecks.create({
+          to: `+${args.data.phoneNumber}`,
+          code: args.code,
+        })
+        .then(async (verification) => {
+          let updatedUser
+          let newPassword
+          if (verification.status === "approved") {
+            if (typeof args.data.password === "string") {
+              newPassword = await hashPassword(args.data.password);
+            }
+            if (newPassword) {
+              updatedUser = await prisma.user.update(
+                {
+                  where: {
+                    id: verifiedUserId,
+                  },
+                  data: { ...args.data, password: newPassword },
+                  include: {
+                    elo: true,
+                  },
+                },
+                info
+              );
+            }
+            if (!newPassword) {
+              updatedUser = await prisma.user.update(
+                {
+                  where: {
+                    id: verifiedUserId,
+                  },
+                  data: { ...args.data },
+                  include: {
+                    elo: true,
+                  },
+                },
+                info
+              );
+            }
+          }
+
+          if(!updatedUser){
+            throw new Error("User was not updated")
+          }
+          return updatedUser;
+        });
     } catch (error) {
       throw new Error(error.message);
     }

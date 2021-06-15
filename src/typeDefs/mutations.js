@@ -3,7 +3,7 @@ const typeDefs = gql`
   type Mutation {
     login(data: LoginUserInput): AuthPayload!
     createUser(data: CreateUserInput): AuthPayload!
-    updateUser(data: UpdateUserInput): ReturnUser!
+    updateUser(data: UpdateUserInput, code: String!): ReturnUser!
     verifyUser(code: String!, phoneNumber: String!): ReturnUser!
     newCode(phoneNumber: String!): ReturnUser!
     deleteUser: ReturnUser!
