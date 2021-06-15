@@ -91,6 +91,7 @@ function Teams(socketid, player, gameType) {
   this.approvalModal = false;
   this.redoModal = false;
   this.results = false;
+  this.scoreSet = false;
 }
 
 function User(info) {
@@ -568,7 +569,6 @@ serverio.on("connection", async (socket) => {
                 rooms[activeUsers[id].roomId].gameId = -1;
                 rooms[activeUsers[id].roomId].startTime = null;
                 rooms[activeUsers[id].roomId].endTime = null;
-
                 //start a new room
 
                 serverio.to(activeUsers[id].roomId).emit("completedMatch");
@@ -587,6 +587,7 @@ serverio.on("connection", async (socket) => {
                 rooms[activeUsers[id].roomId].approved.reject = 0;
               }
             }
+            rooms[activeUsers[id].roomId].scoreSet = false;
             serverio.to(activeUsers[id].roomId).emit("approvedScore", {
               count: rooms[activeUsers[id].roomId].approved.count,
               total: rooms[activeUsers[id].roomId].approved.total,
@@ -605,20 +606,23 @@ serverio.on("connection", async (socket) => {
         },
       });
       if (gameFound) {
-        if (gameFound.status !== "COMPLETED") {
-          rooms[activeUsers[id].roomId].team1.score = team1Score;
-          rooms[activeUsers[id].roomId].team2.score = team2Score;
-          rooms[activeUsers[id].roomId].approved.sockets[socket.id] = true;
-          rooms[activeUsers[id].roomId].approved.count++;
-          const timer =
-            rooms[activeUsers[id].roomId].endTime -
-            rooms[activeUsers[id].roomId].startTime;
-          socket
-            .to(activeUsers[id].roomId)
-            .emit("finalizedScore", { team1Score, team2Score, timer });
-          serverio
-            .to(activeUsers[id].socketId)
-            .emit("finalizedScoreUser", { team1Score, team2Score, timer });
+        if (!rooms[activeUsers[id].roomId].scoreSet) {
+          if (gameFound.status !== "COMPLETED") {
+            rooms[activeUsers[id].roomId].team1.score = team1Score;
+            rooms[activeUsers[id].roomId].team2.score = team2Score;
+            rooms[activeUsers[id].roomId].approved.sockets[socket.id] = true;
+            rooms[activeUsers[id].roomId].approved.count++;
+            rooms[activeUsers[id].roomId].scoreSet = true;
+            const timer =
+              rooms[activeUsers[id].roomId].endTime -
+              rooms[activeUsers[id].roomId].startTime;
+            socket
+              .to(activeUsers[id].roomId)
+              .emit("finalizedScore", { team1Score, team2Score, timer });
+            serverio
+              .to(activeUsers[id].socketId)
+              .emit("finalizedScoreUser", { team1Score, team2Score, timer });
+          }
         }
       }
     }

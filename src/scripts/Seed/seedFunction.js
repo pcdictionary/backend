@@ -35,19 +35,6 @@ export async function seed(
   const validOwnerIds = [];
   const validItemIds = [];
   const validCategoryIds = [];
-  const mypassword = await hashPassword("ikh85millP!");
-  await client.user.create({
-    data: {
-      password: mypassword,
-      firstName: "don",
-      lastName: "ng",
-      email: "itizidon@gmail.com",
-      userName: "itizidon",
-      phoneNumber: "13475752770",
-      elo: { create: {} },
-      status: "CONFIRMED",
-    },
-  });
 
   if (!process.env.PORT) {
     if (testFailure) {
