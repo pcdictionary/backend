@@ -32,7 +32,6 @@ export const schema = makeExecutableSchema({
 export const locationStore = new NodeCache();
 export const loginStore = new NodeCache({ checkperiod: 1800 });
 export const updateUserStore = new NodeCache({ checkperiod: 3600 });
-
 const app = express();
 loginStore.close();
 app.use(
