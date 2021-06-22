@@ -169,8 +169,8 @@ serverio.on("connection", async (socket) => {
 
       serverio
         .to(activeUsers[id].roomId)
-        .emit("updateLobby", {rooms: rooms[activeUsers[id].roomId], roomdId: activeUsers[id].roomId});
-    } else {
+        .emit("updateLobby", rooms[activeUsers[id].roomId]);
+      } else {
       //player is not in a room so sent back to game home screen
       serverio.to(socket.id).emit("noMatch");
     }
