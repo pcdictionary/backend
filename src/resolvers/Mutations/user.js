@@ -54,7 +54,11 @@ const user = {
     info
   ) {
     try {
-      const updated = false;
+      const updated = await prisma.user.findUnique({
+        where: {
+          phoneNumber: args.phoneNumber,
+        },
+      });
       clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verifications.create({
