@@ -52,7 +52,7 @@ export async function seed(
           seedData.userList[i].password
         );
         let user = await client.user.create({
-          data: { ...seedData.userList[i], elo: { create: {} } },
+          data: { ...seedData.userList[i], phoneNumber: getRndInteger(1000000000, 9999999999).toString(), elo: { create: {} } },
         });
         validUserIds.push(user.id);
       } catch (error) {
