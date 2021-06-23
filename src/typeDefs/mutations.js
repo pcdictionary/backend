@@ -6,6 +6,7 @@ const typeDefs = gql`
     updateUser(data: UpdateUserInput, code: String!): ReturnUser!
     verifyUser(code: String!, phoneNumber: String!): ReturnUser!
     newCode(phoneNumber: String!): ReturnUser!
+    forgotPassword(phoneNumber: String!): Boolean!
     deleteUser: ReturnUser!
     changePhoneNumber(phoneNumber: String!): ReturnUser!
     setCheckin(location: String, sport: String): Location

@@ -15,7 +15,7 @@ model User {
   lastName    String
   userName    String @unique
   password    String
-  phoneNumber String? @unique
+  phoneNumber String @unique
   status      AccountStatus @default(INCOMPLETE)
   elo         Elo?
   games       Game[] @relation("UserGame")

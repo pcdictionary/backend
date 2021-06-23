@@ -47,6 +47,34 @@ const user = {
       return error;
     }
   },
+  async forgotPassword(
+    parent,
+    args,
+    { prisma, clientTwilio, verifiedUserId },
+    info
+  ) {
+    try {
+      const updated = false;
+      clientTwilio.verify
+        .services(process.env.TWILIO_SERVICE_ID)
+        .verifications.create({
+          to: `+${args.phoneNumber}`,
+          channel: "sms",
+        })
+        .then((verification) => {
+          if (verification.status === "pending") {
+            updated = true;
+          }
+        });
+      if (updated) {
+        return true;
+      } else {
+        return false;
+      }
+    } catch (error) {
+      return error;
+    }
+  },
   async verifyUser(
     parent,
     args,
@@ -198,7 +226,12 @@ const user = {
       throw new Error(error.message);
     }
   },
-  async updateUser(parent, args, { prisma, request, verifiedUserId,clientTwilio }, info) {
+  async updateUser(
+    parent,
+    args,
+    { prisma, request, verifiedUserId, clientTwilio },
+    info
+  ) {
     try {
       return clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
@@ -207,8 +240,8 @@ const user = {
           code: args.code,
         })
         .then(async (verification) => {
-          let updatedUser
-          let newPassword
+          let updatedUser;
+          let newPassword;
           if (verification.status === "approved") {
             if (typeof args.data.password === "string") {
               newPassword = await hashPassword(args.data.password);
@@ -217,7 +250,7 @@ const user = {
               updatedUser = await prisma.user.update(
                 {
                   where: {
-                    id: verifiedUserId,
+                    phoneNumber: args.data.phoneNumber,
                   },
                   data: { ...args.data, password: newPassword },
                   include: {
@@ -231,7 +264,7 @@ const user = {
               updatedUser = await prisma.user.update(
                 {
                   where: {
-                    id: verifiedUserId,
+                    phoneNumber: args.data.phoneNumber,
                   },
                   data: { ...args.data },
                   include: {
@@ -243,8 +276,8 @@ const user = {
             }
           }
 
-          if(!updatedUser){
-            throw new Error("User was not updated")
+          if (!updatedUser) {
+            throw new Error("User was not updated");
           }
           return updatedUser;
         });
