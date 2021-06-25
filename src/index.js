@@ -319,6 +319,10 @@ serverio.on("connection", async (socket) => {
         serverio
           .to(activeUsers[id].roomId)
           .emit("updateLobby", rooms[activeUsers[id].roomId]);
+
+        if(Object.keys(rooms[activeUsers[id].roomId].team1.members).length===0 && Object.keys(rooms[activeUsers[id].roomId].team2.members).length===0){
+          delete rooms[activeUsers[id].roomId]
+        }
         delete activeUsers[id];
       }
     }
@@ -757,6 +761,10 @@ serverio.on("connection", async (socket) => {
           serverio
             .to(activeUsers[id].roomId)
             .emit("updateLobby", rooms[activeUsers[id].roomId]);
+
+            if(Object.keys(rooms[activeUsers[id].roomId].team1.members).length===0 && Object.keys(rooms[activeUsers[id].roomId].team2.members).length===0){
+              delete rooms[activeUsers[id].roomId]
+            }
           delete activeUsers[id];
         }
       }
