@@ -178,7 +178,6 @@ const user = {
         token: generateAuthToken(user.id),
       };
     } catch (error) {
-      console.log(error.message);
       throw new Error(error.message);
     }
   },
