@@ -8,7 +8,7 @@ const user = {
     try {
       let user;
       const password = await hashPassword(args.data.password);
-      const data = await clientTwilio.verify
+      await clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verifications.create({
           to: `+${args.data.phoneNumber}`,
