@@ -1,3 +1,3 @@
-web: npm start
+web:npm start
 
-release: npx prisma db push --accept-data-loss --skip-generate
+release:npx prisma db push --accept-data-loss --skip-generate
