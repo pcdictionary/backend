@@ -15,7 +15,7 @@ const user = {
           channel: "sms",
         })
         .then(async (service) => {
-          if (services.status === "pending") {
+          if (service.status === "pending") {
             user = await prisma.user.create({
               data: {
                 ...args.data,
