@@ -6,24 +6,31 @@ import { loginStore, updateUserStore } from "../../index.js";
 const user = {
   async createUser(parent, args, { prisma, clientTwilio }, info) {
     try {
+      let user;
       const password = await hashPassword(args.data.password);
       const data = await clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verifications.create({
           to: `+${args.data.phoneNumber}`,
           channel: "sms",
+        })
+        .then((service) => {
+          if (services.status === "pending") {
+            const user = await prisma.user.create({
+              data: {
+                ...args.data,
+                password,
+                elo: { create: {} },
+              },
+              include: {
+                elo: true,
+              },
+            });
+          }
         });
-      const user = await prisma.user.create({
-        data: {
-          ...args.data,
-          password,
-          elo: { create: {} },
-        },
-        include: {
-          elo: true,
-        },
-      });
-
+      if (!user) {
+        throw new Error("Not a real phone number");
+      }
       return { user, token: generateAuthToken(user.id) };
     } catch (error) {
       return error;
