@@ -16,7 +16,7 @@ const user = {
         })
         .then(async (service) => {
           if (services.status === "pending") {
-            const user = await prisma.user.create({
+            user = await prisma.user.create({
               data: {
                 ...args.data,
                 password,
