@@ -37,6 +37,7 @@ const games = {
             orderBy: {
               id: "desc",
             },
+
             include: {
               users: true,
               users2: true,
@@ -44,7 +45,7 @@ const games = {
           },
         },
       });
-
+      
       return foundMatches.allGames
         ? foundMatches.allGames
         : new Error("This User has no recorded games");

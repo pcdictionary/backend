@@ -117,8 +117,27 @@ serverio.on("connection", async (socket) => {
     if (activeUsers[id]) {
       //active player identifie
       let oldSocket = activeUsers[id].socketId;
+      if (!rooms[activeUsers[id].roomId].scoreSet) {
+        socket.to(activeUsers[id].roomId).emit("finalizedScore", {
+          team1Score: rooms[activeUsers[id].roomId].team1.score,
+          team2Score: rooms[activeUsers[id].roomId].team2.score,
+          timer:
+            rooms[activeUsers[id].roomId].endTime -
+            rooms[activeUsers[id].roomId].startTime,
+        });
+        serverio
+          .to(socket.id)
+          .emit("finalizedScoreUser", {
+            team1Score: rooms[activeUsers[id].roomId].team1.score,
+            team2Score: rooms[activeUsers[id].roomId].team2.score,
+            timer:
+              rooms[activeUsers[id].roomId].endTime -
+              rooms[activeUsers[id].roomId].startTime,
+          });
+      }
       if (socket.id !== oldSocket) {
         if (rooms[activeUsers[id].roomId].team1.members[oldSocket]) {
+
           rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
             id,
             socketId: socket.id,
@@ -170,7 +189,7 @@ serverio.on("connection", async (socket) => {
       serverio
         .to(activeUsers[id].roomId)
         .emit("updateLobby", rooms[activeUsers[id].roomId]);
-      } else {
+    } else {
       //player is not in a room so sent back to game home screen
       serverio.to(socket.id).emit("noMatch");
     }
@@ -320,8 +339,12 @@ serverio.on("connection", async (socket) => {
           .to(activeUsers[id].roomId)
           .emit("updateLobby", rooms[activeUsers[id].roomId]);
 
-        if(Object.keys(rooms[activeUsers[id].roomId].team1.members).length===0 && Object.keys(rooms[activeUsers[id].roomId].team2.members).length===0){
-          delete rooms[activeUsers[id].roomId]
+        if (
+          Object.keys(rooms[activeUsers[id].roomId].team1.members).length ===
+            0 &&
+          Object.keys(rooms[activeUsers[id].roomId].team2.members).length === 0
+        ) {
+          delete rooms[activeUsers[id].roomId];
         }
         delete activeUsers[id];
       }
@@ -626,6 +649,13 @@ serverio.on("connection", async (socket) => {
               .to(activeUsers[id].socketId)
               .emit("finalizedScoreUser", { team1Score, team2Score, timer });
           }
+        } else {
+          socket
+            .to(activeUsers[id].roomId)
+            .emit("finalizedScore", { team1Score, team2Score, timer });
+          serverio
+            .to(activeUsers[id].socketId)
+            .emit("finalizedScoreUser", { team1Score, team2Score, timer });
         }
       }
     }
@@ -762,9 +792,14 @@ serverio.on("connection", async (socket) => {
             .to(activeUsers[id].roomId)
             .emit("updateLobby", rooms[activeUsers[id].roomId]);
 
-            if(Object.keys(rooms[activeUsers[id].roomId].team1.members).length===0 && Object.keys(rooms[activeUsers[id].roomId].team2.members).length===0){
-              delete rooms[activeUsers[id].roomId]
-            }
+          if (
+            Object.keys(rooms[activeUsers[id].roomId].team1.members).length ===
+              0 &&
+            Object.keys(rooms[activeUsers[id].roomId].team2.members).length ===
+              0
+          ) {
+            delete rooms[activeUsers[id].roomId];
+          }
           delete activeUsers[id];
         }
       }
