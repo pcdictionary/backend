@@ -117,27 +117,8 @@ serverio.on("connection", async (socket) => {
     if (activeUsers[id]) {
       //active player identifie
       let oldSocket = activeUsers[id].socketId;
-      if (!rooms[activeUsers[id].roomId].scoreSet) {
-        socket.to(activeUsers[id].roomId).emit("finalizedScore", {
-          team1Score: rooms[activeUsers[id].roomId].team1.score,
-          team2Score: rooms[activeUsers[id].roomId].team2.score,
-          timer:
-            rooms[activeUsers[id].roomId].endTime -
-            rooms[activeUsers[id].roomId].startTime,
-        });
-        serverio
-          .to(socket.id)
-          .emit("finalizedScoreUser", {
-            team1Score: rooms[activeUsers[id].roomId].team1.score,
-            team2Score: rooms[activeUsers[id].roomId].team2.score,
-            timer:
-              rooms[activeUsers[id].roomId].endTime -
-              rooms[activeUsers[id].roomId].startTime,
-          });
-      }
       if (socket.id !== oldSocket) {
         if (rooms[activeUsers[id].roomId].team1.members[oldSocket]) {
-
           rooms[activeUsers[id].roomId].team1.members[socket.id] = new Player({
             id,
             socketId: socket.id,
@@ -652,10 +633,22 @@ serverio.on("connection", async (socket) => {
         } else {
           socket
             .to(activeUsers[id].roomId)
-            .emit("finalizedScore", { team1Score, team2Score, timer });
+            .emit("finalizedScore", {
+              team1Score,
+              team2Score,
+              timer:
+                rooms[activeUsers[id].roomId].endTime -
+                rooms[activeUsers[id].roomId].startTime,
+            });
           serverio
             .to(activeUsers[id].socketId)
-            .emit("finalizedScoreUser", { team1Score, team2Score, timer });
+            .emit("finalizedScoreUser", {
+              team1Score,
+              team2Score,
+              timer:
+                rooms[activeUsers[id].roomId].endTime -
+                rooms[activeUsers[id].roomId].startTime,
+            });
         }
       }
     }
