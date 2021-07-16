@@ -142,6 +142,10 @@ serverio.on("connection", async (socket) => {
           });
           delete rooms[activeUsers[id].roomId].team2.members[oldSocket];
         }
+
+        rooms[activeUsers[id].roomId].approved.sockets[socket.id] =
+          rooms[activeUsers[id].roomId].approved.sockets[oldSocket];
+        delete rooms[activeUsers[id].roomId].approved.sockets[oldSocket];
       }
       activeUsers[id].socketId = socket.id;
 
@@ -164,6 +168,20 @@ serverio.on("connection", async (socket) => {
               timer: startedTime,
             },
           });
+          if (rooms[activeUsers[id].roomId].scoreSet) {
+            if (
+              rooms[activeUsers[id].roomId].approved.sockets[socket.id] ===
+              undefined
+            ) {
+              serverio.to(socket.id).emit("finalizedScore", {
+                team1Score: rooms[activeUsers[id].roomId].team1.score,
+                team2Score: rooms[activeUsers[id].roomId].team2.score,
+                timer:
+                  rooms[activeUsers[id].roomId].endTime -
+                  rooms[activeUsers[id].roomId].startTime,
+              });
+            }
+          }
         }
       }
 
@@ -631,24 +649,6 @@ serverio.on("connection", async (socket) => {
               .emit("finalizedScoreUser", { team1Score, team2Score, timer });
           }
         } else {
-          socket
-            .to(activeUsers[id].roomId)
-            .emit("finalizedScore", {
-              team1Score,
-              team2Score,
-              timer:
-                rooms[activeUsers[id].roomId].endTime -
-                rooms[activeUsers[id].roomId].startTime,
-            });
-          serverio
-            .to(activeUsers[id].socketId)
-            .emit("finalizedScoreUser", {
-              team1Score,
-              team2Score,
-              timer:
-                rooms[activeUsers[id].roomId].endTime -
-                rooms[activeUsers[id].roomId].startTime,
-            });
         }
       }
     }
