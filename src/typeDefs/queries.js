@@ -11,6 +11,8 @@ const typeDefs = gql`
     getEloHistory(data: GetEloHistoryInput): Elo
     getParksData(locations: [String]): Location
     getMatchesCount: [Elo]!
+    getLadderPagination(data: GetLadderInput): [Elo]!
+    getLadder(data: GetLadderInput): [Elo]!
   }
 `;
 
