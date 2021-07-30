@@ -1,7 +1,10 @@
 import gql from "graphql-tag";
 
 const typeDefs = gql`
-
+    input GetLadderInput {
+        GameType: GameType!
+        CurrentElo: Int
+    }
 
     type Elo {
         Handball:   Int
