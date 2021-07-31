@@ -4,6 +4,7 @@ const typeDefs = gql`
     input GetLadderInput {
         GameType: GameType!
         CurrentElo: Int
+        Direction: Boolean
     }
 
     type Elo {

@@ -52,6 +52,9 @@ const elo = {
         orderBy: {
           [game]: "desc",
         },
+        include:{
+          user: true
+        }
       });
 
       return foundElo;
@@ -59,6 +62,31 @@ const elo = {
       return error;
     }
   },
+  async getLadderPagination(parent, args, { prisma }, info){
+    try {
+      let query = {};
+      let game = args.data.GameType.charAt(0).toUpperCase() + args.data.GameType.substring(1).toLowerCase();
+      console.log(args.data.Direction)
+      let foundElo = await prisma.elo.findMany({
+        take: 10,
+        where:{
+          [game]: {
+            gt: args.data.CurrentElo
+          }
+        },
+        orderBy: {
+          [game]: args.data.Direction? "asc": "desc",
+        },
+        include:{
+          user: true
+        }
+      });
+
+      return foundElo;
+    } catch (error) {
+      return error;
+    }
+  }
 };
 
 export default elo;
