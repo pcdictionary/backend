@@ -5,6 +5,13 @@ const typeDefs = gql`
         GameType: GameType!
         CurrentElo: Int
         Direction: Boolean
+        skip: Int
+        userName: String
+    }
+
+    input GetLadderUserInput{
+        GameType: GameType!
+        userName: String
     }
 
     type Elo {

@@ -13,6 +13,7 @@ const typeDefs = gql`
     getMatchesCount: [Elo]!
     getLadderPagination(data: GetLadderInput): [Elo]!
     getLadder(data: GetLadderInput): [Elo]!
+    getRanksByUser(data: GetLadderUserInput): [Elo]!
   }
 `;
 

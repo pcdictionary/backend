@@ -48,9 +48,7 @@ const elo = {
       let game =
         args.data.GameType.charAt(0).toUpperCase() +
         args.data.GameType.substring(1).toLowerCase();
-      console.log(test, "THIS IS TEST");
-      console.log(foundElo, "this is found elo");
-      console.log(args.data.GameType, "GAMETYPE");
+
       foundElo.eloHistory.unshift({
         __typename: "EloHistory",
         eloHistory: test.elo[game],
@@ -63,20 +61,35 @@ const elo = {
   async getLadder(parent, args, { prisma }, info) {
     try {
       let query = {};
+      let foundElo;
       let game =
         args.data.GameType.charAt(0).toUpperCase() +
         args.data.GameType.substring(1).toLowerCase();
-
-      let foundElo = await prisma.elo.findMany({
-        take: 20,
-        orderBy: {
-          [game]: "desc",
-        },
-        include: {
-          user: true,
-        },
-      });
-      console.log(foundElo);
+      if (args.data.CurrentElo >= 0) {
+        foundElo = await prisma.elo.findMany({
+          take: 10,
+          where: {
+            [game]: {
+              gt: args.data.CurrentElo,
+            },
+          },
+          orderBy: [{ [game]: "asc" }, { username: "desc" }],
+          include: {
+            user: true,
+          },
+        });
+      } else {
+        foundElo = await prisma.elo.findMany({
+          take: 20,
+          orderBy: [{ [game]: "desc" }, { username: "asc" }],
+          include: {
+            user: true,
+          },
+        });
+      }
+      if (!foundElo) {
+        new Error("No such ranks found.");
+      }
 
       return foundElo;
     } catch (error) {
@@ -85,43 +98,109 @@ const elo = {
   },
   async getLadderPagination(parent, args, { prisma }, info) {
     try {
-      console.log(args.data, "THIS IS DATA");
       let query = {};
       let game =
         args.data.GameType.charAt(0).toUpperCase() +
         args.data.GameType.substring(1).toLowerCase();
-      console.log(args.data.CurrentElo);
       let foundElo;
       if (args.data.CurrentElo >= 0) {
-        console.log("THIS IS HIT");
+        if(args.data.Direction){
         foundElo = await prisma.elo.findMany({
           take: 10,
+          skip: 1,
+          cursor: {
+            username: args.data.userName,
+          },
           where: {
             [game]: {
-              gt: args.data.CurrentElo,
+              gte: args.data.CurrentElo,
             },
           },
-          orderBy: {
-            [game]: args.data.Direction ? "asc" : "desc",
-          },
+
+          orderBy: [
+            { [game]: "asc" },
+            { username: "desc" },
+          ],
           include: {
             user: true,
           },
-        });
+        })}else{
+          foundElo = await prisma.elo.findMany({
+            take: -10,
+            skip: 1,
+            cursor: {
+              username: args.data.userName,
+            },
+            where: {
+              [game]: {
+                lte: args.data.CurrentElo,
+              },
+            },
+  
+            orderBy: [
+              { [game]: "asc" },
+              { username: "desc" },
+            ],
+            include: {
+              user: true,
+            },
+          })
+        };
       } else {
         foundElo = await prisma.elo.findMany({
           take: 20,
-          orderBy: {
-            [game]: "desc",
-          },
+          orderBy: [{ [game]: "desc" }, { username: "asc" }],
           include: {
             user: true,
           },
         });
       }
-      // console.log(foundElo);
-
+      if (!foundElo) {
+        new Error("No such ranks found.");
+      }
       return foundElo;
+    } catch (error) {
+      return error;
+    }
+  },
+  async getRanksByUser(parent, args, { prisma }, info) {
+    try {
+      let game =
+        args.data.GameType.charAt(0).toUpperCase() +
+        args.data.GameType.substring(1).toLowerCase();
+
+      let userfound = await prisma.user.findUnique({
+        where: {
+          userName: args.data.userName,
+        },
+        include: {
+          elo: true,
+        },
+      });
+      if (!userfound) {
+        new Error("No such user found.");
+      }
+
+      let foundRanks = await prisma.elo.findMany({
+        take: 10,
+        cursor: {
+          username: args.data.userName,
+        },
+        where: {
+          [game]: {
+            lte: userfound[game],
+          },
+        },
+        orderBy: [{ [game]: "asc" }, { username: "desc" }],
+        include: {
+          user: true,
+        },
+      });
+      if (!foundRanks) {
+        new Error("No such ranks found.");
+      }
+
+      return foundRanks;
     } catch (error) {
       return error;
     }

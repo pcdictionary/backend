@@ -45,7 +45,7 @@ const games = {
           },
         },
       });
-      
+
       return foundMatches.allGames
         ? foundMatches.allGames
         : new Error("This User has no recorded games");
@@ -65,8 +65,9 @@ const games = {
         },
         include: {
           allGames: {
-            take: 5,
             skip: 1,
+            take: 5,
+
             cursor: {
               id: args.data.page,
             },
