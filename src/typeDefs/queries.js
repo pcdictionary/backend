@@ -14,6 +14,7 @@ const typeDefs = gql`
     getLadderPagination(data: GetLadderInput): [Elo]!
     getLadder(data: GetLadderInput): [Elo]!
     getRanksByUser(data: GetLadderUserInput): [Elo]!
+    findGame(id: Int): Game!
   }
 `;
 

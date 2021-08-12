@@ -21,6 +21,7 @@ const typeDefs = gql`
     FRISBY
     LACROSSE
     SQUASH
+    ARMWRESTLING
   }
   enum VerificationStatus {
     PENDING

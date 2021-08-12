@@ -36,6 +36,7 @@ const typeDefs = gql`
         Frisby: Int
         Lacrosse: Int
         Squash: Int
+        Armwrestling: Int
         user:       User
         userId:     Int
         eloHistory: [EloHistory]!

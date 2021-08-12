@@ -36,7 +36,7 @@ model Game {
   User      User[]             @relation("AllUserGames", fields: [userId], references: [id])
   createdAt DateTime?
   endedAt   DateTime?
-
+  note      String              @default("")
   @@unique(fields: [GameType, id], name: "idGameType")
 }
 
@@ -62,6 +62,7 @@ model Elo {
   Frisby Int? @default(1200)
   Lacrosse Int? @default(1200)
   Squash Int? @default(1200)
+  Armwrestling Int? @default(1200)
   user       User         @relation(fields: [username], references: [userName])
   username   String       @unique
   eloHistory EloHistory[]
@@ -96,6 +97,7 @@ enum GameType {
   FRISBY
   LACROSSE
   SQUASH
+  ARMWRESTLING
 }
 
 enum VerificationStatus {

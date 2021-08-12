@@ -141,6 +141,11 @@ const games = {
     } catch (error) {
       return error;
     }
+  },async findGame(parent, args, { prisma, request, verifiedUserId }, info) {
+    const foundGame = await prisma.game.findUnique({
+      where: { id: args.id },
+    });
+    return foundGame;
   },
 };
 
