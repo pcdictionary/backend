@@ -32,17 +32,7 @@ export async function seed(
   source = "default"
 ) {
   // if (process.env.TRANSFORM === "yes") {
-    const allHistory = await client.eloHistory.findMany({})
-    for(let x = 0; x< allHistory.length; x++){
-      await client.eloHistory.update({
-        where:{
-          id: allHistory[x].id
-        },
-        data:{
-          eloHistory: allHistory[x].eloHistory*1000
-        }
-      })
-    }
+ await client.eloHistory.deleteMany({})
     const updatethese = [
       "Handball",
       "Basketball",
@@ -73,26 +63,27 @@ export async function seed(
           id: users[x].id,
         },
         data:{
-          Handball: users[x].Handball*1000,
-          Basketball: users[x].Basketball*1000,
-          Tennis: users[x].Tennis*1000,
-          Pingpong: users[x].Pingpong*1000,
-          Americanfootball: users[x].Americanfootball*1000,
-          Football: users[x].Football*1000,
-          Baseball: users[x].Baseball*1000,
-          Volleyball: users[x].Volleyball*1000,
-          Boxing: users[x].Boxing*1000,
-          Cricket: users[x].Cricket*1000,
-          Rugby: users[x].Rugby*1000,
-          Wrestling: users[x].Wrestling*1000,
-          Hockey: users[x].Hockey*1000,
-          Badminton: users[x].Badminton*1000,
-          Dodgeball: users[x].Dodgeball*1000,
-          Racquetball: users[x].Racquetball*1000,
-          Fencing: users[x].Fencing*1000,
-          Lacrosse: users[x].Lacrosse*1000,
-          Squash: users[x].Squash*1000,
-          Frisby: users[x].Frisby*1000,
+          Handball: 1200000,
+          Basketball: 1200000,
+          Tennis: 1200000,
+          Pingpong: 1200000,
+          Americanfootball: 1200000,
+          Football: 1200000,
+          Baseball: 1200000,
+          Volleyball: 1200000,
+          Boxing: 1200000,
+          Cricket: 1200000,
+          Rugby: 1200000,
+          Wrestling: 1200000,
+          Hockey: 1200000,
+          Badminton: 1200000,
+          Dodgeball: 1200000,
+          Racquetball: 1200000,
+          Fencing: 1200000,
+          Lacrosse: 1200000,
+          Squash: 1200000,
+          Frisby: 1200000,
+          Armwrestling: 1200000
         }
       });
     }
