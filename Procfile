@@ -1,3 +1,3 @@
 web:npm start
 
-release:npx prisma db push --accept-data-loss --skip-generate
+release:prisma migrate dev --name newsport --preview-feature npx prisma db push --accept-data-loss --skip-generate
