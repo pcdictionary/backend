@@ -36,32 +36,33 @@ model Game {
   User      User[]             @relation("AllUserGames", fields: [userId], references: [id])
   createdAt DateTime?
   endedAt   DateTime?
-
+  note      String              @default("")
   @@unique(fields: [GameType, id], name: "idGameType")
 }
 
 model Elo {
   id         Int          @id @default(autoincrement())
-  Handball   Int?         @default(1200)
-  Basketball Int?         @default(1200)
-  Tennis     Int?         @default(1200)
-  Pingpong   Int?         @default(1200)
-  Americanfootball Int? @default(1200)
-  Football Int? @default(1200)
-  Baseball Int? @default(1200)
-  Volleyball Int? @default(1200)
-  Boxing Int? @default(1200)
-  Cricket Int? @default(1200)
-  Rugby Int? @default(1200)
-  Wrestling Int? @default(1200)
-  Hockey Int? @default(1200)
-  Badminton Int? @default(1200)
-  Dodgeball Int? @default(1200)
-  Racquetball Int? @default(1200)
-  Fencing Int? @default(1200)
-  Frisby Int? @default(1200)
-  Lacrosse Int? @default(1200)
-  Squash Int? @default(1200)
+  Handball   Int?         @default(1200000)
+  Basketball Int?         @default(1200000)
+  Tennis     Int?         @default(1200000)
+  Pingpong   Int?         @default(1200000)
+  Americanfootball Int? @default(1200000)
+  Football Int? @default(1200000)
+  Baseball Int? @default(1200000)
+  Volleyball Int? @default(1200000)
+  Boxing Int? @default(1200000)
+  Cricket Int? @default(1200000)
+  Rugby Int? @default(1200000)
+  Wrestling Int? @default(1200000)
+  Hockey Int? @default(1200000)
+  Badminton Int? @default(1200000)
+  Dodgeball Int? @default(1200000)
+  Racquetball Int? @default(1200000)
+  Fencing Int? @default(1200000)
+  Frisby Int? @default(1200000)
+  Lacrosse Int? @default(1200000)
+  Squash Int? @default(1200000)
+  Armwrestling Int? @default(1200000)
   user       User         @relation(fields: [username], references: [userName])
   username   String       @unique
   eloHistory EloHistory[]
@@ -96,6 +97,7 @@ enum GameType {
   FRISBY
   LACROSSE
   SQUASH
+  ARMWRESTLING
 }
 
 enum VerificationStatus {

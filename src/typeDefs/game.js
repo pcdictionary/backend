@@ -18,6 +18,7 @@ const typeDefs = gql`
     score2: Int
     users: [User]
     users2: [User]
+    note: String!
   }
 `;
 
