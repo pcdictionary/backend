@@ -704,7 +704,7 @@ serverio.on("connection", async (socket) => {
       }
     }
 
-    newElo = EloRating(oldElo, teamAvgElo, 30, d);
+    newElo = EloRating(oldElo, teamAvgElo, 30000, d);
     await prisma.elo.update({
       where: {
         username: activeUsers[id].username,
