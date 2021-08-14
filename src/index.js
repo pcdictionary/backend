@@ -545,6 +545,257 @@ serverio.on("connection", async (socket) => {
                   rooms[activeUsers[id].roomId].approved.total >
                 0.65
               ) {
+                serverio.to(activeUsers[id].roomId).emit("completedMatch");
+                if (
+                  rooms[activeUsers[id].roomId].team1.score >
+                  rooms[activeUsers[id].roomId].team2.score
+                ) {
+                  //Team 1 WINS GAME
+                  for (const property in rooms[activeUsers[id].roomId].team1
+                    .members) {
+                    let oldElo =
+                      rooms[activeUsers[id].roomId].team1.members[property].elo;
+                    let newElo = EloRating(
+                      oldElo,
+                      rooms[activeUsers[id].roomId].team2.averageElo,
+                      30000,
+                      1
+                    );
+                    await prisma.elo.update({
+                      where: {
+                        username:
+                          rooms[activeUsers[id].roomId].team1.members[property]
+                            .username,
+                      },
+                      data: {
+                        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+                        eloHistory: {
+                          create: {
+                            eloHistory: oldElo,
+                            GameType:
+                              rooms[
+                                activeUsers[id].roomId
+                              ].gameType.toUpperCase(),
+                          },
+                        },
+                      },
+                    });
+                    rooms[activeUsers[id].roomId].team1.members[property].elo =
+                      newElo.Ra;
+                    serverio
+                      .to(
+                        rooms[activeUsers[id].roomId].team1.members[property]
+                          .socketId
+                      )
+                      .emit("updatedElo", { oldElo, newElo: newElo.Ra });
+                  }
+                  //Team 2 lost
+                  for (const property in rooms[activeUsers[id].roomId].team2
+                    .members) {
+                    let oldElo =
+                      rooms[activeUsers[id].roomId].team2.members[property].elo;
+                    let newElo = EloRating(
+                      oldElo,
+                      rooms[activeUsers[id].roomId].team1.averageElo,
+                      30000,
+                      -1
+                    );
+                    await prisma.elo.update({
+                      where: {
+                        username:
+                          rooms[activeUsers[id].roomId].team2.members[property]
+                            .username,
+                      },
+                      data: {
+                        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+                        eloHistory: {
+                          create: {
+                            eloHistory: oldElo,
+                            GameType:
+                              rooms[
+                                activeUsers[id].roomId
+                              ].gameType.toUpperCase(),
+                          },
+                        },
+                      },
+                    });
+                    rooms[activeUsers[id].roomId].team2.members[property].elo =
+                      newElo.Ra;
+                    serverio
+                      .to(
+                        rooms[activeUsers[id].roomId].team2.members[property]
+                          .socketId
+                      )
+                      .emit("updatedElo", { oldElo, newElo: newElo.Ra });
+                  }
+                }
+                if (
+                  rooms[activeUsers[id].roomId].team1.score <
+                  rooms[activeUsers[id].roomId].team2.score
+                ) {
+                  //Team 1 Lost
+                  for (const property in rooms[activeUsers[id].roomId].team1
+                    .members) {
+                    let oldElo =
+                      rooms[activeUsers[id].roomId].team1.members[property].elo;
+                    let newElo = EloRating(
+                      oldElo,
+                      rooms[activeUsers[id].roomId].team2.averageElo,
+                      30000,
+                      -1
+                    );
+                    await prisma.elo.update({
+                      where: {
+                        username:
+                          rooms[activeUsers[id].roomId].team1.members[property]
+                            .username,
+                      },
+                      data: {
+                        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+                        eloHistory: {
+                          create: {
+                            eloHistory: oldElo,
+                            GameType:
+                              rooms[
+                                activeUsers[id].roomId
+                              ].gameType.toUpperCase(),
+                          },
+                        },
+                      },
+                    });
+                    rooms[activeUsers[id].roomId].team1.members[property].elo =
+                      newElo.Ra;
+                    serverio
+                      .to(
+                        rooms[activeUsers[id].roomId].team1.members[property]
+                          .socketId
+                      )
+                      .emit("updatedElo", { oldElo, newElo: newElo.Ra });
+                  }
+                  //Team 2 won
+                  for (const property in rooms[activeUsers[id].roomId].team2
+                    .members) {
+                    let oldElo =
+                      rooms[activeUsers[id].roomId].team2.members[property].elo;
+                    let newElo = EloRating(
+                      oldElo,
+                      rooms[activeUsers[id].roomId].team1.averageElo,
+                      30000,
+                      1
+                    );
+                    await prisma.elo.update({
+                      where: {
+                        username:
+                          rooms[activeUsers[id].roomId].team2.members[property]
+                            .username,
+                      },
+                      data: {
+                        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+                        eloHistory: {
+                          create: {
+                            eloHistory: oldElo,
+                            GameType:
+                              rooms[
+                                activeUsers[id].roomId
+                              ].gameType.toUpperCase(),
+                          },
+                        },
+                      },
+                    });
+                    rooms[activeUsers[id].roomId].team2.members[property].elo =
+                      newElo.Ra;
+                    serverio
+                      .to(
+                        rooms[activeUsers[id].roomId].team2.members[property]
+                          .socketId
+                      )
+                      .emit("updatedElo", { oldElo, newElo: newElo.Ra });
+                  }
+                }
+                if (
+                  rooms[activeUsers[id].roomId].team1.score ===
+                  rooms[activeUsers[id].roomId].team2.score
+                ) {
+                  for (const property in rooms[activeUsers[id].roomId].team1
+                    .members) {
+                    let oldElo =
+                      rooms[activeUsers[id].roomId].team1.members[property].elo;
+                    let newElo = EloRating(
+                      oldElo,
+                      rooms[activeUsers[id].roomId].team2.averageElo,
+                      30000,
+                      0
+                    );
+                    await prisma.elo.update({
+                      where: {
+                        username:
+                          rooms[activeUsers[id].roomId].team1.members[property]
+                            .username,
+                      },
+                      data: {
+                        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+                        eloHistory: {
+                          create: {
+                            eloHistory: oldElo,
+                            GameType:
+                              rooms[
+                                activeUsers[id].roomId
+                              ].gameType.toUpperCase(),
+                          },
+                        },
+                      },
+                    });
+
+                    rooms[activeUsers[id].roomId].team1.members[property].elo =
+                      newElo.Ra;
+                    serverio
+                      .to(
+                        rooms[activeUsers[id].roomId].team1.members[property]
+                          .socketId
+                      )
+                      .emit("updatedElo", { oldElo, newElo: newElo.Ra });
+                  }
+                  for (const property in rooms[activeUsers[id].roomId].team2
+                    .members) {
+                    let oldElo =
+                      rooms[activeUsers[id].roomId].team2.members[property].elo;
+                    let newElo = EloRating(
+                      oldElo,
+                      rooms[activeUsers[id].roomId].team1.averageElo,
+                      30000,
+                      0
+                    );
+                    await prisma.elo.update({
+                      where: {
+                        username:
+                          rooms[activeUsers[id].roomId].team2.members[property]
+                            .username,
+                      },
+                      data: {
+                        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+                        eloHistory: {
+                          create: {
+                            eloHistory: oldElo,
+                            GameType:
+                              rooms[
+                                activeUsers[id].roomId
+                              ].gameType.toUpperCase(),
+                          },
+                        },
+                      },
+                    });
+                    rooms[activeUsers[id].roomId].team2.members[property].elo =
+                      newElo.Ra;
+
+                    serverio
+                      .to(
+                        rooms[activeUsers[id].roomId].team2.members[property]
+                          .socketId
+                      )
+                      .emit("updatedElo", { oldElo, newElo: newElo.Ra });
+                  }
+                }
+
                 rooms[activeUsers[id].roomId].endTime = new Date();
                 await prisma.game.update({
                   where: {
@@ -596,7 +847,11 @@ serverio.on("connection", async (socket) => {
                 rooms[activeUsers[id].roomId].endTime = null;
                 //start a new room
 
-                serverio.to(activeUsers[id].roomId).emit("completedMatch");
+
+
+                serverio
+                  .to(activeUsers[id].roomId)
+                  .emit("updateLobby", rooms[activeUsers[id].roomId]);
               }
             } else {
               rooms[activeUsers[id].roomId].approved.sockets[socket.id] = false;
@@ -657,77 +912,75 @@ serverio.on("connection", async (socket) => {
   socket.on("test", () => {});
 
   socket.on("updateElo", async () => {
-    let newElo;
-    let oldElo;
-    let teamAvgElo;
-    let d;
-    if (!lowerWinner[rooms[activeUsers[id].roomId].gameType]) {
-      if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-        oldElo = rooms[activeUsers[id].roomId].team1.members[socket.id].elo;
-        teamAvgElo = rooms[activeUsers[id].roomId].team2.averageElo;
-        if (
-          rooms[activeUsers[id].roomId].team1.score >
-          rooms[activeUsers[id].roomId].team2.score
-        ) {
-          d = 1;
-        } else if (
-          rooms[activeUsers[id].roomId].team1.score <
-          rooms[activeUsers[id].roomId].team2.score
-        ) {
-          d = -1;
-        } else if (
-          rooms[activeUsers[id].roomId].team1.score ===
-          rooms[activeUsers[id].roomId].team2.score
-        ) {
-          d = 0;
-        }
-      }
-      if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
-        oldElo = rooms[activeUsers[id].roomId].team2.members[socket.id].elo;
-        teamAvgElo = rooms[activeUsers[id].roomId].team1.averageElo;
-        if (
-          rooms[activeUsers[id].roomId].team2.score >
-          rooms[activeUsers[id].roomId].team1.score
-        ) {
-          d = 1;
-        } else if (
-          rooms[activeUsers[id].roomId].team2.score <
-          rooms[activeUsers[id].roomId].team1.score
-        ) {
-          d = -1;
-        } else if (
-          rooms[activeUsers[id].roomId].team2.score ===
-          rooms[activeUsers[id].roomId].team1.score
-        ) {
-          d = 0;
-        }
-      }
-    }
-
-    newElo = EloRating(oldElo, teamAvgElo, 30000, d);
-    await prisma.elo.update({
-      where: {
-        username: activeUsers[id].username,
-      },
-      data: {
-        [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
-        eloHistory: {
-          create: {
-            eloHistory: oldElo,
-            GameType: rooms[activeUsers[id].roomId].gameType.toUpperCase(),
-          },
-        },
-      },
-    });
-    if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-      rooms[activeUsers[id].roomId].team1.members[socket.id].elo = newElo.Ra;
-    } else {
-      rooms[activeUsers[id].roomId].team2.members[socket.id].elo = newElo.Ra;
-    }
-    serverio.to(socket.id).emit("updatedElo", { oldElo, newElo: newElo.Ra });
-    serverio
-      .to(activeUsers[id].roomId)
-      .emit("updateLobby", rooms[activeUsers[id].roomId]);
+    // let newElo;
+    // let oldElo;
+    // let teamAvgElo;
+    // let d;
+    // if (!lowerWinner[rooms[activeUsers[id].roomId].gameType]) {
+    //   if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+    //     oldElo = rooms[activeUsers[id].roomId].team1.members[socket.id].elo;
+    //     teamAvgElo = rooms[activeUsers[id].roomId].team2.averageElo;
+    //     if (
+    //       rooms[activeUsers[id].roomId].team1.score >
+    //       rooms[activeUsers[id].roomId].team2.score
+    //     ) {
+    //       d = 1;
+    //     } else if (
+    //       rooms[activeUsers[id].roomId].team1.score <
+    //       rooms[activeUsers[id].roomId].team2.score
+    //     ) {
+    //       d = -1;
+    //     } else if (
+    //       rooms[activeUsers[id].roomId].team1.score ===
+    //       rooms[activeUsers[id].roomId].team2.score
+    //     ) {
+    //       d = 0;
+    //     }
+    //   }
+    //   if (rooms[activeUsers[id].roomId].team2.members[socket.id]) {
+    //     oldElo = rooms[activeUsers[id].roomId].team2.members[socket.id].elo;
+    //     teamAvgElo = rooms[activeUsers[id].roomId].team1.averageElo;
+    //     if (
+    //       rooms[activeUsers[id].roomId].team2.score >
+    //       rooms[activeUsers[id].roomId].team1.score
+    //     ) {
+    //       d = 1;
+    //     } else if (
+    //       rooms[activeUsers[id].roomId].team2.score <
+    //       rooms[activeUsers[id].roomId].team1.score
+    //     ) {
+    //       d = -1;
+    //     } else if (
+    //       rooms[activeUsers[id].roomId].team2.score ===
+    //       rooms[activeUsers[id].roomId].team1.score
+    //     ) {
+    //       d = 0;
+    //     }
+    //   }
+    // }
+    // newElo = EloRating(oldElo, teamAvgElo, 30000, d);
+    // await prisma.elo.update({
+    //   where: {
+    //     username: activeUsers[id].username,
+    //   },
+    //   data: {
+    //     [rooms[activeUsers[id].roomId].gameType]: newElo.Ra,
+    //     eloHistory: {
+    //       create: {
+    //         eloHistory: oldElo,
+    //         GameType: rooms[activeUsers[id].roomId].gameType.toUpperCase(),
+    //       },
+    //     },
+    //   },
+    // });
+    // if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+    //   rooms[activeUsers[id].roomId].team1.members[socket.id].elo = newElo.Ra;
+    // } else {
+    //   rooms[activeUsers[id].roomId].team2.members[socket.id].elo = newElo.Ra;
+    // }
+    // serverio
+    //   .to(activeUsers[id].roomId)
+    //   .emit("updateLobby", rooms[activeUsers[id].roomId]);
   });
 
   socket.on("activeGameCheck", async () => {
