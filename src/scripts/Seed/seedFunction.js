@@ -32,22 +32,26 @@ export async function seed(
   source = "default"
 ) {
 
-  await client.elo.update({
-    where:{
-      username: "itizidon"
-    },
-    data:{
-      Handball: 1215000,
-      eloHistory:{
-        create:{
-          eloHistory: 1200000,
-          GameType: "HANDBALL"
-        }
-      }
-    },
-  })
+  // await client.elo.update({
+  //   where:{
+  //     username: "itizidon"
+  //   },
+  //   data:{
+  //     Handball: 1215000,
+  //     eloHistory:{
+  //       create:{
+  //         eloHistory: 1200000,
+  //         GameType: "HANDBALL"
+  //       }
+  //     }
+  //   },
+  // })
   // if (process.env.TRANSFORM === "yes") {
-//  await client.game.deleteMany({})
+ await client.user.deleteMany({
+   where:{
+    status: "INCOMPLETE"
+   }
+ })
 //     const updatethese = [
 //       "Handball",
 //       "Basketball",
