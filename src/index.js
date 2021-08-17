@@ -408,12 +408,13 @@ serverio.on("connection", async (socket) => {
 
   socket.on("switchStatus", async () => {
     if (activeUsers[id]) {
-      const gameFound = await prisma.game.findUnique({
-        where: {
-          id: rooms[activeUsers[id].roomId].gameId,
-        },
-      });
-      if (rooms[activeUsers[id].roomId].startTime) {
+      if (!rooms[activeUsers[id].roomId].startTime) {
+        const gameFound = await prisma.game.findUnique({
+          where: {
+            id: rooms[activeUsers[id].roomId].gameId,
+          },
+        });
+
         if (!gameFound) {
           if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
             if (rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
@@ -444,83 +445,85 @@ serverio.on("connection", async (socket) => {
 
   socket.on("startMatch", async () => {
     if (activeUsers[id]) {
-      const gameFound = await prisma.game.findUnique({
-        where: {
-          id: rooms[activeUsers[id].roomId].gameId,
-        },
-      });
-      if (!gameFound) {
-        let team1Count = Object.values(
-          rooms[activeUsers[id].roomId].team1.members
-        );
-        let team2Count = Object.values(
-          rooms[activeUsers[id].roomId].team2.members
-        );
-        if (
-          team1Count.length === team2Count.length &&
-          team2Count.length ===
-            rooms[activeUsers[id].roomId].team2.readyCount &&
-          team1Count.length === rooms[activeUsers[id].roomId].team1.readyCount
-        ) {
-          rooms[activeUsers[id].roomId].approved.total =
-            team1Count.length + team2Count.length;
-          //add timer
+      if (!rooms[activeUsers[id].roomId].startTime) {
+        const gameFound = await prisma.game.findUnique({
+          where: {
+            id: rooms[activeUsers[id].roomId].gameId,
+          },
+        });
+        if (!gameFound) {
+          let team1Count = Object.values(
+            rooms[activeUsers[id].roomId].team1.members
+          );
+          let team2Count = Object.values(
+            rooms[activeUsers[id].roomId].team2.members
+          );
+          if (
+            team1Count.length === team2Count.length &&
+            team2Count.length ===
+              rooms[activeUsers[id].roomId].team2.readyCount &&
+            team1Count.length === rooms[activeUsers[id].roomId].team1.readyCount
+          ) {
+            rooms[activeUsers[id].roomId].approved.total =
+              team1Count.length + team2Count.length;
+            //add timer
 
-          let team1Users = [];
-          let team2Users = [];
-          let allTeamIds = [];
-          let team1EloSum = 0;
-          let team2EloSum = 0;
-          for (let x = 0; x < team1Count.length; x++) {
-            team1Users.push({ id: team1Count[x].userId });
-            team2Users.push({ id: team2Count[x].userId });
-            allTeamIds.push(team2Count[x].userId);
-            allTeamIds.push(team1Count[x].userId);
-            team1EloSum += team1Count[x].elo;
-            team2EloSum += team2Count[x].elo;
-          }
-          rooms[activeUsers[id].roomId].team1.averageElo =
-            team1EloSum / team1Count.length;
-          rooms[activeUsers[id].roomId].team2.averageElo =
-            team2EloSum / team2Count.length;
+            let team1Users = [];
+            let team2Users = [];
+            let allTeamIds = [];
+            let team1EloSum = 0;
+            let team2EloSum = 0;
+            for (let x = 0; x < team1Count.length; x++) {
+              team1Users.push({ id: team1Count[x].userId });
+              team2Users.push({ id: team2Count[x].userId });
+              allTeamIds.push(team2Count[x].userId);
+              allTeamIds.push(team1Count[x].userId);
+              team1EloSum += team1Count[x].elo;
+              team2EloSum += team2Count[x].elo;
+            }
+            rooms[activeUsers[id].roomId].team1.averageElo =
+              team1EloSum / team1Count.length;
+            rooms[activeUsers[id].roomId].team2.averageElo =
+              team2EloSum / team2Count.length;
 
-          const currentTime = new Date();
+            const currentTime = new Date();
 
-          rooms[activeUsers[id].roomId].startTime = currentTime;
-          const selectedGameType =
-            rooms[activeUsers[id].roomId].gameType.toUpperCase();
-          const gameId = await prisma.game.create({
-            data: {
-              users: {
-                connect: team1Users,
-              },
-              users2: {
-                connect: team2Users,
-              },
-              status: status.STARTED,
-              GameType: selectedGameType,
-              createdAt: rooms[activeUsers[id].roomId].startTime,
-            },
-          });
-          for (let x = 0; x < allTeamIds.length; x++) {
-            await prisma.user.update({
-              where: {
-                id: allTeamIds[x],
-              },
+            rooms[activeUsers[id].roomId].startTime = currentTime;
+            const selectedGameType =
+              rooms[activeUsers[id].roomId].gameType.toUpperCase();
+            const gameId = await prisma.game.create({
               data: {
-                allGames: {
-                  connect: {
-                    id: gameId.id,
-                  },
+                users: {
+                  connect: team1Users,
                 },
+                users2: {
+                  connect: team2Users,
+                },
+                status: status.STARTED,
+                GameType: selectedGameType,
+                createdAt: rooms[activeUsers[id].roomId].startTime,
               },
             });
+            for (let x = 0; x < allTeamIds.length; x++) {
+              await prisma.user.update({
+                where: {
+                  id: allTeamIds[x],
+                },
+                data: {
+                  allGames: {
+                    connect: {
+                      id: gameId.id,
+                    },
+                  },
+                },
+              });
+            }
+            rooms[activeUsers[id].roomId].toggle = true;
+            rooms[activeUsers[id].roomId].gameId = gameId.id;
+            serverio
+              .to(activeUsers[id].roomId)
+              .emit("startedMatch", currentTime.getTime());
           }
-          rooms[activeUsers[id].roomId].toggle = true;
-          rooms[activeUsers[id].roomId].gameId = gameId.id;
-          serverio
-            .to(activeUsers[id].roomId)
-            .emit("startedMatch", currentTime.getTime());
         }
       }
     }
