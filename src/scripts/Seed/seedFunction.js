@@ -31,11 +31,11 @@ export async function seed(
   testFailure = false,
   source = "default"
 ) {
-  await client.game.deleteMany({
-    where:{
-      status: "PENDING"
-    }
-  })
+  // await client.game.deleteMany({
+  //   where:{
+  //     status: "PENDING"
+  //   }
+  // })
 
   // await client.elo.update({
   //   where:{
