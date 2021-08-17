@@ -413,25 +413,27 @@ serverio.on("connection", async (socket) => {
           id: rooms[activeUsers[id].roomId].gameId,
         },
       });
-      if (!gameFound) {
-        if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
-          if (rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
-            rooms[activeUsers[id].roomId].team1.readyCount -= 1;
-          } else {
-            rooms[activeUsers[id].roomId].team1.readyCount += 1;
-          }
+      if (rooms[activeUsers[id].roomId].startTime) {
+        if (!gameFound) {
+          if (rooms[activeUsers[id].roomId].team1.members[socket.id]) {
+            if (rooms[activeUsers[id].roomId].team1.members[socket.id].status) {
+              rooms[activeUsers[id].roomId].team1.readyCount -= 1;
+            } else {
+              rooms[activeUsers[id].roomId].team1.readyCount += 1;
+            }
 
-          rooms[activeUsers[id].roomId].team1.members[socket.id].status =
-            !rooms[activeUsers[id].roomId].team1.members[socket.id].status;
-        } else {
-          if (rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
-            rooms[activeUsers[id].roomId].team2.readyCount -= 1;
+            rooms[activeUsers[id].roomId].team1.members[socket.id].status =
+              !rooms[activeUsers[id].roomId].team1.members[socket.id].status;
           } else {
-            rooms[activeUsers[id].roomId].team2.readyCount += 1;
-          }
+            if (rooms[activeUsers[id].roomId].team2.members[socket.id].status) {
+              rooms[activeUsers[id].roomId].team2.readyCount -= 1;
+            } else {
+              rooms[activeUsers[id].roomId].team2.readyCount += 1;
+            }
 
-          rooms[activeUsers[id].roomId].team2.members[socket.id].status =
-            !rooms[activeUsers[id].roomId].team2.members[socket.id].status;
+            rooms[activeUsers[id].roomId].team2.members[socket.id].status =
+              !rooms[activeUsers[id].roomId].team2.members[socket.id].status;
+          }
         }
         serverio
           .to(activeUsers[id].roomId)
@@ -846,8 +848,6 @@ serverio.on("connection", async (socket) => {
                 rooms[activeUsers[id].roomId].startTime = null;
                 rooms[activeUsers[id].roomId].endTime = null;
                 //start a new room
-
-
 
                 serverio
                   .to(activeUsers[id].roomId)
