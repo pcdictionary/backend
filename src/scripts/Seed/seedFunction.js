@@ -31,30 +31,54 @@ export async function seed(
   testFailure = false,
   source = "default"
 ) {
+  await client.game.deleteMany({
+    where:{
+      status: "STARTED"
+    }
+  })
+
+  // await client.elo.update({
+  //   where:{
+  //     username: "itizidon"
+  //   },
+  //   data:{
+  //     Handball: 1215000,
+  //     eloHistory:{
+  //       create:{
+  //         eloHistory: 1200000,
+  //         GameType: "HANDBALL"
+  //       }
+  //     }
+  //   },
+  // })
   // if (process.env.TRANSFORM === "yes") {
- await client.game.deleteMany({})
-    const updatethese = [
-      "Handball",
-      "Basketball",
-      "Tennis",
-      "Pingpong",
-      "Americanfootball",
-      "Football",
-      "Baseball",
-      "Volleyball",
-      "Boxing",
-      "Cricket",
-      "Rugby",
-      "Wrestling",
-      "Hockey",
-      "Badminton",
-      "Dodgeball",
-      "Racquetball",
-      "Fencing",
-      "Frisby",
-      "Lacrosse",
-      "Squash",
-    ];
+//  await client.user.deleteMany({
+//    where:{
+//     status: "INCOMPLETE"
+//    }
+//  })
+//     const updatethese = [
+//       "Handball",
+//       "Basketball",
+//       "Tennis",
+//       "Pingpong",
+//       "Americanfootball",
+//       "Football",
+//       "Baseball",
+//       "Volleyball",
+//       "Boxing",
+//       "Cricket",
+//       "Rugby",
+//       "Wrestling",
+//       "Hockey",
+//       "Badminton",
+//       "Dodgeball",
+//       "Racquetball",
+//       "Fencing",
+//       "Frisby",
+//       "Lacrosse",
+//       "Squash",
+//     ];
     // const users = await client.elo.findMany({});
   
     // for (let x = 0; x < users.length ; x++) {
