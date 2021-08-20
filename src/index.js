@@ -196,7 +196,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("createRoom", async (gameType) => {
-    socket.on("createdroom")
+    console.on("createdroom")
     if (!activeUsers[id]) {
       const selectedGameType = gameType.toUpperCase();
       let currentElo = await prisma.user.findUnique({
