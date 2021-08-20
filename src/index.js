@@ -112,8 +112,9 @@ let rooms = {};
 var activeUsers = {};
 serverio.on("connection", async (socket) => {
   const id = await getUserId(socket.handshake).userId;
-
+  console.log(socket.id,"THIS IS SOCKETID")
   socket.on("reconnect", async () => {
+    console.log("reconnect hit")
     if (activeUsers[id]) {
       //active player identifie
       let oldSocket = activeUsers[id].socketId;
@@ -195,6 +196,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("createRoom", async (gameType) => {
+    socket.on("createdroom")
     if (!activeUsers[id]) {
       const selectedGameType = gameType.toUpperCase();
       let currentElo = await prisma.user.findUnique({
@@ -232,6 +234,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("joinRoom", async (room) => {
+    console.log("joinRoom")
     if (!activeUsers[id]) {
       if (rooms[room]) {
         if (rooms[room].gameId === -1) {
@@ -292,6 +295,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("joinOptions", async () => {
+    console.log("joinOptions")
     if (!activeUsers[id]) {
       serverio.to(socket.id).emit("redirectQRCode");
     } else {
@@ -303,6 +307,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("leaveRoom", async () => {
+    console.log("leaveRoom")
     if (activeUsers[id]) {
       const gameFound = await prisma.game.findUnique({
         where: {
@@ -351,6 +356,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("switchTeam", async () => {
+    console.log("switchteam")
     if (activeUsers[id]) {
       if (!rooms[activeUsers[id].roomId].startTime) {
         let currentElo = await prisma.user.findUnique({
@@ -413,6 +419,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("switchStatus", async () => {
+    console.log("switchStatus")
     if (activeUsers[id]) {
       if (!rooms[activeUsers[id].roomId].startTime) {
         const gameFound = await prisma.game.findUnique({
@@ -450,6 +457,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("startMatch", async () => {
+    console.log("startMatch")
     if (activeUsers[id]) {
       if (!rooms[activeUsers[id].roomId].startTime) {
         const gameFound = await prisma.game.findUnique({
@@ -536,6 +544,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("approveScore", async ({ answer }) => {
+    console.log("approveScore")
     if (activeUsers[id]) {
       if (rooms[activeUsers[id].roomId].startTime) {
         const gameFound = await prisma.game.findUnique({
@@ -918,6 +927,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("finalScore", async ({ team1Score, team2Score }) => {
+    console.log("final Score")
     if (activeUsers[id]) {
       if (rooms[activeUsers[id].roomId].startTime) {
         const gameFound = await prisma.game.findUnique({
@@ -1025,6 +1035,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("activeGameCheck", async () => {
+    console.log("ACTIVEGAMECHECK")
     if (activeUsers[id]) {
       const gameFound = await prisma.game.findUnique({
         where: {
@@ -1042,6 +1053,7 @@ serverio.on("connection", async (socket) => {
   });
 
   socket.on("disconnect", async () => {
+    console.log("disconnect")
     if (activeUsers[id]) {
       if (activeUsers[id].reconnected) {
         activeUsers[id].reconnected = false;
