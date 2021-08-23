@@ -20,6 +20,10 @@ const typeDefs = gql`
     users2: [User]
     note: String!
   }
+  type AccountMatchesType{
+    Elo: Elo
+    ReturnUser: ReturnUser
+  }
 `;
 
 export default typeDefs;

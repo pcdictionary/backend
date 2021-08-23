@@ -112,7 +112,6 @@ let rooms = {};
 var activeUsers = {};
 serverio.on("connection", async (socket) => {
   const id = await getUserId(socket.handshake).userId;
-
   socket.on("reconnect", async () => {
     if (activeUsers[id]) {
       //active player identifie

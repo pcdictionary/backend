@@ -10,11 +10,12 @@ const typeDefs = gql`
     getAllMatchesPagination(data: GetAllMatchesPaginationInput): [Game]!
     getEloHistory(data: GetEloHistoryInput): Elo
     getParksData(locations: [String]): Location
-    getMatchesCount: [Elo]!
+    getMatchesCount: Elo!
     getLadderPagination(data: GetLadderInput): [Elo]!
     getLadder(data: GetLadderInput): [Elo]!
     getRanksByUser(data: GetLadderUserInput): [Elo]!
     findGame(id: Int): Game!
+    getAllMatchesAccount: ReturnUser!
   }
 `;
 
