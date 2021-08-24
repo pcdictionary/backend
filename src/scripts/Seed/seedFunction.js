@@ -52,11 +52,11 @@ export async function seed(
   //   },
   // })
   // if (process.env.TRANSFORM === "yes") {
-//  await client.user.deleteMany({
-//    where:{
-//     status: "INCOMPLETE"
-//    }
-//  })
+ await client.user.deleteMany({
+   where:{
+    status: "INCOMPLETE"
+   }
+ })
 //     const updatethese = [
 //       "Handball",
 //       "Basketball",
