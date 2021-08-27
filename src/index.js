@@ -91,6 +91,7 @@ function Teams(socketid, player, gameType) {
   this.redoModal = false;
   this.results = false;
   this.scoreSet = false;
+  this.notes = "";
 }
 
 function User(info) {
@@ -165,6 +166,7 @@ serverio.on("connection", async (socket) => {
               team1Score: rooms[activeUsers[id].roomId].team1.score,
               team2Score: rooms[activeUsers[id].roomId].team2.score,
               timer: startedTime,
+              notes: rooms[activeUsers[id].roomId].notes
             },
           });
           if (rooms[activeUsers[id].roomId].scoreSet) {
@@ -175,6 +177,7 @@ serverio.on("connection", async (socket) => {
               serverio.to(socket.id).emit("finalizedScore", {
                 team1Score: rooms[activeUsers[id].roomId].team1.score,
                 team2Score: rooms[activeUsers[id].roomId].team2.score,
+                notes: rooms[activeUsers[id].roomId].notes,
                 timer:
                   rooms[activeUsers[id].roomId].endTime -
                   rooms[activeUsers[id].roomId].startTime,
@@ -506,7 +509,7 @@ serverio.on("connection", async (socket) => {
                 },
                 status: status.STARTED,
                 GameType: selectedGameType,
-                createdAt: rooms[activeUsers[id].roomId].startTime,
+                createdAt: rooms[activeUsers[id].roomId].startTime
               },
             });
             for (let x = 0; x < allTeamIds.length; x++) {
@@ -841,6 +844,7 @@ serverio.on("connection", async (socket) => {
                       ),
                       endedAt: rooms[activeUsers[id].roomId].endTime,
                       status: status.COMPLETED,
+                      note: rooms[activeUsers[id].roomId].notes
                     },
                   });
 
@@ -880,6 +884,7 @@ serverio.on("connection", async (socket) => {
                   rooms[activeUsers[id].roomId].gameId = -1;
                   rooms[activeUsers[id].roomId].startTime = null;
                   rooms[activeUsers[id].roomId].endTime = null;
+                  rooms[activeUsers[id].roomId].notes = "";
                   //start a new room
 
                   serverio
@@ -916,7 +921,7 @@ serverio.on("connection", async (socket) => {
     }
   });
 
-  socket.on("finalScore", async ({ team1Score, team2Score }) => {
+  socket.on("finalScore", async ({ team1Score, team2Score, notes }) => {
     if (activeUsers[id]) {
       if (rooms[activeUsers[id].roomId].startTime) {
         const gameFound = await prisma.game.findUnique({
@@ -932,15 +937,16 @@ serverio.on("connection", async (socket) => {
               rooms[activeUsers[id].roomId].approved.sockets[socket.id] = true;
               rooms[activeUsers[id].roomId].approved.count++;
               rooms[activeUsers[id].roomId].scoreSet = true;
+              rooms[activeUsers[id].roomId].notes = notes || ""
               const timer =
                 rooms[activeUsers[id].roomId].endTime -
                 rooms[activeUsers[id].roomId].startTime;
               socket
                 .to(activeUsers[id].roomId)
-                .emit("finalizedScore", { team1Score, team2Score, timer });
+                .emit("finalizedScore", { team1Score, team2Score, timer, notes });
               serverio
                 .to(activeUsers[id].socketId)
-                .emit("finalizedScoreUser", { team1Score, team2Score, timer });
+                .emit("finalizedScoreUser", { team1Score, team2Score, timer, notes });
             }
           } else {
           }
