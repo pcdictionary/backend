@@ -19,6 +19,8 @@ const typeDefs = gql`
     users: [User]
     users2: [User]
     note: String!
+    createdAt: String
+    endedAt: String
   }
   type AccountMatchesType{
     Elo: Elo

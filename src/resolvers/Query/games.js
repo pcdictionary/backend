@@ -141,8 +141,13 @@ const games = {
     return foundMatches;
   },
   async findGame(parent, args, { prisma, request, verifiedUserId }, info) {
+
     const foundGame = await prisma.game.findUnique({
       where: { id: args.id },
+      include: {
+        users: true,
+        users2: true,
+      },
     });
     return foundGame;
   },
