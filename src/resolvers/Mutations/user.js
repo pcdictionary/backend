@@ -146,7 +146,7 @@ const user = {
   async login(parent, args, { prisma }, info) {
     try {
       const value = await loginStore.get(args.data.email);
-      if (value > 6) {
+      if (value > 10) {
         throw new Error("Too Many Attempts");
       } else {
         if (value) {
