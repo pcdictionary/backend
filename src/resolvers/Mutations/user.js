@@ -295,7 +295,53 @@ const user = {
       throw new Error(error.message);
     }
   },
-
+  async sendCodeForgotEmail(
+    parent,
+    args,
+    { prisma, request, verifiedUserId, clientTwilio },
+    info
+  ) {
+    let success = false;
+    await clientTwilio.verify
+      .services(process.env.TWILIO_SERVICE_ID)
+      .verifications.create({
+        to: `+${args.data.phoneNumber}`,
+        channel: "sms",
+      })
+      .then(async (service) => {
+        if (service.status === "pending") {
+          success = true;
+        }
+      });
+    return success;
+  },
+  async userEmail(
+    parent,
+    args,
+    { prisma, request, verifiedUserId, clientTwilio },
+    info
+  ) {
+    return clientTwilio.verify
+      .services(process.env.TWILIO_SERVICE_ID)
+      .verificationChecks.create({
+        to: `+${args.phoneNumber}`,
+        code: args.code,
+      })
+      .then(async (verification) => {
+        let user;
+        if (verification.status === "approved") {
+          user = await prisma.user.findUnique({
+            where: {
+              phoneNumber: args.phoneNumber,
+            },
+          });
+        }
+        if (!user) {
+          throw new Error("Wrong Number");
+        }
+        return user;
+      });
+  },
   async deleteUser(parent, args, { prisma, request, verifiedUserId }, info) {
     try {
       if (verifiedUserId) {

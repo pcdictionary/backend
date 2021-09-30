@@ -11,6 +11,8 @@ const typeDefs = gql`
     changePhoneNumber(phoneNumber: String!): ReturnUser!
     setCheckin(location: String, sport: String): Location
     allowChanges(phoneNumber: String!): ReturnUser!
+    sendCodeForgotEmail(data: PhoneNumberInput): Boolean!
+    userEmail(code: String!, phoneNumber: String!): ReturnUser!
   }
 `;
 
