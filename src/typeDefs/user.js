@@ -9,6 +9,9 @@ const typeDefs = gql`
     userName:   String!
     phoneNumber: String!
   }
+  input PhoneNumberInput {
+    phoneNumber: String!
+  }
   input UpdateUserInput {
     firstName:  String
     lastName:   String
