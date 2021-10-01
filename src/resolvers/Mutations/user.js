@@ -20,6 +20,7 @@ const user = {
               data: {
                 ...args.data,
                 password,
+                email: args.data.email.toLowerCase(),
                 elo: { create: {} },
               },
               include: {
