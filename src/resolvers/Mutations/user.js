@@ -244,6 +244,10 @@ const user = {
     info
   ) {
     try {
+      let email;
+      if (args.data.email) {
+        email = args.data.email.toLowerCase();
+      }
       return clientTwilio.verify
         .services(process.env.TWILIO_SERVICE_ID)
         .verificationChecks.create({
@@ -258,32 +262,69 @@ const user = {
               newPassword = await hashPassword(args.data.password);
             }
             if (newPassword) {
-              updatedUser = await prisma.user.update(
-                {
-                  where: {
-                    phoneNumber: args.data.phoneNumber,
+              if (email) {
+                updatedUser = await prisma.user.update(
+                  {
+                    where: {
+                      phoneNumber: args.data.phoneNumber,
+                    },
+                    data: {
+                      ...args.data,
+                      email: email,
+                      password: newPassword,
+                    },
+                    include: {
+                      elo: true,
+                    },
                   },
-                  data: { ...args.data, password: newPassword },
-                  include: {
-                    elo: true,
+                  info
+                );
+              } else {
+                updatedUser = await prisma.user.update(
+                  {
+                    where: {
+                      phoneNumber: args.data.phoneNumber,
+                    },
+                    data: {
+                      ...args.data,
+                      password: newPassword,
+                    },
+                    include: {
+                      elo: true,
+                    },
                   },
-                },
-                info
-              );
+                  info
+                );
+              }
             }
             if (!newPassword) {
-              updatedUser = await prisma.user.update(
-                {
-                  where: {
-                    phoneNumber: args.data.phoneNumber,
+              if (email) {
+                updatedUser = await prisma.user.update(
+                  {
+                    where: {
+                      phoneNumber: args.data.phoneNumber,
+                    },
+                    data: { ...args.data, email: email },
+                    include: {
+                      elo: true,
+                    },
                   },
-                  data: { ...args.data },
-                  include: {
-                    elo: true,
+                  info
+                );
+              } else {
+                updatedUser = await prisma.user.update(
+                  {
+                    where: {
+                      phoneNumber: args.data.phoneNumber,
+                    },
+                    data: { ...args.data },
+                    include: {
+                      elo: true,
+                    },
                   },
-                },
-                info
-              );
+                  info
+                );
+              }
             }
           }
 
