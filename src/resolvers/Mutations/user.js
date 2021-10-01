@@ -159,7 +159,7 @@ const user = {
 
       const user = await prisma.user.findUnique({
         where: {
-          email: args.data.email,
+          email: args.data.email.toLowerCase(),
         },
         include: {
           elo: true,
