@@ -31,12 +31,25 @@ export async function seed(
   testFailure = false,
   source = "default"
 ) {
-  await client.game.deleteMany({
-    where:{
-      status: "STARTED"
-    }
-  })
 
+  const users = await client.user.findMany({})
+  for(let x = 0; x < users.length; x++){
+    users[x]
+    await client.user.update({
+      where:{
+        id: users[x].id
+      },
+      data:{
+        email: users[x].email.toLowerCase()
+      }
+    })
+  }
+  // await client.game.deleteMany({
+  //   where:{
+  //     status: "STARTED"
+  //   }
+  // })
+  // console.log("Test")
   // await client.elo.update({
   //   where:{
   //     username: "itizidon"
