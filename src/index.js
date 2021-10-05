@@ -22,6 +22,7 @@ export const loginStore = new NodeCache({ checkperiod: 1800 });
 export const updateUserStore = new NodeCache({ checkperiod: 3600 });
 const app = express();
 loginStore.close();
+app.use(cors({ origin: ["http://localhost:3000"], credentials: true }));
 app.use(
   "/graphql",
   graphqlHTTP(async (request, response, graphQLParams) => {
