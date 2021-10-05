@@ -8,24 +8,14 @@ const user = {
     try {
       let user;
       const password = await hashPassword(args.data.password);
-
-          if (service.status === "pending") {
-            user = await prisma.user.create({
-              data: {
-                ...args.data,
-                password,
-                email: args.data.email.toLowerCase(),
-                elo: { create: {} },
-              },
-              include: {
-                elo: true,
-              },
-            });
-          }
-      if (!user) {
-        throw new Error("Not a real phone number");
-      }
-      return { user, token: generateAuthToken(user.id) };
+      user = await prisma.user.create({
+        data: {
+          ...args.data,
+          password,
+          email: args.data.email.toLowerCase(),
+        },
+      });
+      return user;
     } catch (error) {
       return error;
     }

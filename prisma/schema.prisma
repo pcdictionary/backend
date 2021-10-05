@@ -12,9 +12,7 @@ model User {
   email       String @unique
   firstName   String
   lastName    String
-  userName    String @unique
   password    String
-  phoneNumber String @unique
   admin       Boolean @default(false)
 }
 
