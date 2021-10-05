@@ -4,46 +4,28 @@
 
 import { seedData } from "./seedDataDumps/seedData100.js";
 import hashPassword from "../../utils/hashPassword.js";
-import { locationStore } from "../../index.js";
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-const GAMETYPES = ["HANDBALL", "BASKETBALL", "TENNIS", "PINGPONG", "FOOTBALL"];
-const PARKS = [
-  "Seth Low Playground",
-  "Dahill Triangle",
-  "Gravesend Park",
-  "Friends Field",
-  "Milestone Park",
-  "Parks",
-  "Bealin Square",
-  "Samuel Goldberg Triangle",
-  "Lt. Joseph Petrosino Playground",
-  "Ketchum Triangle",
-  "Boro Park Village",
-  "Boro Park Village Phase",
-  "Garibaldi Playground",
-];
 export async function seed(
   client,
   test = false,
   testFailure = false,
   source = "default"
 ) {
-
-  const users = await client.user.findMany({})
-  for(let x = 0; x < users.length; x++){
-    users[x]
-    await client.user.update({
-      where:{
-        id: users[x].id
-      },
-      data:{
-        email: users[x].email.toLowerCase()
-      }
-    })
-  }
+  // const users = await client.user.findMany({})
+  // for(let x = 0; x < users.length; x++){
+  //   users[x]
+  //   await client.user.update({
+  //     where:{
+  //       id: users[x].id
+  //     },
+  //     data:{
+  //       email: users[x].email.toLowerCase()
+  //     }
+  //   })
+  // }
   // await client.game.deleteMany({
   //   where:{
   //     status: "STARTED"

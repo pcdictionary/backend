@@ -9,9 +9,6 @@ const typeDefs = gql`
     userName:   String!
     phoneNumber: String!
   }
-  input PhoneNumberInput {
-    phoneNumber: String!
-  }
   input UpdateUserInput {
     firstName:  String
     lastName:   String
@@ -26,12 +23,7 @@ const typeDefs = gql`
     firstName:  String!
     lastName:   String!
     userName:   String!
-    elo:        Elo
     phoneNumber:  String!
-    status:     AccountStatus
-    games:      [Game]
-    games2:     [Game]
-    allGames:   [Game]
   }
   type User {
     id:         Int!
@@ -41,10 +33,6 @@ const typeDefs = gql`
     password:   String!
     userName:   String!
     phoneNumber: String
-    status: AccountStatus
-    elo:        Elo
-    games:      [Game]
-    games2:     [Game]
   }
 `;
 

@@ -5,7 +5,6 @@ generator client {
 datasource db {
   provider = "postgresql"
   url      = env("DATABASE_URL")
-  shadowDatabaseUrl = env("HEROKU_POSTGRESQL_IVORY_URL")
 }
 
 model User {
@@ -16,98 +15,24 @@ model User {
   userName    String @unique
   password    String
   phoneNumber String @unique
-  status      AccountStatus @default(INCOMPLETE)
-  elo         Elo?
-  games       Game[] @relation("UserGame")
-  games2      Game[] @relation("UserGame2")
-  allGames    Game[] @relation("AllUserGames")
-  @@unique(fields: [id, phoneNumber], name: "idphoneNumber")
+  admin       Boolean @default(false)
 }
 
-model Game {
-  id        Int                @id @default(autoincrement())
-  status    VerificationStatus @default(PENDING)
-  users     User[]             @relation("UserGame")
-  users2    User[]             @relation("UserGame2")
-  score1    Int?
-  score2    Int?
-  GameType  GameType?
-  userId    Int?
-  User      User[]             @relation("AllUserGames", fields: [userId], references: [id])
-  createdAt DateTime?
-  endedAt   DateTime?
-  note      String              @default("")
-  @@unique(fields: [GameType, id], name: "idGameType")
+model Word{
+  id          Int    @id @default(autoincrement())
+  word        String @unique
+  definitions Definitions[]
 }
 
-model Elo {
-  id         Int          @id @default(autoincrement())
-  Handball   Int?         @default(1200000)
-  Basketball Int?         @default(1200000)
-  Tennis     Int?         @default(1200000)
-  Pingpong   Int?         @default(1200000)
-  Americanfootball Int? @default(1200000)
-  Football Int? @default(1200000)
-  Baseball Int? @default(1200000)
-  Volleyball Int? @default(1200000)
-  Boxing Int? @default(1200000)
-  Cricket Int? @default(1200000)
-  Rugby Int? @default(1200000)
-  Wrestling Int? @default(1200000)
-  Hockey Int? @default(1200000)
-  Badminton Int? @default(1200000)
-  Dodgeball Int? @default(1200000)
-  Racquetball Int? @default(1200000)
-  Fencing Int? @default(1200000)
-  Frisby Int? @default(1200000)
-  Lacrosse Int? @default(1200000)
-  Squash Int? @default(1200000)
-  Armwrestling Int? @default(1200000)
-  user       User         @relation(fields: [username], references: [userName])
-  username   String       @unique
-  eloHistory EloHistory[]
+model Definitions {
+  id          Int    @id @default(autoincrement())
+  word        Word   @relation(fields: [wordId], references: [id])
+  wordId      Int
+  status      Status @default(PENDING)
 }
 
-model EloHistory {
-  id         Int       @id @default(autoincrement())
-  History    Elo       @relation(fields: [eloId], references: [id])
-  eloId      Int
-  eloHistory Int
-  GameType   GameType?
-}
-
-enum GameType {
-  HANDBALL
-  BASKETBALL
-  TENNIS
-  PINGPONG
-  AMERICANFOOTBALL
-  FOOTBALL
-  BASEBALL
-  VOLLEYBALL
-  BOXING
-  CRICKET
-  RUGBY
-  WRESTLING
-  HOCKEY
-  BADMINTON
-  DODGEBALL
-  RACQUETBALL
-  FENCING
-  FRISBY
-  LACROSSE
-  SQUASH
-  ARMWRESTLING
-}
-
-enum VerificationStatus {
+enum Status {
   PENDING
-  STARTED
-  COMPLETED
-}
-
-enum AccountStatus {
-  INCOMPLETE
-  CONFIRMED
-  BANNED
+  APPROVED
+  DENIED
 }
