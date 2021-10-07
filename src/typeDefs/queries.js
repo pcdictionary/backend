@@ -4,6 +4,7 @@ const typeDefs = gql`
   type Query {
     allUsers: [User!]!
     getUser: ReturnUser!
+    getWord: WordPayload!
   }
 `;
 

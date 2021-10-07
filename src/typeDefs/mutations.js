@@ -4,6 +4,8 @@ const typeDefs = gql`
     login(data: LoginUserInput): AuthPayload!
     createUser(data: CreateUserInput): User!
     deleteUser: ReturnUser!
+    createWord(data: CreateWordInput): Word
+    updateWord(status: Status, id: Int): Definitions
   }
 `;
 
