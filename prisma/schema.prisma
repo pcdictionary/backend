@@ -8,25 +8,28 @@ datasource db {
 }
 
 model User {
-  id          Int    @id @default(autoincrement())
-  email       String @unique
-  firstName   String
-  lastName    String
-  password    String
-  admin       Boolean @default(false)
+  id        Int     @id @default(autoincrement())
+  email     String  @unique
+  firstName String
+  lastName  String
+  password  String
+  admin     Boolean @default(false)
 }
 
-model Word{
-  id          Int    @id @default(autoincrement())
-  word        String @unique
+model Word {
+  id          Int           @id @default(autoincrement())
+  word        String        @unique
   definitions Definitions[]
 }
 
 model Definitions {
-  id          Int    @id @default(autoincrement())
-  word        Word   @relation(fields: [wordId], references: [id])
+  id          Int      @id @default(autoincrement())
+  word        Word     @relation(fields: [wordId], references: [id])
   wordId      Int
-  status      Status @default(PENDING)
+  status      Status   @default(PENDING)
+  definition  String
+  example     String
+  alternative String[]
 }
 
 enum Status {

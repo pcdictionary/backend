@@ -3,6 +3,8 @@ import generateAuthToken from "../../utils/generateAuthToken.js";
 import hashPassword from "../../utils/hashPassword.js";
 import { loginStore, updateUserStore } from "../../index.js";
 
+
+
 const user = {
   async createUser(parent, args, { prisma, clientTwilio }, info) {
     try {
@@ -36,9 +38,6 @@ const user = {
       const user = await prisma.user.findUnique({
         where: {
           email: args.data.email.toLowerCase(),
-        },
-        include: {
-          elo: true,
         },
       });
 

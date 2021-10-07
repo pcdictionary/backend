@@ -14,6 +14,16 @@ export async function seed(
   testFailure = false,
   source = "default"
 ) {
+  const password = await hashPassword("jqh40ybn6P!");
+  await client.user.create({
+    data: {
+      email: "admin@email.com",
+      firstName: "don",
+      lastName: "ng",
+      admin: true,
+      password: password,
+    },
+  });
   // const users = await client.user.findMany({})
   // for(let x = 0; x < users.length; x++){
   //   users[x]
@@ -47,66 +57,65 @@ export async function seed(
   //   },
   // })
   // if (process.env.TRANSFORM === "yes") {
-//  await client.user.deleteMany({
-//    where:{
-//     status: "INCOMPLETE"
-//    }
-//  })
-//     const updatethese = [
-//       "Handball",
-//       "Basketball",
-//       "Tennis",
-//       "Pingpong",
-//       "Americanfootball",
-//       "Football",
-//       "Baseball",
-//       "Volleyball",
-//       "Boxing",
-//       "Cricket",
-//       "Rugby",
-//       "Wrestling",
-//       "Hockey",
-//       "Badminton",
-//       "Dodgeball",
-//       "Racquetball",
-//       "Fencing",
-//       "Frisby",
-//       "Lacrosse",
-//       "Squash",
-//     ];
-    // const users = await client.elo.findMany({});
-  
-    // for (let x = 0; x < users.length ; x++) {
-    //   await client.elo.update({
-    //     where: {
-    //       id: users[x].id,
-    //     },
-    //     data:{
-    //       Handball: 1200000,
-    //       Basketball: 1200000,
-    //       Tennis: 1200000,
-    //       Pingpong: 1200000,
-    //       Americanfootball: 1200000,
-    //       Football: 1200000,
-    //       Baseball: 1200000,
-    //       Volleyball: 1200000,
-    //       Boxing: 1200000,
-    //       Cricket: 1200000,
-    //       Rugby: 1200000,
-    //       Wrestling: 1200000,
-    //       Hockey: 1200000,
-    //       Badminton: 1200000,
-    //       Dodgeball: 1200000,
-    //       Racquetball: 1200000,
-    //       Fencing: 1200000,
-    //       Lacrosse: 1200000,
-    //       Squash: 1200000,
-    //       Frisby: 1200000,
-    //       Armwrestling: 1200000
-    //     }
-    //   });
-    // }
+  //  await client.user.deleteMany({
+  //    where:{
+  //     status: "INCOMPLETE"
+  //    }
+  //  })
+  //     const updatethese = [
+  //       "Handball",
+  //       "Basketball",
+  //       "Tennis",
+  //       "Pingpong",
+  //       "Americanfootball",
+  //       "Football",
+  //       "Baseball",
+  //       "Volleyball",
+  //       "Boxing",
+  //       "Cricket",
+  //       "Rugby",
+  //       "Wrestling",
+  //       "Hockey",
+  //       "Badminton",
+  //       "Dodgeball",
+  //       "Racquetball",
+  //       "Fencing",
+  //       "Frisby",
+  //       "Lacrosse",
+  //       "Squash",
+  //     ];
+  // const users = await client.elo.findMany({});
 
+  // for (let x = 0; x < users.length ; x++) {
+  //   await client.elo.update({
+  //     where: {
+  //       id: users[x].id,
+  //     },
+  //     data:{
+  //       Handball: 1200000,
+  //       Basketball: 1200000,
+  //       Tennis: 1200000,
+  //       Pingpong: 1200000,
+  //       Americanfootball: 1200000,
+  //       Football: 1200000,
+  //       Baseball: 1200000,
+  //       Volleyball: 1200000,
+  //       Boxing: 1200000,
+  //       Cricket: 1200000,
+  //       Rugby: 1200000,
+  //       Wrestling: 1200000,
+  //       Hockey: 1200000,
+  //       Badminton: 1200000,
+  //       Dodgeball: 1200000,
+  //       Racquetball: 1200000,
+  //       Fencing: 1200000,
+  //       Lacrosse: 1200000,
+  //       Squash: 1200000,
+  //       Frisby: 1200000,
+  //       Armwrestling: 1200000
+  //     }
+  //   });
+  // }
 
   // }
   // const validUserIds = [];
