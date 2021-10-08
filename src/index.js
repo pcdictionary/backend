@@ -18,6 +18,8 @@ export const schema = makeExecutableSchema({
   typeDefs,
 });
 
+export const wordIdCursor = new NodeCache({checkperiod: 1800});
+
 export const loginStore = new NodeCache({ checkperiod: 1800 });
 export const updateUserStore = new NodeCache({ checkperiod: 3600 });
 const app = express();

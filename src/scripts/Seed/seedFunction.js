@@ -24,6 +24,20 @@ export async function seed(
       password: password,
     },
   });
+  for (let x = 0; x < 50; x++) {
+    await client.word.create({
+      data: {
+        word: `${x}+${x}`,
+        definitions: {
+          create: {
+            definition: `${x}+${x}`,
+            example: `${x}+${x}`,
+            alternative: `${x}+${x}`,
+          },
+        },
+      },
+    });
+  }
   // const users = await client.user.findMany({})
   // for(let x = 0; x < users.length; x++){
   //   users[x]

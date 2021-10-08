@@ -1,3 +1,4 @@
+import { wordIdCursor } from "../../index.js";
 const words = {
   async createWord(parent, args, { prisma }, info) {
     try {
@@ -20,12 +21,14 @@ const words = {
   },
   async updateWord(parent, args, { prisma }, info) {
     try {
+      console.log(args)
       const definition = await prisma.definitions.update({
         where: { id: args.id },
         data: {
           status: args.status,
         },
       });
+      console.log(definition)
       return definition;
     } catch (error) {
       return error;

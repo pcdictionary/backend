@@ -5,6 +5,7 @@ const typeDefs = gql`
     allUsers: [User!]!
     getUser: ReturnUser!
     getWord: WordPayload!
+    skipWord: WordPayload!
   }
 `;
 

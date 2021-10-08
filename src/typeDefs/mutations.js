@@ -5,7 +5,7 @@ const typeDefs = gql`
     createUser(data: CreateUserInput): User!
     deleteUser: ReturnUser!
     createWord(data: CreateWordInput): Word
-    updateWord(status: Status, id: Int): Definitions
+    updateWord(status: String, id: Int): Definitions
   }
 `;
 
