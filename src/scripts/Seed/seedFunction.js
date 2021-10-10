@@ -7,7 +7,28 @@ import hashPassword from "../../utils/hashPassword.js";
 function getRndInteger(min, max) {
   return Math.floor(Math.random() * (max - min)) + min;
 }
-
+const allWords = [
+  "Handball",
+  "Basketball",
+  "Tennis",
+  "Pingpong",
+  "Americanfootball",
+  "Football",
+  "Baseball",
+  "Volleyball",
+  "Boxing",
+  "Cricket",
+  "Rugby",
+  "Wrestling",
+  "Hockey",
+  "Badminton",
+  "Dodgeball",
+  "Racquetball",
+  "Fencing",
+  "Frisby",
+  "Lacrosse",
+  "Squash",
+];
 export async function seed(
   client,
   test = false,
@@ -24,7 +45,17 @@ export async function seed(
       password: password,
     },
   });
+  for (let x = 0; x < allWords.length; x++) {
+    await client.alternative.create({
+      data: {
+        word: allWords[x],
+      },
+    });
+  }
   for (let x = 0; x < 50; x++) {
+    const word1 = allWords[getRndInteger(0, allWords.length)];
+    const word2 = allWords[getRndInteger(0, allWords.length)];
+    let tempId = getRndInteger(1, 18)
     await client.word.create({
       data: {
         word: `${x}+${x}`,
@@ -32,8 +63,10 @@ export async function seed(
           create: {
             definition: `${x}+${x}`,
             example: `${x}+${x}`,
-            alternative: `${x}+${x}`,
           },
+        },
+        alternatives: {
+          connect: { id: tempId },
         },
       },
     });

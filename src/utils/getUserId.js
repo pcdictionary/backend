@@ -6,7 +6,7 @@ import jwt from "jsonwebtoken";
 
 const getUserId = (request) => {
   const cookie =
-    request.headers.cookie === "null" ? null : request.headers.cookie;
+    request.headers.authorization === "null" ? null : request.headers.authorization;
   if (cookie) {
     const token = cookie.split("=");
     const secret = process.env.JWT_SECRET

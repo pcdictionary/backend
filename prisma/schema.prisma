@@ -17,19 +17,25 @@ model User {
 }
 
 model Word {
-  id          Int           @id @default(autoincrement())
-  word        String        @unique
-  definitions Definitions[]
+  id           Int           @id @default(autoincrement())
+  word         String        @unique
+  definitions  Definitions[]
+  alternatives Alternative[]
+}
+
+model Alternative {
+  id    Int    @id @default(autoincrement())
+  words Word[]
+  word  String @unique
 }
 
 model Definitions {
-  id          Int      @id @default(autoincrement())
-  word        Word     @relation(fields: [wordId], references: [id])
-  wordId      Int
-  status      Status   @default(PENDING)
-  definition  String
-  example     String
-  alternative String[]
+  id         Int    @id @default(autoincrement())
+  word       Word   @relation(fields: [wordId], references: [id])
+  wordId     Int
+  status     Status @default(PENDING)
+  definition String
+  example    String
 }
 
 enum Status {

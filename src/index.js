@@ -9,6 +9,7 @@ import getUserId from "./utils/getUserId.js";
 import { v4 as uuidv4 } from "uuid";
 import NodeCache from "node-cache";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser"
 dotenv.config();
 const { PrismaClient } = pkg;
 const prisma = new PrismaClient();
@@ -18,16 +19,26 @@ export const schema = makeExecutableSchema({
   typeDefs,
 });
 
-export const wordIdCursor = new NodeCache({checkperiod: 1800});
+export const wordIdCursor = new NodeCache({ checkperiod: 1800 });
 
 export const loginStore = new NodeCache({ checkperiod: 1800 });
 export const updateUserStore = new NodeCache({ checkperiod: 3600 });
 const app = express();
 loginStore.close();
-app.use(cors({ origin: ["http://localhost:3000","http://localhost:3001"], credentials: true }));
+app.use(express.json())
+app.use(cookieParser());
+const options = {
+  origin: ["http://localhost:3001", "http://localhost:3000"],
+  credentials: true,
+  methods: 'GET,HEAD,POST,PATCH,DELETE,OPTIONS',
+};
+app.use(cors(options));
+
 app.use(
   "/graphql",
+  cors(options),
   graphqlHTTP(async (request, response, graphQLParams) => {
+    // console.log(request)
     const userIds = await getUserId(request);
     return {
       schema,
