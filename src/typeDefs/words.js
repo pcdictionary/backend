@@ -16,6 +16,11 @@ const typeDefs = gql`
     id: Int!
     word: String!
     definitions: [Definitions]
+    alternatives: [Alternatives]
+  }
+  type Alternatives {
+    id: Int!
+    word: String!
   }
   type Definitions {
     id: Int!
