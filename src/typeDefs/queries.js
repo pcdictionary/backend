@@ -6,6 +6,9 @@ const typeDefs = gql`
     getUser: ReturnUser!
     getWord: WordPayload!
     skipWord: WordPayload!
+    searchWord(word: String): SearchedWordPayload!
+    wordRecommendations(prefix: String): WordRecommendations!
+    getHomePage: [WordPayload]
   }
 `;
 
