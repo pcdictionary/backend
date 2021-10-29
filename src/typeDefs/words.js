@@ -7,10 +7,16 @@ const typeDefs = gql`
     example: String!
     alternative: String!
   }
+  type WordRecommendations{
+    words: [String]
+  }
   type WordPayload{
     word: Word
     definition: Definitions
-
+  }
+  type SearchedWordPayload{
+    word: Word
+    definition: Definitions
   }
   type Word {
     id: Int!
