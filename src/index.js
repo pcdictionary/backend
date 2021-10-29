@@ -57,7 +57,6 @@ app.use(
   "/graphql",
   cors(options),
   graphqlHTTP(async (request, response, graphQLParams) => {
-    // console.log(request)
     const userIds = await getUserId(request);
     return {
       schema,
