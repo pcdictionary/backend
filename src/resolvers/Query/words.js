@@ -6,7 +6,6 @@ const words = {
   async getWord(parent, args, { prisma }, info) {
     try {
       const cursor = await wordIdCursor.get("defCursor");
-      console.log(cursor);
       if (!cursor) {
         const wordDetails = await prisma.definitions.findFirst({
           where: {
@@ -82,9 +81,10 @@ const words = {
     }
   },
   async searchWord(parent, args, { prisma }, info) {
+    const lowerCaseWord = args.word.toLowerCase();
     const data = await prisma.word.findUnique({
       where: {
-        word: args.word,
+        word: lowerCaseWord,
       },
 
       include: {

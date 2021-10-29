@@ -10,7 +10,6 @@ const user = {
   async getUser(parent, args, { prisma, verifiedUserId }, info) {
     try {
       let query = {};
-      console.log(verifiedUserId);
       if (verifiedUserId) query = { id: verifiedUserId };
       else return new Error("Invalid search parameters");
       const foundUser = await prisma.user.findUnique({
