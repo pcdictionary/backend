@@ -10,21 +10,48 @@ const words = {
           create: { word: alternatives[x] },
         });
       }
-      const word = await prisma.word.create({
-        data: {
+      const foundWord = await prisma.word.findUnique({
+        where: {
           word: args.data.words,
-          definitions: {
-            create: {
-              definition: args.data.definition,
-              example: args.data.example,
-              // alternative: args.data.alternative,
-            },
-          },
-          alternatives: { connectOrCreate: alternativesData },
+        },
+        include: {
+          definitions: true,
+          alternatives: true,
         },
       });
-      return word;
-
+      console.log(foundWord);
+      if (foundWord) {
+        const word = await prisma.word.update({
+          where: {
+            id: foundWord.id,
+          },
+          data: {
+            definitions: {
+              create: {
+                definition: args.data.definition,
+                example: args.data.example,
+              },
+            },
+            alternatives: { connectOrCreate: alternativesData },
+          },
+        });
+        return word;
+      } else {
+        const word = await prisma.word.create({
+          data: {
+            word: args.data.words,
+            definitions: {
+              create: {
+                definition: args.data.definition,
+                example: args.data.example,
+                // alternative: args.data.alternative,
+              },
+            },
+            alternatives: { connectOrCreate: alternativesData },
+          },
+        });
+        return word;
+      }
     } catch (error) {
       return error;
     }

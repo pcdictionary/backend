@@ -32,7 +32,7 @@ model Alternative {
 model Definitions {
   id         Int    @id @default(autoincrement())
   word       Word   @relation(fields: [wordId], references: [id])
-  wordId     Int @unique
+  wordId     Int
   status     Status @default(PENDING)
   definition String
   example    String

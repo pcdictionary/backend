@@ -82,22 +82,21 @@ const words = {
     }
   },
   async searchWord(parent, args, { prisma }, info) {
-    const word = await prisma.word.findUnique({
+    const data = await prisma.word.findUnique({
       where: {
         word: args.word,
       },
+
       include: {
         alternatives: true,
+        definitions: {
+          where: {
+            status: "APPROVED",
+          },
+        },
       },
     });
-    console.log(word)
-    const wordDetails = await prisma.definitions.findUnique({
-      where: {
-        wordId: word.id,
-      },
-    });
-    wordIdCursor.set("defCursor", wordDetails.id, 3600);
-    return { word, definition: wordDetails };
+    return data;
   },
   async wordRecommendations(parent, args, { prisma }, info) {
     if (args.prefix !== "") {
@@ -108,31 +107,49 @@ const words = {
     }
   },
   async getHomePage(parent, args, { prisma }, info) {
-    const returnRandomWords = [];
-    console.log("HIT")
     const words = await prisma.word.findMany({
       take: 5,
       include: {
         alternatives: true,
-        // definitions: true
+        definitions: {
+          where: {
+            status: "APPROVED",
+          },
+        },
       },
     });
-    console.log(words)
-    for (let x = 0; x < words.length; x++) {
-      const wordDetails = await prisma.definitions.findUnique({
-        where: {
-          wordId: words[x].id,
-        },
-      });
-      const randomlySelectedWord = { word: words[x], definition: wordDetails };
-      returnRandomWords.push(randomlySelectedWord);
-    }
 
-    return returnRandomWords;
+    return words;
   },
-  // async browseWords(parent, args, { prisma }, info){
+  async wordPagination(parent, args, { prisma }, info) {
+    const words = await prisma.word.findMany({
+      skip: args.page,
+      take: 10,
+      where: {
+        word: {
+          startsWith: args.letter,
+        },
+      },
 
-  // }
+      orderBy: {
+        word: "asc",
+      },
+      include: {
+        alternatives: true,
+        definitions: {
+          where: {
+            status: "APPROVED",
+          },
+        },
+      },
+    });
+    return words;
+  },
+  async totalWordCount(parent, args, { prisma }, info){
+    const data = await allWords.get("allWords");
+    const totalCount = data.find(args.letter)
+    return totalCount.length
+  }
 };
 
 export default words;
