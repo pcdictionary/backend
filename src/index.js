@@ -51,7 +51,7 @@ const options = {
       ? "https://euphemaryadmin.herokuapp.com/"
       : "http://localhost:3001",
     process.env.PORT
-      ? "https://euphemaryfrontend.herokuapp.com/graphql"
+      ? "https://euphemaryfrontend.herokuapp.com"
       : "http://localhost:3000",
   ],
   credentials: true,
