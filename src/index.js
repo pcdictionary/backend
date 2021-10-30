@@ -52,7 +52,7 @@ const options = {
   methods: "GET,HEAD,POST,PATCH,DELETE,OPTIONS",
 };
 app.use(cors(options));
-
+app.options("/graphql", cors(options))
 app.use(
   "/graphql",
   cors(options),
