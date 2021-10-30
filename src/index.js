@@ -47,7 +47,7 @@ loginStore.close();
 app.use(express.json());
 app.use(cookieParser());
 const options = {
-  origin: ["https://euphemaryadmin.herokuapp.com/", "https://euphemaryfrontend.herokuapp.com/"],
+  origin: ["https://euphemaryadmin.herokuapp.com/", "https://euphemaryfrontend.herokuapp.com/graphql"],
   credentials: true,
   methods: "GET,HEAD,POST,PATCH,DELETE,OPTIONS",
 };
