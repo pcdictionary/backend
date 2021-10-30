@@ -51,8 +51,9 @@ const options = {
   credentials: true,
   methods: "GET,HEAD,POST,PATCH,DELETE,OPTIONS",
 };
-app.use(cors(options));
 app.options("/graphql", cors(options))
+app.use(cors(options));
+
 app.use(
   "/graphql",
   cors(options),
