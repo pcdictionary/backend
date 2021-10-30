@@ -35,7 +35,7 @@ export async function seed(
   testFailure = false,
   source = "default"
 ) {
-  const password = await hashPassword("jqh40ybn6P!");
+  // const password = await hashPassword(process.env.ADMIN_PASSWORD);
   await client.user.create({
     data: {
       email: "admin@email.com",
@@ -45,32 +45,32 @@ export async function seed(
       password: password,
     },
   });
-  for (let x = 0; x < allWords.length; x++) {
-    await client.alternative.create({
-      data: {
-        word: allWords[x],
-      },
-    });
-  }
-  for (let x = 0; x < 50; x++) {
-    const word1 = allWords[getRndInteger(0, allWords.length)];
-    const word2 = allWords[getRndInteger(0, allWords.length)];
-    let tempId = getRndInteger(1, 18)
-    await client.word.create({
-      data: {
-        word: `${x}+${x}`,
-        definitions: {
-          create: {
-            definition: `${x}+${x}`,
-            example: `${x}+${x}`,
-          },
-        },
-        alternatives: {
-          connect: { id: tempId },
-        },
-      },
-    });
-  }
+  // for (let x = 0; x < allWords.length; x++) {
+  //   await client.alternative.create({
+  //     data: {
+  //       word: allWords[x],
+  //     },
+  //   });
+  // }
+  // for (let x = 0; x < 50; x++) {
+  //   const word1 = allWords[getRndInteger(0, allWords.length)];
+  //   const word2 = allWords[getRndInteger(0, allWords.length)];
+  //   let tempId = getRndInteger(1, 18)
+  //   await client.word.create({
+  //     data: {
+  //       word: `${x}+${x}`,
+  //       definitions: {
+  //         create: {
+  //           definition: `${x}+${x}`,
+  //           example: `${x}+${x}`,
+  //         },
+  //       },
+  //       alternatives: {
+  //         connect: { id: tempId },
+  //       },
+  //     },
+  //   });
+  // }
   // const users = await client.user.findMany({})
   // for(let x = 0; x < users.length; x++){
   //   users[x]
