@@ -21,12 +21,12 @@ export const schema = makeExecutableSchema({
 
 export const wordIdCursor = new NodeCache({ checkperiod: 1800 });
 export const allWords = new NodeCache({ checkperiod: 86400 });
-export const wordCount = new NodeCache({checkperiod: 86400})
+export const wordCount = new NodeCache({ checkperiod: 86400 });
 let allWordsTrie = new Trie();
 
 const buildAllWordsTrie = async () => {
   const words = await prisma.word.findMany({});
-  wordCount.set("wordCount", words.length, 86400)
+  wordCount.set("wordCount", words.length, 86400);
   for (const { word } of words) {
     allWordsTrie.insert(word);
   }
@@ -34,7 +34,6 @@ const buildAllWordsTrie = async () => {
 };
 
 buildAllWordsTrie();
-
 
 allWords.on("expired", async function (key, value) {
   allWordsTrie = new Trie();
@@ -47,11 +46,18 @@ loginStore.close();
 app.use(express.json());
 app.use(cookieParser());
 const options = {
-  origin: ["https://euphemaryadmin.herokuapp.com/", "https://euphemaryfrontend.herokuapp.com/graphql"],
+  origin: [
+    process.env.PORT
+      ? "https://euphemaryadmin.herokuapp.com/"
+      : "http://localhost:3001",
+    process.env.PORT
+      ? "https://euphemaryfrontend.herokuapp.com/graphql"
+      : "http://localhost:3000",
+  ],
   credentials: true,
   methods: "GET,HEAD,POST,PATCH,DELETE,OPTIONS",
 };
-app.options("/graphql", cors(options))
+app.options("/graphql", cors(options));
 app.use(cors(options));
 
 app.use(
