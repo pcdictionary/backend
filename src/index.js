@@ -48,7 +48,7 @@ app.use(cookieParser());
 const options = {
   origin: [
     process.env.PORT
-      ? "https://euphemaryadmin.herokuapp.com/"
+      ? "https://euphemaryadmin.herokuapp.com"
       : "http://localhost:3001",
     process.env.PORT
       ? "https://euphemaryfrontend.herokuapp.com"
